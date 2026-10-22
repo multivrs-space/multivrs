@@ -23,49 +23,15 @@ export type StripePlan = {
   priceSuffix: string;
 };
 
-export const DEFAULT_HOBBY_FEATURES = [
-  "Deploy from Git (GitHub, GitLab, CLI)",
-  "Automatic SSL & custom domains",
-  "100K edge requests / month",
-  "5 GB fast data transfer / month",
-  "Global edge network & routing",
-  "Serverless function execution",
-  "1 developer seat",
-  "Community support",
-];
-
-export const DEFAULT_PRO_FEATURES = [
-  "Flat rate CDN & DDoS mitigation",
-  "Free custom domain & managed SSL",
-  "1M serverless invocations & sandbox runtimes",
-  "Global edge network with anycast routing",
-  "Observability, tracing & error logging",
-  "Advanced WAF protection & custom rules",
-  "On-demand concurrent builds (zero queue)",
-  "Team collaboration & RBAC permissions",
-  "Two-way transactional email & mailboxes",
-];
-
-function fallbackPlan(name: string): StripePlan {
-  if (name.toLowerCase() === "hobby") {
-    return {
-      configured: true,
-      description: "For personal projects, hobbyists, and experiments.",
-      features: DEFAULT_HOBBY_FEATURES,
-      name: "Hobby",
-      priceId: null,
-      priceLabel: "$0",
-      priceSuffix: "/mo.",
-    };
-  }
+function unavailablePlan(name: string): StripePlan {
   return {
     configured: false,
-    description: "Modular plan starting at $20/mo platform base, up to $50/mo with all add-on modules.",
-    features: DEFAULT_PRO_FEATURES,
-    name: "Pro",
+    description: "This plan is temporarily unavailable.",
+    features: [],
+    name,
     priceId: null,
-    priceLabel: "$20",
-    priceSuffix: "/mo.",
+    priceLabel: "Unavailable",
+    priceSuffix: "",
   };
 }
 
@@ -127,33 +93,21 @@ async function getStripePlan(
     priceId: process.env[priceIdName] || undefined,
     lookupKey: process.env[lookupKeyName] || defaultLookupKey,
   });
-  if (!config.success) return fallbackPlan(name);
+  if (!config.success) return unavailablePlan(name);
 
   try {
     const price = await resolvePrice(config.data);
     const amount = formatAmount(price);
-    if (!amount || !price.active) return fallbackPlan(name);
+    if (!amount || !price.active) return unavailablePlan(name);
     const product = productFrom(price);
-    if (!product?.active) return fallbackPlan(name);
-
-    const rawFeatures =
-      product.marketing_features
-        ?.map((feature) => feature.name?.trim())
-        .filter((name): name is string => Boolean(name)) ?? [];
-    const defaultFeatures =
-      name.toLowerCase() === "hobby"
-        ? DEFAULT_HOBBY_FEATURES
-        : DEFAULT_PRO_FEATURES;
-    const features = rawFeatures.length > 0 ? rawFeatures : defaultFeatures;
-
+    if (!product?.active) return unavailablePlan(name);
     return {
       configured: true,
-      description:
-        product.description?.trim() ||
-        (name.toLowerCase() === "hobby"
-          ? "For personal projects, hobbyists, and experiments."
-          : "Modular plan starting at $20/mo platform base, up to $50/mo with all add-on modules."),
-      features,
+      description: product.description?.trim() || "",
+      features:
+        product.marketing_features
+          ?.map((feature) => feature.name?.trim())
+          .filter((name): name is string => Boolean(name)) ?? [],
       metadata: product.metadata ?? {},
       name: product.name,
       priceId: price.id,
@@ -164,7 +118,7 @@ async function getStripePlan(
     };
   } catch (error) {
     console.error(`[getStripePlan:${name}] error:`, error);
-    return fallbackPlan(name);
+    return unavailablePlan(name);
   }
 }
 

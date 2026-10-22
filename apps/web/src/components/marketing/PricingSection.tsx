@@ -26,6 +26,10 @@ export function PricingSection({
   const maxProPrice = calculateProMaxPrice();
 
   function handleProAction() {
+    if (!proPlan.configured) {
+      router.push("/contact/sales");
+      return;
+    }
     const target = "/dashboard?upgradeTeam=pricing-page-plan-card-cta";
     if (!session?.user) {
       router.push(`/signup?next=${encodeURIComponent(target)}`);
@@ -84,7 +88,13 @@ export function PricingSection({
               text,
               icon: iconForPricingFeature(text),
             }))}
-            action={session?.user ? "Upgrade now" : "Start with Pro"}
+            action={
+              proPlan.configured
+                ? session?.user
+                  ? "Upgrade now"
+                  : "Start with Pro"
+                : "Contact us"
+            }
             variant="featured"
             onAction={handleProAction}
           />
