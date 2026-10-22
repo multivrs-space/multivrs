@@ -75,7 +75,7 @@ export function TeamAvatar({
   }
 
   const trimmed = name?.trim();
-  const initial = (trimmed ? trimmed[0] : "T").toUpperCase();
+  const initial = (trimmed?.[0] ?? "T").toUpperCase();
 
   return (
     <div

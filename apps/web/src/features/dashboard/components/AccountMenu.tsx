@@ -13,6 +13,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -106,16 +108,16 @@ export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
 
       {plan === "pro" && (
         <div className="px-1.5 pt-1.5">
-          <Button
-            className="w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs"
-            size="sm"
-            asChild
+          <Link
+            href="/contact/sales"
             onClick={onClose}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs",
+            )}
           >
-            <Link href="/contact/sales">
-              Upgrade to Enterprise
-            </Link>
-          </Button>
+            Upgrade to Enterprise
+          </Link>
         </div>
       )}
 

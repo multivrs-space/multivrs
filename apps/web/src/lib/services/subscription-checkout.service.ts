@@ -1,4 +1,5 @@
 import "server-only";
+import type Stripe from "stripe";
 import { ConflictError, NotFoundError } from "@multivrs/error-utils";
 import { getProPlan } from "@/lib/payments/pricing";
 import { getStripe } from "@/lib/payments/stripe-client";

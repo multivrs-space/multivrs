@@ -74,6 +74,8 @@ interface WorkspaceOption {
   isPersonal: boolean;
   organizationId?: string | null;
   plan?: PlanKey;
+  username?: string;
+  image?: string | null;
 }
 
 const DEFAULT_PRO_CARD_FEATURES = [
@@ -178,11 +180,13 @@ export function UpgradeSheet({
       id: "personal",
       name: activeWorkspaceName,
       slug: workspaceName || user.username,
+      username: user.username,
+      image: user.image,
       isPersonal: true,
       organizationId: null,
       plan: currentPlan as PlanKey,
     }),
-    [activeWorkspaceName, workspaceName, user.username, currentPlan],
+    [activeWorkspaceName, workspaceName, user.username, user.image, currentPlan],
   );
 
   const selectableWorkspaces = useMemo<WorkspaceOption[]>(() => {
@@ -191,6 +195,8 @@ export function UpgradeSheet({
         id: w.username,
         name: w.name || w.username,
         slug: w.username,
+        username: w.username,
+        image: w.image,
         isPersonal: !w.role,
         organizationId: w.role ? w.username : null,
         plan: w.plan,
@@ -204,6 +210,8 @@ export function UpgradeSheet({
           id: org.id,
           name: org.name,
           slug: org.slug,
+          username: org.slug,
+          image: null,
           isPersonal: false,
           organizationId: org.id,
         });
