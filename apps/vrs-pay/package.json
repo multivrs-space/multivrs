@@ -30,7 +30,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@biomejs/biome": "^2.4.16",
-    "@swift-rust/ui": "latest"
+    "@swift-rust/ui": "0.7.1"
   },
   "engines": {
     "bun": ">=1.3.0"

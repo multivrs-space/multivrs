@@ -125,7 +125,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^2.4.16",
-        "@swift-rust/ui": "latest",
+        "@swift-rust/ui": "0.7.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "typescript": "^6.0.0",
@@ -343,6 +343,13 @@
         "typescript": "5.9.2",
       },
     },
+    "packages/cli": {
+      "name": "@multivrs/cli",
+      "version": "0.1.0",
+      "bin": {
+        "multivrs": "bin/multivrs",
+      },
+    },
     "packages/client": {
       "name": "@multivrs/client",
       "version": "0.0.0",
@@ -431,6 +438,15 @@
       "dependencies": {
         "@multivrs/config": "*",
       },
+      "devDependencies": {
+        "@repo/biome-config": "*",
+        "@repo/typescript-config": "*",
+        "typescript": "5.9.2",
+      },
+    },
+    "packages/mail": {
+      "name": "@multivrs/mail",
+      "version": "0.1.1",
       "devDependencies": {
         "@repo/biome-config": "*",
         "@repo/typescript-config": "*",
@@ -1218,6 +1234,8 @@
 
     "@multivrs/builder-swift-rust": ["@multivrs/builder-swift-rust@workspace:packages/builder-swift-rust"],
 
+    "@multivrs/cli": ["@multivrs/cli@workspace:packages/cli"],
+
     "@multivrs/client": ["@multivrs/client@workspace:packages/client"],
 
     "@multivrs/config": ["@multivrs/config@workspace:packages/config"],
@@ -1233,6 +1251,8 @@
     "@multivrs/fs-detectors": ["@multivrs/fs-detectors@workspace:packages/fs-detectors"],
 
     "@multivrs/functions": ["@multivrs/functions@workspace:packages/functions"],
+
+    "@multivrs/mail": ["@multivrs/mail@workspace:packages/mail"],
 
     "@multivrs/mcp-adapter": ["@multivrs/mcp-adapter@workspace:packages/mcp-adapter"],
 
@@ -1784,7 +1804,7 @@
 
     "@swift-rust/pdf": ["@swift-rust/pdf@0.2.1", "", { "dependencies": { "pdfjs-dist": "^4.7.0" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-tUpVGZpqH3USUftkXlUbUjCGkbihpBkbVWh/gnd0dwRyN3zWVTMdsBPR3csRNVtieHIHjDbbmZm0FR9q0sh3Qg=="],
 
-    "@swift-rust/ui": ["@swift-rust/ui@0.7.0", "", { "dependencies": { "@clack/prompts": "^1.5.1", "picocolors": "^1.0.1" }, "bin": { "swift-rust-ui": "dist/cli.js" } }, "sha512-9NoY2wbLeKXdyvxmEPxY1ruw0k+TfzX0FIO1fvRg8iowR4pjdQOOMYszvrKgfHeVKlMx6cBJaq1yjlzDMZi0VA=="],
+    "@swift-rust/ui": ["@swift-rust/ui@0.7.1", "", { "dependencies": { "@clack/prompts": "^1.5.1", "picocolors": "^1.0.1" }, "bin": { "swift-rust-ui": "dist/cli.js" } }, "sha512-L5JWRHdx33GI4Cl+pWPbcWOShWYgKnGXvoLvEu47PX2xQkvKTKjYa9B2BWIcQGSSnpIpziQC7fP9eOxsvJZ69Q=="],
 
     "@swift-rust/video": ["@swift-rust/video@0.2.1", "", { "peerDependencies": { "react": "^18 || ^19" } }, "sha512-b2jBMU2tMSML2S4+XLUGkwJU/yKkxa3yUbXk6qyPFZ72riOUeqbCiFOqnvVHwXHp21rxB67FTo0tmRDM2myIQA=="],
 
