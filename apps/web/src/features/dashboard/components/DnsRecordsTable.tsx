@@ -24,8 +24,8 @@ export function DnsRecordsTable({
   onRemove,
 }: DnsRecordsTableProps) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.025]">
-      <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+    <section className="overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
           <h2 className="text-sm font-medium">DNS records</h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -37,7 +37,7 @@ export function DnsRecordsTable({
           <Plus /> Add record
         </Button>
       </div>
-      <div className="hidden grid-cols-[80px_1fr_2fr_100px_44px] gap-4 border-b border-white/6 px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-muted-foreground md:grid">
+      <div className="hidden grid-cols-[80px_1fr_2fr_100px_44px] gap-4 border-b border-border px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-muted-foreground md:grid">
         <span>Type</span>
         <span>Name</span>
         <span>Value</span>
@@ -76,7 +76,7 @@ function DnsRecordRow({
   onRemove: (record: DnsRecord) => void;
 }) {
   return (
-    <div className="grid grid-cols-[64px_1fr_40px] items-center gap-3 border-b border-white/6 px-5 py-4 last:border-b-0 md:grid-cols-[80px_1fr_2fr_100px_44px] md:gap-4">
+    <div className="grid grid-cols-[64px_1fr_40px] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0 md:grid-cols-[80px_1fr_2fr_100px_44px] md:gap-4">
       <span className="w-fit rounded-md border border-cyan-400/20 bg-cyan-400/8 px-2 py-1 font-mono text-[11px] font-semibold text-cyan-300">
         {record.type}
       </span>

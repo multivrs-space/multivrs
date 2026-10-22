@@ -21,13 +21,13 @@ export function DeploymentProgress({
 }) {
   const hasAttempt = status !== "idle";
   return (
-    <section className="mt-8 rounded-2xl border border-white/10 bg-[#09090b] p-6">
+    <section className="mt-8 rounded-2xl border border-border bg-card p-6">
       <h2 className="text-lg font-semibold">Deployment</h2>
       {!hasAttempt ? (
-        <div className="mt-4 grid min-h-48 place-items-center rounded-xl border border-white/10 bg-black/60 text-center">
+        <div className="mt-4 grid min-h-48 place-items-center rounded-xl border border-border bg-muted text-center">
           <div>
-            <Globe2 className="mx-auto size-8 text-white/30" />
-            <p className="mt-3 text-xs text-white/40">
+            <Globe2 className="mx-auto size-8 text-muted-foreground" />
+            <p className="mt-3 text-xs text-muted-foreground">
               Build progress and logs will appear here.
             </p>
           </div>
@@ -35,7 +35,7 @@ export function DeploymentProgress({
       ) : (
         <div className="mt-4 space-y-4">
           <div
-            className="flex items-center gap-2 text-xs text-white/60"
+            className="flex items-center gap-2 text-xs text-foreground/60"
             aria-live="polite"
           >
             {status === "building" ? (
@@ -53,10 +53,10 @@ export function DeploymentProgress({
                   ? `Canceled after ${seconds}s`
                   : `Deployment failed after ${seconds}s`}
           </div>
-          <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-black p-4 font-mono text-xs">
+          <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-border bg-background p-4 font-mono text-xs">
             {logs.map((log) => (
               <div key={log.id} className="flex gap-2">
-                <span className="text-white/30">›</span>
+                <span className="text-muted-foreground">›</span>
                 <span>{log.message}</span>
               </div>
             ))}
@@ -66,7 +66,7 @@ export function DeploymentProgress({
               <button
                 type="button"
                 onClick={cancel}
-                className="h-9 rounded-lg border border-white/15 px-4 text-xs font-medium hover:bg-white/5"
+                className="h-9 rounded-lg border border-border px-4 text-xs font-medium hover:bg-foreground/5"
               >
                 Cancel deployment
               </button>
@@ -74,7 +74,7 @@ export function DeploymentProgress({
             {detailsUrl ? (
               <Link
                 href={detailsUrl}
-                className="inline-flex h-9 items-center rounded-lg border border-white/15 px-4 text-xs font-medium hover:bg-white/5"
+                className="inline-flex h-9 items-center rounded-lg border border-border px-4 text-xs font-medium hover:bg-foreground/5"
               >
                 View deployment details
               </Link>

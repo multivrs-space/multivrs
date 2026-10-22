@@ -74,7 +74,7 @@ export function DomainMarketplace() {
               Find a domain for your
               <RotatingDomainWord />
             </h1>
-            <p className="mb-7 mt-6 text-sm text-white/45">
+            <p className="mb-7 mt-6 text-sm text-muted-foreground">
               Fast. At-cost. Private.
             </p>
           </>
@@ -198,7 +198,7 @@ function Results({
       <div className="mb-3 mt-10 flex items-end justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">All results</h2>
-          <p className="mt-1 text-xs text-white/35" aria-live="polite">
+          <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">
             {checking
               ? `Checked ${results.length.toLocaleString("en-US")} so far, checking more…`
               : total > 0
@@ -216,7 +216,7 @@ function Results({
           onSortChange={onSortChange}
         />
       </div>
-      <div className="grid border-l border-t border-white/8 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-3">
         {results.map((result) => (
           <DomainResult
             key={result.domain}
@@ -233,7 +233,7 @@ function Results({
           type="button"
           onClick={onLoadMore}
           disabled={loadingMore}
-          className="mt-5 h-10 w-full border border-white/15 text-sm text-white/65 hover:bg-white/5 disabled:cursor-wait disabled:opacity-60"
+          className="mt-5 h-10 w-full border border-border text-sm text-foreground/65 hover:bg-foreground/5 disabled:cursor-wait disabled:opacity-60"
         >
           {loadingMore ? "Checking more extensions…" : "Load more"}
         </button>
@@ -257,7 +257,7 @@ function sortResults(results: DomainSearchResult[], sort: DomainSort) {
 
 function Status({ message }: { message: string }) {
   return (
-    <div className="border-y border-white/10 py-14 text-center text-sm text-white/45">
+    <div className="border-y border-border py-14 text-center text-sm text-muted-foreground">
       {message}
     </div>
   );

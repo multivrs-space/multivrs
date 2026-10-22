@@ -92,7 +92,7 @@ export function ProjectLogsConsole({
           {filtered.map((log) => (
             <div
               key={log.id}
-              className="grid grid-cols-[9rem_5rem_7rem_10rem_minmax(18rem,1fr)] gap-3 border-b border-[var(--hairline)] px-4 py-3 font-geist-mono text-xs text-muted-foreground hover:bg-white/[0.025]"
+              className="grid grid-cols-[9rem_5rem_7rem_10rem_minmax(18rem,1fr)] gap-3 border-b border-[var(--hairline)] px-4 py-3 font-geist-mono text-xs text-muted-foreground hover:bg-foreground/[0.04]"
             >
               <time>
                 {new Date(log.timestamp).toLocaleString("en-US", {

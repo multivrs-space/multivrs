@@ -28,14 +28,14 @@ function LoginFormSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       <div className="space-y-2">
-        <div className="h-6 w-32 rounded bg-white/10" />
-        <div className="h-4 w-48 rounded bg-white/5" />
+        <div className="h-6 w-32 rounded bg-muted" />
+        <div className="h-4 w-48 rounded bg-foreground/5" />
       </div>
       <div className="space-y-3">
-        <div className="h-10 w-full rounded-lg bg-white/10" />
-        <div className="h-10 w-full rounded-lg bg-white/5" />
+        <div className="h-10 w-full rounded-lg bg-muted" />
+        <div className="h-10 w-full rounded-lg bg-foreground/5" />
       </div>
-      <div className="h-11 w-full rounded-lg bg-white/10" />
+      <div className="h-11 w-full rounded-lg bg-muted" />
     </div>
   );
 }

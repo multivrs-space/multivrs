@@ -76,7 +76,7 @@ export function SidebarObservabilityNav({
         {onBack ? (
           <button
             type="button"
-            className="group flex w-full h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted-foreground transition-colors hover:bg-white/2.5 hover:text-foreground"
+            className="group flex w-full h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
             onClick={onBack}
           >
             <ArrowLeft
@@ -87,7 +87,7 @@ export function SidebarObservabilityNav({
           </button>
         ) : (
           <Link
-            className="group flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted-foreground transition-colors hover:bg-white/2.5 hover:text-foreground"
+            className="group flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
             href={backHref}
           >
             <ArrowLeft
@@ -120,8 +120,8 @@ export function SidebarObservabilityNav({
                   className={cn(
                     "nav-item group flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] transition-colors duration-150",
                     isActive
-                      ? "nav-rail-active bg-white/8 font-medium text-foreground"
-                      : "text-muted-foreground hover:bg-white/2.5 hover:text-foreground",
+                      ? "nav-rail-active bg-foreground/8 font-medium text-foreground"
+                      : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                   )}
                   href={`/${username}/${scope}/observability?view=${item.view}`}
                   onClick={() => onLinkClick?.()}

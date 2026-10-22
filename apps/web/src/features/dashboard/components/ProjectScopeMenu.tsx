@@ -104,7 +104,7 @@ function ScopeRow({
         )}
       </span>
       <span className="flex-1 truncate">{label}</span>
-      {selected ? <Check className="size-4 text-[var(--accent)]" /> : null}
+      {selected ? <Check className="size-4 text-primary" /> : null}
     </DropdownMenuItem>
   );
 }

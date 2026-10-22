@@ -50,33 +50,33 @@ export function AssignDomainTargetStep({
   return (
     <>
       <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-lg font-semibold text-white">
+        <DialogTitle className="text-lg font-semibold text-foreground">
           Connect Domain
         </DialogTitle>
-        <DialogDescription className="text-xs text-white/50">
+        <DialogDescription className="text-xs text-muted-foreground">
           Connect{" "}
-          <span className="font-medium text-white/80">{fullDomain}</span> to a
+          <span className="font-medium text-foreground/80">{fullDomain}</span> to a
           project.
         </DialogDescription>
       </DialogHeader>
       <div className="my-4 space-y-2">
-        <span className="block text-xs font-medium text-white/80">Project</span>
+        <span className="block text-xs font-medium text-foreground/80">Project</span>
         <DropdownMenu open={dropdownOpen} onOpenChange={onDropdownChange}>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border border-white/10 bg-black/60 px-3 text-sm text-white focus:border-white/40"
+              className="flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border border-border bg-muted px-3 text-sm text-foreground focus:border-ring"
             >
               <span className="flex items-center gap-2.5">
-                <Bot className="size-4 text-white/60" />
+                <Bot className="size-4 text-foreground/60" />
                 {selectedProject?.name ?? "Select Project..."}
               </span>
-              <ChevronDown className="size-4 text-white/40" />
+              <ChevronDown className="size-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-(--radix-dropdown-menu-trigger-width) rounded-xl border-white/10 bg-[#09090b] p-2 shadow-2xl"
+            className="w-(--radix-dropdown-menu-trigger-width) rounded-xl border-border bg-card p-2 shadow-2xl"
           >
             <DashboardSearchInput
               containerClassName="mb-2 w-full"
@@ -93,11 +93,11 @@ export function AssignDomainTargetStep({
                   onSelect={() => onProjectChange(project.id)}
                   className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                     project.id === projectId
-                      ? "bg-white/15 font-medium text-white"
-                      : "text-white/80 hover:bg-white/10"
+                      ? "bg-muted font-medium text-foreground"
+                      : "text-foreground/80 hover:bg-muted"
                   }`}
                 >
-                  <Bot className="size-3.5 shrink-0 text-white/60" />
+                  <Bot className="size-3.5 shrink-0 text-foreground/60" />
                   <span className="truncate">{project.name}</span>
                 </DropdownMenuItem>
               ))}

@@ -96,7 +96,7 @@ export function OAuthButtons({
         type="button"
         onClick={() => handleOAuthSignIn("google")}
         disabled={disabled}
-        className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] text-sm font-medium text-white/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loadingProvider === "google" ? <Spinner /> : <GoogleIcon />}
         Google
@@ -106,7 +106,7 @@ export function OAuthButtons({
         type="button"
         onClick={() => handleOAuthSignIn("github")}
         disabled={disabled}
-        className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] text-sm font-medium text-white/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loadingProvider === "github" ? <Spinner /> : <GitHubIcon />}
         GitHub

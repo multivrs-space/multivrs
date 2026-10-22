@@ -33,8 +33,8 @@ export function LogsSectionSkeleton() {
           </button>
         ))}
       </div>
-      <div className="overflow-hidden rounded-xl border border-white/8">
-        <div className="grid h-10 grid-cols-[9rem_5rem_7rem_10rem_1fr] items-center gap-3 border-white/8 border-b px-4 font-geist-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="overflow-hidden rounded-xl border border-border">
+        <div className="grid h-10 grid-cols-[9rem_5rem_7rem_10rem_1fr] items-center gap-3 border-border border-b px-4 font-geist-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
           <span>Time</span>
           <span>Level</span>
           <span>Source</span>
@@ -43,7 +43,7 @@ export function LogsSectionSkeleton() {
         </div>
         {SKELETON_ROWS.map((row) => (
           <div
-            className="h-11 animate-pulse border-white/6 border-b bg-white/[0.025]"
+            className="h-11 animate-pulse border-border border-b bg-foreground/[0.04]"
             key={row}
           />
         ))}

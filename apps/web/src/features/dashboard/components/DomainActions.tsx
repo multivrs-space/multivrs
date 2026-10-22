@@ -92,15 +92,15 @@ export function DomainActions({
 
       <DropdownMenuContent
         align="end"
-        className="w-64 rounded-2xl border border-white/10 bg-[#09090b]/95 p-1.5 shadow-2xl backdrop-blur-xl"
+        className="w-64 rounded-2xl border border-border bg-card/95 p-1.5 shadow-2xl backdrop-blur-xl"
       >
-        <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-white/50">
+        <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-muted-foreground">
           {hostname}
         </DropdownMenuLabel>
 
-        <div className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-white/90">
+        <div className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-foreground/90">
           <div className="flex items-center gap-3">
-            <RefreshCw className="size-4 shrink-0 text-white/70" />
+            <RefreshCw className="size-4 shrink-0 text-foreground/70" />
             <span>Auto Renewal {autoRenew ? "On" : "Off"}</span>
           </div>
 
@@ -112,7 +112,7 @@ export function DomainActions({
             disabled={renewPending}
             onClick={toggleAutoRenew}
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-              autoRenew ? "bg-[#A855F7]" : "bg-white/20"
+              autoRenew ? "bg-[#A855F7]" : "bg-foreground/20"
             }`}
           >
             <span
@@ -125,13 +125,13 @@ export function DomainActions({
 
         <DropdownMenuItem
           onClick={() => router.push(detailUrl)}
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-white/90 hover:bg-white/10 cursor-pointer"
+          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted cursor-pointer"
         >
-          <Settings className="size-4 shrink-0 text-white/70" />
+          <Settings className="size-4 shrink-0 text-foreground/70" />
           <span>Configure</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="-mx-1.5 my-1.5 bg-white/10" />
+        <DropdownMenuSeparator className="-mx-1.5 my-1.5 bg-muted" />
         <DropdownMenuItem
           onClick={() => setConfirmDelete(true)}
           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer"

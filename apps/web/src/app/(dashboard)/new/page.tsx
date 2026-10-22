@@ -14,7 +14,7 @@ export default async function NewProjectPage() {
   if (!session) redirect("/login?redirect=/new");
   const username = session.user.username ?? session.user.id;
   return (
-    <div className="min-h-screen w-full bg-[#030303] text-white">
+    <div className="min-h-screen w-full bg-background text-foreground">
       <NewProjectHeader />
       <main className="w-full">
         <NewProjectFlow username={username} />

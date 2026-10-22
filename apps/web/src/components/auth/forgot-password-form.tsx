@@ -10,9 +10,9 @@ import { authClient } from "@/lib/auth-client";
 import { emailSchema } from "@/validators/auth.validators";
 
 const labelClass =
-  "font-mono text-[11px] font-medium uppercase tracking-wider text-white/50";
+  "font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
 const inputClass =
-  "h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-white/30 focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
+  "h-11 rounded-lg border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
 
 /**
  * Request a password-reset link. On success we always show the same
@@ -57,18 +57,18 @@ export function ForgotPasswordForm() {
           <MailCheck className="size-5 text-[#A855F7]" />
         </div>
         <div className="space-y-1.5">
-          <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+          <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
             Check your email
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             If an account exists for{" "}
-            <span className="text-white/80">{email}</span>, we&apos;ve sent a
+            <span className="text-foreground/80">{email}</span>, we&apos;ve sent a
             link to reset your password.
           </p>
         </div>
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-white transition-colors hover:text-[#A855F7]"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-[#A855F7]"
         >
           <ArrowLeft className="size-4" />
           Back to sign in
@@ -80,10 +80,10 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Reset password
         </h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-foreground">
           Enter your email and we&apos;ll send you a reset link.
         </p>
       </div>
@@ -113,7 +113,7 @@ export function ForgotPasswordForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Sending link…" : "Send reset link"}
         </button>
@@ -121,7 +121,7 @@ export function ForgotPasswordForm() {
 
       <Link
         href="/login"
-        className="flex items-center justify-center gap-1.5 text-sm text-white/40 transition-colors hover:text-white"
+        className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
         Back to sign in

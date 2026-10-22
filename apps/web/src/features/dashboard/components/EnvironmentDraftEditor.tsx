@@ -27,11 +27,11 @@ export function EnvironmentDraftEditor({
     });
   }
   return (
-    <section className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
+    <section className="overflow-hidden rounded-xl border border-border bg-muted/70">
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-2 p-3.5 text-xs font-medium text-white/80"
+        className="flex w-full items-center gap-2 p-3.5 text-xs font-medium text-foreground/80"
       >
         <ChevronRight className={open ? "size-3.5 rotate-90" : "size-3.5"} />{" "}
         Environment variables
@@ -48,7 +48,7 @@ export function EnvironmentDraftEditor({
                     update(item.id, { key: event.target.value })
                   }
                   placeholder="EXAMPLE_KEY"
-                  className="h-9 w-full rounded-md border border-white/10 bg-black px-3 font-mono text-xs outline-hidden"
+                  className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs outline-hidden"
                 />
               </label>
               <label className="min-w-0 flex-1">
@@ -59,7 +59,7 @@ export function EnvironmentDraftEditor({
                     update(item.id, { value: event.target.value })
                   }
                   placeholder="value"
-                  className="h-9 w-full rounded-md border border-white/10 bg-black px-3 font-mono text-xs outline-hidden"
+                  className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs outline-hidden"
                 />
               </label>
               <button
@@ -72,7 +72,7 @@ export function EnvironmentDraftEditor({
                     ),
                   })
                 }
-                className="p-2 text-white/40 hover:text-red-400"
+                className="p-2 text-muted-foreground hover:text-red-400"
                 aria-label="Remove variable"
               >
                 <Trash2 className="size-4" />

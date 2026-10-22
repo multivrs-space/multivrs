@@ -68,7 +68,7 @@ export function ProjectCardsList({
 
 function EmptyProjects() {
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--hairline-strong)] bg-white/[0.015] px-6 text-center">
+    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--hairline-strong)] bg-foreground/[0.03] px-6 text-center">
       <span className="mb-5 flex size-14 items-center justify-center rounded-full border border-[var(--hairline)]">
         <Plus className="size-6 text-muted-foreground" />
       </span>

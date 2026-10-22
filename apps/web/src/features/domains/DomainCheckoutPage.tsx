@@ -87,11 +87,11 @@ export function DomainCheckoutPage({ sandboxEnabled, user }: Props) {
   if (!cartItems.length) return <EmptyCheckout />;
 
   return (
-    <main className="min-h-screen bg-black px-5 pb-24 pt-24 text-white">
+    <main className="min-h-screen bg-background px-5 pb-24 pt-24 text-foreground">
       <div className="mx-auto max-w-6xl">
         <Link
           href="/domains"
-          className="inline-flex items-center gap-2 text-sm text-white/45 hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" /> Back to search
         </Link>
@@ -111,7 +111,7 @@ export function DomainCheckoutPage({ sandboxEnabled, user }: Props) {
           </CheckoutElementsProvider>
         ) : stripePromise ? (
           <div className="mt-10 grid items-start gap-5 lg:grid-cols-[1.25fr_0.9fr]">
-            <section className="border border-white/12 bg-[#080808] p-5 sm:p-7">
+            <section className="border border-border bg-card p-5 sm:p-7">
               <div className="flex min-h-72 items-center justify-center">
                 {checkoutError ? (
                   <div className="max-w-sm text-center">
@@ -119,13 +119,13 @@ export function DomainCheckoutPage({ sandboxEnabled, user }: Props) {
                     <button
                       type="button"
                       onClick={() => setCheckoutAttempt((value) => value + 1)}
-                      className="mt-5 h-10 border border-white/15 px-5 text-sm font-medium transition-colors hover:bg-white hover:text-black"
+                      className="mt-5 h-10 border border-border px-5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
                     >
                       Try again
                     </button>
                   </div>
                 ) : (
-                  <p className="flex items-center gap-2 text-sm text-white/45">
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     Preparing secure payment…
                   </p>
                 )}
@@ -135,14 +135,14 @@ export function DomainCheckoutPage({ sandboxEnabled, user }: Props) {
           </div>
         ) : (
           <div className="mt-10 grid items-start gap-5 lg:grid-cols-[1.25fr_0.9fr]">
-            <section className="border border-white/12 bg-[#080808] p-5 sm:p-7">
+            <section className="border border-border bg-card p-5 sm:p-7">
               {sandboxEnabled ? (
                 <SandboxCheckout
                   pending={pending}
                   onSubmit={completeSandboxOrder}
                 />
               ) : (
-                <p className="text-sm text-white/55">
+                <p className="text-sm text-foreground/55">
                   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not configured.
                 </p>
               )}

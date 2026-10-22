@@ -17,9 +17,9 @@ interface AuthLayoutProps {
  */
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#030303] px-6 py-12">
-      {/* Galaxy starfield */}
-      <div className="absolute inset-0 z-0">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-6 py-12">
+      {/* Galaxy starfield — dark theme only. Light mode uses the page background. */}
+      <div className="absolute inset-0 z-0 hidden dark:block">
         <Galaxy
           density={0.9}
           starSpeed={0.25}
@@ -37,7 +37,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* Radial vignette for legibility */}
       <div
-        className="pointer-events-none absolute inset-0 z-10"
+        className="pointer-events-none absolute inset-0 z-10 hidden dark:block"
         style={{
           background:
             "radial-gradient(ellipse 60% 50% at 50% 50%, transparent 0%, rgba(3,3,3,0.55) 70%, rgba(3,3,3,0.9) 100%)",
@@ -47,7 +47,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       {/* Brand mark */}
       <Link
         href="/home"
-        className="absolute left-6 top-6 z-20 flex items-center gap-2 text-white/80 transition-colors hover:text-white"
+        className="absolute left-6 top-6 z-20 flex items-center gap-2 text-foreground/80 transition-colors hover:text-foreground"
       >
         <MultivrsMark className="size-6 text-[#A855F7]" />
         <span className="font-clash text-lg font-semibold tracking-tight">
@@ -57,11 +57,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* Card */}
       <div className="relative z-20 w-full max-w-[400px]">
-        <div className="rounded-2xl border border-white/10 bg-black/40 p-8 shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:p-10">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-[0_8px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl dark:bg-card/80 dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)] sm:p-10">
           {children}
         </div>
 
-        <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-widest text-white/30">
+        <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
           Build · Deploy · Scale
         </p>
       </div>

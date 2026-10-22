@@ -11,7 +11,10 @@ import { SettingsPage } from "@/features/dashboard/components/SettingsPage";
 import { TeamSettingsPage } from "@/features/dashboard/components/TeamSettingsPage";
 import { TemplatesDashboard } from "@/features/dashboard/components/TemplatesDashboard";
 import { ALL_PROJECTS_SCOPE } from "@/features/dashboard/constants/navigation";
-import { getSectionMeta } from "@/features/dashboard/constants/sections";
+import {
+  canonicalSectionSlug,
+  getSectionMeta,
+} from "@/features/dashboard/constants/sections";
 import { isPlatformProjectSection } from "@/features/dashboard/lib/project-platform-sections";
 import type { AnalyticsRange } from "@/features/dashboard/types/analytics.types";
 import { getServerSession } from "@/lib/auth/session";
@@ -50,7 +53,8 @@ export default async function SectionPage({
   params: Promise<{ username: string; scope: string; section: string }>;
   searchParams: Promise<{ compose?: string; range?: string; view?: string }>;
 }) {
-  const { username, scope, section } = await params;
+  const { username, scope, section: requestedSection } = await params;
+  const section = canonicalSectionSlug(requestedSection);
   const meta = getSectionMeta(section);
   if (!meta) {
     notFound();

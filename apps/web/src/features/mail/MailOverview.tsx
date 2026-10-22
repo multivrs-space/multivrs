@@ -43,7 +43,7 @@ function OverviewData({ onView }: { onView: (view: MailView) => void }) {
             className="bg-white dark:bg-black p-4 sm:p-5 min-w-0"
             key={label}
           >
-            <Icon className="size-4 text-accent/70 shrink-0" />
+            <Icon className="size-4 text-primary/70 shrink-0" />
             <p className="mt-3 sm:mt-5 text-xl sm:text-2xl font-medium tracking-tight truncate">
               {value}
             </p>
@@ -65,7 +65,7 @@ function OverviewData({ onView }: { onView: (view: MailView) => void }) {
               </p>
             </div>
             <button
-              className="flex shrink-0 items-center gap-1 text-xs text-accent transition-colors hover:text-accent/80"
+              className="flex shrink-0 items-center gap-1 text-xs text-primary transition-colors hover:text-primary/80"
               onClick={() => onView("inbox")}
               type="button"
             >

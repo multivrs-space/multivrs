@@ -12,7 +12,7 @@ async function DocsHubContent() {
 export default function DocsRootPage() {
   return (
     <main className="w-full flex-1 min-w-0">
-      <Suspense fallback={<div className="w-full min-h-screen animate-pulse bg-zinc-950" />}>
+      <Suspense fallback={<div className="w-full min-h-screen animate-pulse bg-card" />}>
         <DocsHubContent />
       </Suspense>
     </main>

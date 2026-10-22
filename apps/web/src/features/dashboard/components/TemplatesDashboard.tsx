@@ -706,10 +706,10 @@ function TemplateList({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {templates.map((template) => (
           <article
-            className="group overflow-hidden rounded-xl border border-(--hairline) bg-white/[0.015] transition-colors hover:border-(--hairline-strong)"
+            className="group overflow-hidden rounded-xl border border-(--hairline) bg-foreground/[0.03] transition-colors hover:border-(--hairline-strong)"
             key={template.id}
           >
-            <div className="relative aspect-[16/10] border-b border-(--hairline) bg-white/[0.02]">
+            <div className="relative aspect-[16/10] border-b border-(--hairline) bg-foreground/[0.04]">
               {template.imageUrl ? (
                 <Image
                   alt={template.name}
@@ -751,7 +751,7 @@ function TemplateList({
     );
   }
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--hairline-strong)] bg-white/[0.015]">
+    <div className="overflow-hidden rounded-2xl border border-[var(--hairline-strong)] bg-foreground/[0.03]">
       {templates.map((template) => (
         <div
           className="flex items-center gap-4 border-b border-[var(--hairline)] p-4 last:border-b-0"
@@ -768,7 +768,7 @@ function TemplateList({
               />
             </div>
           ) : (
-            <div className="grid size-12 shrink-0 place-items-center rounded-lg border border-[var(--hairline)] bg-white/[0.03]">
+            <div className="grid size-12 shrink-0 place-items-center rounded-lg border border-[var(--hairline)] bg-muted/40">
               <FileCode2 className="size-5 text-muted-foreground" />
             </div>
           )}
@@ -813,7 +813,7 @@ function TemplateStatusDot({ status }: { status: TemplateStatus }) {
 
 function EmptyTemplates({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="flex min-h-[420px] flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--hairline-strong)] bg-white/[0.015] px-6 text-center">
+    <div className="flex min-h-[420px] flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--hairline-strong)] bg-foreground/[0.03] px-6 text-center">
       <span className="mb-5 flex size-14 items-center justify-center rounded-full border border-[var(--hairline)]">
         <Plus className="size-6 text-muted-foreground" />
       </span>
@@ -952,7 +952,7 @@ function FileField({
   const inputRef = useRef<HTMLInputElement>(null);
   const openFilePicker = () => inputRef.current?.click();
   return (
-    <div className="relative flex h-24 items-center justify-center overflow-hidden border border-dashed border-[var(--hairline-strong)] px-4 py-3 transition-colors hover:border-foreground/35 hover:bg-white/[0.02]">
+    <div className="relative flex h-24 items-center justify-center overflow-hidden border border-dashed border-[var(--hairline-strong)] px-4 py-3 transition-colors hover:border-foreground/35 hover:bg-foreground/[0.04]">
       {files.length ? (
         <span
           className={
@@ -1039,7 +1039,7 @@ function ImageThumbnail({
       />
       <button
         aria-label={`Remove ${file.name}`}
-        className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-black/75 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+        className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-foreground/80 text-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();

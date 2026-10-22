@@ -7,32 +7,32 @@ export function CdnSectionSkeleton() {
         description="Cache policy and edge services for the selected project."
         title="CDN"
       />
-      <section className="animate-pulse rounded-2xl border border-white/8 bg-white/2 p-5">
+      <section className="animate-pulse rounded-2xl border border-border bg-foreground/2 p-5">
         <h2 className="text-sm font-semibold text-muted-foreground">
           Cache behavior
         </h2>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div className="h-20 rounded-xl border border-white/8 bg-black/20" />
-          <div className="h-20 rounded-xl border border-white/8 bg-black/20" />
+          <div className="h-20 rounded-xl border border-border bg-muted/50" />
+          <div className="h-20 rounded-xl border border-border bg-muted/50" />
         </div>
-        <div className="mt-5 h-10 rounded-lg bg-white/4" />
+        <div className="mt-5 h-10 rounded-lg bg-foreground/4" />
       </section>
-      <section className="animate-pulse rounded-2xl border border-white/8 bg-white/2 p-5">
+      <section className="animate-pulse rounded-2xl border border-border bg-foreground/2 p-5">
         <h2 className="text-sm font-semibold text-muted-foreground">
           Edge telemetry
         </h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {["compression", "stale", "browser"].map((item) => (
             <div
-              className="h-24 rounded-xl border border-white/8 bg-black/20"
+              className="h-24 rounded-xl border border-border bg-muted/50"
               key={item}
             />
           ))}
         </div>
       </section>
       <div className="flex animate-pulse gap-3">
-        <div className="h-10 w-32 rounded-lg bg-white/10" />
-        <div className="h-10 w-28 rounded-lg border border-white/8 bg-white/3" />
+        <div className="h-10 w-32 rounded-lg bg-muted" />
+        <div className="h-10 w-28 rounded-lg border border-border bg-foreground/3" />
       </div>
     </main>
   );

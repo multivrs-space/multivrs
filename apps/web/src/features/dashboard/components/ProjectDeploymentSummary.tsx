@@ -12,7 +12,7 @@ export function ProjectDeploymentSummary({
   const production = data.production;
   return (
     <section className="grid gap-4 md:grid-cols-3">
-      <article className="border border-[var(--hairline)] bg-white/[0.015] p-5 md:col-span-2">
+      <article className="border border-[var(--hairline)] bg-foreground/[0.03] p-5 md:col-span-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Production deployment</h2>
           <Rocket className="size-4 text-muted-foreground" />
@@ -47,7 +47,7 @@ export function ProjectDeploymentSummary({
           </p>
         )}
       </article>
-      <article className="border border-[var(--hairline)] bg-white/[0.015] p-5">
+      <article className="border border-[var(--hairline)] bg-foreground/[0.03] p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Last 24 hours</h2>
           <Activity className="size-4 text-muted-foreground" />

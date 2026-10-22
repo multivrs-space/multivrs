@@ -103,7 +103,7 @@ const DEFAULT_PRO_CARD_DESCRIPTIONS: Record<string, string> = {
 };
 
 function renderModularIcon(iconName: string) {
-  const sizeClass = "size-3.5 text-zinc-300";
+  const sizeClass = "size-3.5 text-muted-foreground";
   switch (iconName) {
     case "Users":
       return <Users className={sizeClass} />;
@@ -386,33 +386,33 @@ export function UpgradeSheet({
             e.preventDefault();
           }
         }}
-        className="w-full sm:max-w-none md:w-[860px] md:max-w-[860px] p-0 border-l border-zinc-800 bg-black text-white shadow-2xl overflow-y-auto font-sans"
+        className="w-full sm:max-w-none md:w-[860px] md:max-w-[860px] p-0 border-l border-border bg-background text-foreground shadow-2xl overflow-y-auto font-sans"
       >
         <SheetTitle className="sr-only">{actionTitle}</SheetTitle>
         <SheetDescription className="sr-only">
           {actionSubtitle}
         </SheetDescription>
 
-        <div className="flex flex-col md:flex-row min-h-full divide-y md:divide-y-0 md:divide-x divide-zinc-800">
+        <div className="flex flex-col md:flex-row min-h-full divide-y md:divide-y-0 md:divide-x divide-border">
           {/* Left Column: What's included */}
-          <div className="w-full md:w-[320px] shrink-0 p-6 md:p-8 flex flex-col justify-between bg-zinc-950/70 border-r border-zinc-800/80">
+          <div className="w-full md:w-[320px] shrink-0 p-6 md:p-8 flex flex-col justify-between bg-muted/40 dark:bg-zinc-950/70 border-r border-border">
             <div>
-              <h2 className="text-sm font-semibold tracking-tight text-white mb-1">
+              <h2 className="text-sm font-semibold tracking-tight text-foreground mb-1">
                 What&apos;s included
               </h2>
-              <p className="text-xs text-zinc-400 mb-5">
+              <p className="text-xs text-muted-foreground mb-5">
                 All Hobby features, plus:
               </p>
               <ul className="space-y-3.5">
                 {includedFeatures.map(({ title, description }) => (
                   <li key={title} className="flex items-start gap-3">
-                    <Check className="size-3.5 stroke-[2.5] text-zinc-300 mt-0.5 shrink-0" />
+                    <Check className="size-3.5 stroke-[2.5] text-primary mt-0.5 shrink-0" />
                     <div className="flex-1 text-xs">
-                      <div className="flex items-center gap-1.5 font-medium text-zinc-100">
+                      <div className="flex items-center gap-1.5 font-medium text-foreground">
                         <span>{title}</span>
                       </div>
                       {description && (
-                        <p className="text-zinc-400 mt-0.5 leading-normal text-[11px]">
+                        <p className="text-muted-foreground mt-0.5 leading-normal text-[11px]">
                           {description}
                         </p>
                       )}
@@ -422,25 +422,25 @@ export function UpgradeSheet({
               </ul>
             </div>
 
-            <div className="pt-6 border-t border-zinc-800/80 mt-6">
+            <div className="pt-6 border-t border-border mt-6">
               <Link
                 href="/pricing"
                 target="_blank"
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors group"
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
               >
-                <ExternalLink className="size-3.5 text-zinc-400 group-hover:text-white" />
+                <ExternalLink className="size-3.5 text-muted-foreground group-hover:text-foreground" />
                 <span>Learn more about pricing</span>
               </Link>
             </div>
           </div>
 
           {/* Right Column: Unified Checkout & Review with Live Toggles */}
-          <div className="flex-1 p-6 md:p-8 flex flex-col relative bg-black min-w-0 md:min-w-[480px]">
+          <div className="flex-1 p-6 md:p-8 flex flex-col relative bg-background min-w-0 md:min-w-[480px]">
             {/* Close Button */}
             <button
               type="button"
               onClick={handleClose}
-              className="absolute top-5 right-5 size-8 rounded-md flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer z-10"
+              className="absolute top-5 right-5 size-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer z-10"
               aria-label="Close"
             >
               <X className="size-4" />
@@ -458,10 +458,10 @@ export function UpgradeSheet({
                   Pro
                 </span>
               </div>
-              <h1 className="text-xl font-semibold tracking-tight text-white mt-3">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground mt-3">
                 {actionTitle}
               </h1>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {actionSubtitle}
               </p>
 
@@ -472,30 +472,30 @@ export function UpgradeSheet({
                   onOpenChange={setWorkspaceDropdownOpen}
                   modal={false}
                 >
-                  <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-900 hover:border-zinc-700 text-xs text-zinc-200 transition-colors cursor-pointer group shadow-xs">
+                  <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-muted/60 hover:bg-muted text-xs text-foreground transition-colors cursor-pointer group shadow-xs">
                     <TeamAvatar
                       name={selectedWorkspace.name || selectedWorkspace.username}
                       image={selectedWorkspace.image}
                       size={16}
                     />
-                    <span className="text-zinc-500 font-normal">Workspace:</span>
-                    <span className="font-medium text-zinc-100 truncate max-w-[150px]">
+                    <span className="text-muted-foreground font-normal">Workspace:</span>
+                    <span className="font-medium text-foreground truncate max-w-[150px]">
                       {selectedWorkspace.name}
                     </span>
                     {selectedWorkspace.plan && (
-                      <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.2 text-[9px] font-medium text-zinc-400 capitalize border border-zinc-700/50">
+                      <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.2 text-[9px] font-medium text-muted-foreground capitalize border border-border">
                         {selectedWorkspace.plan}
                       </span>
                     )}
-                    <ChevronDown className="size-3 text-zinc-400 group-hover:text-zinc-200 transition-colors" />
+                    <ChevronDown className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
                     align="center"
                     onCloseAutoFocus={(e) => e.preventDefault()}
-                    className="w-64 border-zinc-800 bg-zinc-950 p-1.5 text-xs font-sans shadow-2xl"
+                    className="w-64 border-border bg-popover p-1.5 text-xs font-sans shadow-2xl"
                   >
-                    <div className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                    <div className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                       Switch Workspace
                     </div>
                     {selectableWorkspaces.map((w) => {
@@ -507,7 +507,7 @@ export function UpgradeSheet({
                             setSelectedWorkspace(w);
                             setWorkspaceDropdownOpen(false);
                           }}
-                          className="flex items-center justify-between px-2.5 py-2 cursor-pointer rounded-md hover:bg-zinc-900 text-zinc-200 transition-colors"
+                          className="flex items-center justify-between px-2.5 py-2 cursor-pointer rounded-md hover:bg-accent text-foreground transition-colors"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <TeamAvatar
@@ -517,26 +517,26 @@ export function UpgradeSheet({
                             />
                             <span className="truncate font-medium">{w.name}</span>
                             {w.plan && (
-                              <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.2 text-[9px] font-medium text-zinc-400 capitalize border border-zinc-700/50">
+                              <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.2 text-[9px] font-medium text-muted-foreground capitalize border border-border">
                                 {w.plan}
                               </span>
                             )}
                           </div>
                           {isSelected && (
-                            <Check className="size-3.5 text-zinc-100 stroke-[2.5]" />
+                            <Check className="size-3.5 text-foreground stroke-[2.5]" />
                           )}
                         </DropdownMenuItem>
                       );
                     })}
 
-                    <DropdownMenuSeparator className="my-1 border-t border-zinc-800/80" />
+                    <DropdownMenuSeparator className="my-1 border-t border-border" />
 
                     <DropdownMenuItem
                       onClick={() => {
                         handleClose();
                         window.location.href = "/account/settings#team";
                       }}
-                      className="px-2.5 py-1.5 cursor-pointer rounded-md hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 text-xs"
+                      className="px-2.5 py-1.5 cursor-pointer rounded-md hover:bg-accent text-muted-foreground hover:text-foreground text-xs"
                     >
                       + Create a new team
                     </DropdownMenuItem>
@@ -548,14 +548,14 @@ export function UpgradeSheet({
             {/* Cards Section */}
             <div className="mt-7 space-y-3">
               {/* Card 1: Included credit */}
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950/60 text-xs">
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-purple-500/20 bg-purple-500/10 text-xs">
                 <div className="flex items-center gap-3">
                   <Coins className="size-4 text-primary" />
                   <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-zinc-200">
+                    <span className="font-medium text-foreground">
                       Included credit
                     </span>
-                    <HelpCircle className="size-3 text-zinc-500" />
+                    <HelpCircle className="size-3 text-muted-foreground" />
                   </div>
                 </div>
                 <span className="font-semibold text-primary font-mono">
@@ -564,14 +564,14 @@ export function UpgradeSheet({
               </div>
 
               {/* Card 2: Free domain with Pro */}
-              <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950/60 text-xs">
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl border border-purple-500/20 bg-purple-500/10 text-xs">
                 <div className="flex items-center gap-3">
                   <Globe className="size-4 text-primary" />
                   <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-zinc-200">
+                    <span className="font-medium text-foreground">
                       Free domain with Pro
                     </span>
-                    <HelpCircle className="size-3 text-zinc-500" />
+                    <HelpCircle className="size-3 text-muted-foreground" />
                   </div>
                 </div>
                 <span className="font-semibold text-primary font-mono">
@@ -580,52 +580,54 @@ export function UpgradeSheet({
               </div>
 
               {/* Card 3: Payment Method card */}
-              <div className="flex items-center justify-between px-4 py-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60 text-xs">
+              <div className="flex items-center justify-between px-4 py-3.5 rounded-xl border border-border bg-muted/40 text-xs">
                 <div className="flex items-center gap-3">
-                  <CreditCard className="size-4 text-zinc-400 shrink-0" />
+                  <CreditCard className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     {paymentInfo?.hasPaymentMethod ? (
                       <>
-                        <p className="font-medium text-zinc-200 capitalize">
+                        <p className="font-medium text-foreground capitalize">
                           {paymentInfo.brand || "Card"} ending in{" "}
                           {paymentInfo.last4 || "••••"}
                         </p>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-muted-foreground">
                           exp. {paymentInfo.expMonth || "12"}/
                           {paymentInfo.expYear || "2028"}
                         </p>
                       </>
                     ) : (
                       <>
-                        <p className="font-medium text-zinc-200">
+                        <p className="font-medium text-foreground">
                           Payment Method
                         </p>
-                        <p className="text-[11px] text-zinc-500">
+                        <p className="text-[11px] text-muted-foreground">
                           Entered securely via Stripe Checkout
                         </p>
                       </>
                     )}
                   </div>
                 </div>
-                <span className="text-[11px] text-zinc-500 truncate max-w-50">
+                <span className="text-[11px] text-muted-foreground truncate max-w-50">
                   {userEmail}
                 </span>
               </div>
 
               {/* Table: Product & Cost breakdown with Modular Switches */}
               <div className="pt-2 text-xs">
-                <div className="flex items-center justify-between text-zinc-500 pb-2 border-b border-zinc-800 text-[11px]">
+                <div className="flex items-center justify-between text-muted-foreground pb-2 border-b border-border text-[11px]">
                   <span>Product</span>
                   <span>Cost</span>
                 </div>
 
                 {/* Mandatory Pro Platform Base */}
-                <div className="py-2.5 flex items-center justify-between text-zinc-200">
+                <div className="py-2.5 flex items-center justify-between text-foreground">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="size-3.5 text-zinc-400" />
+                    <ShieldCheck className="size-3.5 text-muted-foreground" />
                     <span>Pro Platform Base</span>
                   </div>
-                  <span className="font-mono text-zinc-300 font-medium">$20</span>
+                  <span className="font-mono text-foreground font-medium">
+                    ${PRO_BASE_PRICE_USD}
+                  </span>
                 </div>
 
                 {/* Modular Add-on Toggle Rows */}
@@ -634,24 +636,24 @@ export function UpgradeSheet({
                   return (
                     <div
                       key={mod.key}
-                      className="py-2.5 flex items-center justify-between border-t border-zinc-800/80 text-zinc-200"
+                      className="py-2.5 flex items-center justify-between border-t border-border text-foreground"
                     >
                       <div className="flex items-center gap-2.5 pr-2">
-                        <div className="size-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+                        <div className="size-6 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
                           {renderModularIcon(mod.iconName)}
                         </div>
                         <div className="space-y-0.5">
-                          <span className="font-medium text-zinc-200">
+                          <span className="font-medium text-foreground">
                             {mod.name}
                           </span>
-                          <p className="text-[10px] text-zinc-500">
+                          <p className="text-[10px] text-muted-foreground">
                             {mod.description}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-mono text-xs font-medium text-zinc-300">
+                        <span className="font-mono text-xs font-medium text-foreground">
                           {isChecked ? `+$${mod.priceUsd}` : "$0"}
                         </span>
                         <Switch
@@ -669,17 +671,17 @@ export function UpgradeSheet({
                   );
                 })}
 
-                <div className="py-2.5 flex items-center justify-between border-t border-zinc-800/80 text-zinc-400">
+                <div className="py-2.5 flex items-center justify-between border-t border-border text-muted-foreground">
                   <span>Estimated tax</span>
                   <span className="font-mono">$0</span>
                 </div>
 
                 {/* Live Total */}
-                <div className="py-3 flex items-center justify-between border-t border-zinc-800 font-semibold text-white text-sm">
+                <div className="py-3 flex items-center justify-between border-t border-border font-semibold text-foreground text-sm">
                   <span>Total</span>
-                  <span className="font-mono text-base font-bold text-white">
+                  <span className="font-mono text-base font-bold text-foreground">
                     ${totalPrice}
-                    <span className="text-xs font-normal text-zinc-400">
+                    <span className="text-xs font-normal text-muted-foreground">
                       {" "}
                       / month
                     </span>
@@ -688,7 +690,7 @@ export function UpgradeSheet({
               </div>
 
               {/* Legal Terms Disclaimer */}
-              <p className="text-[11px] text-zinc-500 leading-relaxed pt-1">
+              <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">
                 You will be charged ${totalPrice} immediately. Renews monthly in
                 advance at ${totalPrice} plus any metered usage or overages.
                 Downgrade or cancel any time in Settings.
@@ -716,17 +718,17 @@ export function UpgradeSheet({
                   type="button"
                   onClick={handleClose}
                   disabled={isUpgrading}
-                  className="text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer text-center w-full py-1 block"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-center w-full py-1 block"
                 >
                   Cancel
                 </button>
 
-                <p className="text-center text-[11px] text-zinc-500 pt-1">
+                <p className="text-center text-[11px] text-muted-foreground pt-1">
                   Need custom limits, SAML SSO, or an SLA?{" "}
                   <Link
                     href="/contact/sales"
                     onClick={handleClose}
-                    className="text-zinc-400 hover:text-white underline underline-offset-2 transition-colors"
+                    className="text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
                   >
                     Contact Sales for Enterprise
                   </Link>

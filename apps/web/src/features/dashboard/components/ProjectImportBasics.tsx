@@ -38,14 +38,14 @@ export function ProjectImportBasics({
 }) {
   return (
     <>
-      <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 font-mono text-xs">
+      <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted/40 p-4 font-mono text-xs">
         <GitHubMark className="size-4" />
         <span className="font-semibold">
           {source.owner}/{source.name}
         </span>
-        <span className="text-white/30">•</span>
+        <span className="text-muted-foreground">•</span>
         <span>{source.branch}</span>
-        <span className="text-white/30">•</span>
+        <span className="text-muted-foreground">•</span>
         <span className="flex items-center gap-1">
           <Folder className="size-3" /> {config.rootDirectory}
         </span>
@@ -56,24 +56,24 @@ export function ProjectImportBasics({
         </p>
       ) : null}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 text-xs text-white/60">
+        <div className="space-y-2 text-xs text-foreground/60">
           <span>Workspace</span>
-          <div className="flex h-10 items-center rounded-lg border border-white/10 bg-black/60 px-3 text-white">
+          <div className="flex h-10 items-center rounded-lg border border-border bg-muted px-3 text-foreground">
             <span className="mr-2 size-2 rounded-full bg-emerald-500" />
             {source.team}
           </div>
         </div>
-        <label className="space-y-2 text-xs text-white/60">
+        <label className="space-y-2 text-xs text-foreground/60">
           <span>Project name</span>
           <input
             value={config.projectName}
             onChange={(event) =>
               onChange({ ...config, projectName: event.target.value })
             }
-            className="h-10 w-full rounded-lg border border-white/10 bg-black/60 px-3 text-white outline-hidden focus:border-white/30"
+            className="h-10 w-full rounded-lg border border-border bg-muted px-3 text-foreground outline-hidden focus:border-ring"
           />
         </label>
-        <div className="space-y-2 text-xs text-white/60">
+        <div className="space-y-2 text-xs text-foreground/60">
           <span>Framework</span>
           <Select
             value={config.framework}
@@ -82,7 +82,7 @@ export function ProjectImportBasics({
               if (framework) onChange({ ...config, framework });
             }}
           >
-            <SelectTrigger className="bg-black/60">
+            <SelectTrigger className="bg-muted">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -94,14 +94,14 @@ export function ProjectImportBasics({
             </SelectContent>
           </Select>
         </div>
-        <label className="space-y-2 text-xs text-white/60">
+        <label className="space-y-2 text-xs text-foreground/60">
           <span>Root directory</span>
           <input
             value={config.rootDirectory}
             onChange={(event) =>
               onChange({ ...config, rootDirectory: event.target.value })
             }
-            className="h-10 w-full rounded-lg border border-white/10 bg-black/60 px-3 font-mono text-white outline-hidden focus:border-white/30"
+            className="h-10 w-full rounded-lg border border-border bg-muted px-3 font-mono text-foreground outline-hidden focus:border-ring"
           />
         </label>
       </div>

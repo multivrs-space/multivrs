@@ -16,7 +16,7 @@ export default function AcceptInvitationPage({
   return (
     <AuthLayout>
       <Suspense
-        fallback={<p className="text-sm text-white/50">Loading invitation…</p>}
+        fallback={<p className="text-sm text-muted-foreground">Loading invitation…</p>}
       >
         <Invitation searchParams={searchParams} />
       </Suspense>

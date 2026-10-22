@@ -92,7 +92,7 @@ export function IntegrationsPage({
             </Button>
           </div>
           {token && (
-            <div className="relative rounded-xl border border-[var(--hairline)] bg-black/30 p-4 pr-12">
+            <div className="relative rounded-xl border border-[var(--hairline)] bg-muted p-4 pr-12">
               <code className="block max-h-28 overflow-auto break-all text-[10px] leading-5 text-muted-foreground">
                 {token}
               </code>

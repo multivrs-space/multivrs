@@ -126,9 +126,9 @@ export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
       <div className="flex items-center justify-between px-3 py-1.5">
         <div>
           <p className="text-[12px] text-muted-foreground">Platform Status</p>
-          <p className="text-[13px] text-accent">All systems normal.</p>
+          <p className="text-[13px] text-primary">All systems normal.</p>
         </div>
-        <span className="size-2 rounded-full bg-accent" />
+        <span className="size-2 rounded-full bg-primary" />
       </div>
     </div>
   );

@@ -16,12 +16,12 @@ export function TemplatesHero() {
   const signedIn = Boolean(session?.user);
 
   return (
-    <section className="border-b border-white/10 px-6 pt-24 pb-12 sm:pt-28 sm:pb-14">
+    <section className="border-b border-border px-6 pt-24 pb-12 sm:pt-28 sm:pb-14">
       <div className="mx-auto max-w-3xl text-center">
         <h1 className="font-clash text-5xl leading-[0.96] font-semibold tracking-normal sm:text-6xl">
           Build faster with templates.
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-white/55 sm:text-lg">
+        <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
           Start with a solid foundation. Find the right template for your next
           product, or publish your own and earn from every sale.
         </p>

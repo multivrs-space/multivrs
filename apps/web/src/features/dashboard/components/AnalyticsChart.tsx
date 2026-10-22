@@ -96,11 +96,11 @@ function TrafficTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-black/85 px-3 py-2 shadow-2xl backdrop-blur-xl">
+    <div className="rounded-xl border border-border bg-popover px-3 py-2 shadow-2xl backdrop-blur-xl">
       <p className="font-geist-mono text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-white">
+      <p className="mt-1 text-sm font-semibold text-foreground">
         {payload[0]?.value?.toLocaleString()} pageviews
       </p>
     </div>

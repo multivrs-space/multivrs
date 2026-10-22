@@ -20,11 +20,11 @@ export function BuildSettingsFields({
     ["Install command", "installCommand", "Detected from lockfile"],
   ] as const;
   return (
-    <section className="overflow-hidden rounded-xl border border-white/10 bg-black/40">
+    <section className="overflow-hidden rounded-xl border border-border bg-muted/70">
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-2 p-3.5 text-xs font-medium text-white/80"
+        className="flex w-full items-center gap-2 p-3.5 text-xs font-medium text-foreground/80"
       >
         <ChevronRight className={open ? "size-3.5 rotate-90" : "size-3.5"} />{" "}
         Build and output settings
@@ -32,7 +32,7 @@ export function BuildSettingsFields({
       {open ? (
         <div className="space-y-3 p-4 pt-0">
           {fields.map(([label, key, placeholder]) => (
-            <label key={key} className="block space-y-1 text-xs text-white/60">
+            <label key={key} className="block space-y-1 text-xs text-foreground/60">
               <span>{label}</span>
               <input
                 value={config[key]}
@@ -40,7 +40,7 @@ export function BuildSettingsFields({
                 onChange={(event) =>
                   onChange({ ...config, [key]: event.target.value })
                 }
-                className="h-9 w-full rounded-md border border-white/10 bg-black px-3 text-xs text-white outline-hidden focus:border-white/30"
+                className="h-9 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground outline-hidden focus:border-ring"
               />
             </label>
           ))}

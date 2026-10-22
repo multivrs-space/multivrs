@@ -52,7 +52,7 @@ export function SidebarTeamSettingsNav() {
                     "flex h-8 items-center rounded-md px-2.5 text-xs transition-colors",
                     isActive
                       ? "bg-white/[0.08] dark:bg-white/[0.08] font-medium text-foreground"
-                      : "text-muted-foreground hover:bg-white/[0.03] hover:text-foreground",
+                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                   )}
                 >
                   {item.label}

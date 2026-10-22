@@ -83,12 +83,12 @@ export function VerifyEmailForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Verify your email
         </h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-foreground">
           Enter the 6-digit code we sent to{" "}
-          <span className="text-white/80">{email || "your email"}</span>.
+          <span className="text-foreground/80">{email || "your email"}</span>.
         </p>
       </div>
 
@@ -106,14 +106,14 @@ export function VerifyEmailForm() {
                 // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length OTP slots
                 key={i}
                 index={i}
-                className="size-12 rounded-lg border-white/10 bg-white/[0.03] text-lg text-white first:rounded-l-lg last:rounded-r-lg data-[active=true]:border-[#A855F7] data-[active=true]:ring-[#A855F7]/30"
+                className="size-12 rounded-lg border-border bg-muted/40 text-lg text-foreground first:rounded-l-lg last:rounded-r-lg data-[active=true]:border-[#A855F7] data-[active=true]:ring-[#A855F7]/30"
               />
             ))}
           </InputOTPGroup>
         </InputOTP>
 
         {isVerifying && (
-          <p className="font-mono text-[11px] uppercase tracking-widest text-white/40">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             Verifying…
           </p>
         )}
@@ -124,14 +124,14 @@ export function VerifyEmailForm() {
           type="button"
           onClick={handleResend}
           disabled={isResending}
-          className="text-sm text-white/40 transition-colors hover:text-[#A855F7] disabled:opacity-50"
+          className="text-sm text-muted-foreground transition-colors hover:text-[#A855F7] disabled:opacity-50"
         >
           {isResending ? "Sending…" : "Didn't get it? Resend code"}
         </button>
 
         <Link
           href="/login"
-          className="flex items-center justify-center gap-1.5 text-sm text-white/40 transition-colors hover:text-white"
+          className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           Back to sign in

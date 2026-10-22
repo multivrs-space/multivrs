@@ -43,7 +43,7 @@ export function SidebarFooter({
           className="size-7 shrink-0 rounded-full border border-(--hairline-strong) object-cover"
         />
       ) : (
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-(--hairline-strong) bg-white/4 font-geist-mono text-[12px] font-medium text-foreground">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-(--hairline-strong) bg-foreground/4 font-geist-mono text-[12px] font-medium text-foreground">
           {initial}
         </span>
       )}
@@ -80,7 +80,7 @@ export function SidebarFooter({
         >
           <Bell className="size-4" strokeWidth={1.75} />
           {notifications.some((item) => !item.read) ? (
-            <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-accent ring-2 ring-(--ink)" />
+            <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-primary ring-2 ring-(--ink)" />
           ) : null}
         </DropdownMenuTrigger>
         <DropdownMenuContent

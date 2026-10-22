@@ -31,9 +31,9 @@ function SidebarAccountNavContent() {
             placeholder="Find"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-md border border-[var(--hairline)] bg-black/40 dark:bg-black/40 pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-foreground/30 focus:ring-1 focus:ring-foreground/20"
+            className="h-8 w-full rounded-md border border-[var(--hairline)] bg-muted pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-foreground/30 focus:ring-1 focus:ring-foreground/20"
           />
-          <kbd className="pointer-events-none absolute right-2 select-none rounded border border-[var(--hairline)] bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+          <kbd className="pointer-events-none absolute right-2 select-none rounded border border-[var(--hairline)] bg-foreground/5 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
             F
           </kbd>
         </div>
@@ -48,8 +48,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs transition-colors",
                 currentTab === "overview"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               <LayoutGrid className="size-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
@@ -64,8 +64,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs transition-colors",
                 currentTab === "activity"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               <Activity className="size-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
@@ -80,8 +80,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs transition-colors",
                 currentTab === "invites"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               <Mail className="size-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
@@ -93,7 +93,7 @@ function SidebarAccountNavContent() {
           <li>
             <Link
               href="/help"
-              className="flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs text-muted-foreground transition-colors hover:bg-white/[0.04] hover:text-foreground"
+              className="flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
             >
               <HelpCircle className="size-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />
               <span>Support</span>
@@ -110,8 +110,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs transition-colors",
                 currentTab === "settings"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               <Settings className="size-4 shrink-0" strokeWidth={1.75} />
@@ -126,8 +126,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center rounded-md pl-9 pr-2.5 text-xs transition-colors",
                 currentTab === "authentication"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               Authentication
@@ -141,8 +141,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center rounded-md pl-9 pr-2.5 text-xs transition-colors",
                 currentTab === "sign-in-with-multivrs"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               Sign in with Multivrs
@@ -156,8 +156,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center rounded-md pl-9 pr-2.5 text-xs transition-colors",
                 currentTab === "billing-information"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               Billing Information
@@ -171,8 +171,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center rounded-md pl-9 pr-2.5 text-xs transition-colors",
                 currentTab === "billing-items"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               Billing Items
@@ -186,8 +186,8 @@ function SidebarAccountNavContent() {
               className={cn(
                 "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-xs transition-colors",
                 currentTab === "invoices"
-                  ? "bg-white/[0.08] font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  ? "bg-foreground/[0.08] font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
               )}
             >
               <FileText className="size-4 shrink-0 text-muted-foreground/70" strokeWidth={1.75} />

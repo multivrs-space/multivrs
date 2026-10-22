@@ -8,17 +8,17 @@ export function FirewallSectionSkeleton() {
         description="Ordered traffic rules for the selected project."
         title="Firewall"
       />
-      <section className="overflow-hidden rounded-2xl border border-white/8 bg-white/2">
-        <div className="h-20 border-white/8 border-b p-4">
+      <section className="overflow-hidden rounded-2xl border border-border bg-foreground/2">
+        <div className="h-20 border-border border-b p-4">
           <h2 className="text-sm font-semibold">Custom rules</h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Create, pause, and remove rules without redeploying.
           </p>
         </div>
-        <div className="grid grid-cols-4 gap-3 border-white/8 border-b p-4">
+        <div className="grid grid-cols-4 gap-3 border-border border-b p-4">
           {["Rule name", "Path", "Starts with", "/admin or NG"].map((label) => (
             <div
-              className="flex h-10 items-center rounded-lg border border-white/8 px-3 text-xs text-muted-foreground"
+              className="flex h-10 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground"
               key={label}
             >
               {label}
@@ -27,7 +27,7 @@ export function FirewallSectionSkeleton() {
         </div>
         {SKELETON_ROWS.slice(0, 3).map((row) => (
           <div
-            className="h-16 animate-pulse border-white/6 border-b bg-white/[0.025]"
+            className="h-16 animate-pulse border-border border-b bg-foreground/[0.04]"
             key={row}
           />
         ))}

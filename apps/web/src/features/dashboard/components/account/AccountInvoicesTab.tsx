@@ -56,17 +56,17 @@ export function AccountInvoicesTab({
           value={filter}
           onValueChange={(val) => setFilter(val as "all" | "paid" | "open")}
         >
-          <SelectTrigger className="h-9 w-44 rounded-md border-zinc-800 bg-zinc-900/60 px-3 text-xs font-medium text-zinc-200 hover:bg-zinc-800/80 focus:ring-1 focus:ring-zinc-700">
+          <SelectTrigger className="h-9 w-44 rounded-md border-border bg-background px-3 text-xs font-medium text-foreground hover:bg-muted focus:ring-1 focus:ring-ring">
             <SelectValue placeholder="All Invoices" />
           </SelectTrigger>
-          <SelectContent className="border-zinc-800 bg-zinc-900 text-zinc-200">
-            <SelectItem value="all" className="text-xs focus:bg-zinc-800 focus:text-white">
+          <SelectContent className="border-border bg-popover text-popover-foreground">
+            <SelectItem value="all" className="text-xs">
               All Invoices
             </SelectItem>
-            <SelectItem value="paid" className="text-xs focus:bg-zinc-800 focus:text-white">
+            <SelectItem value="paid" className="text-xs">
               Paid Invoices
             </SelectItem>
-            <SelectItem value="open" className="text-xs focus:bg-zinc-800 focus:text-white">
+            <SelectItem value="open" className="text-xs">
               Open Invoices
             </SelectItem>
           </SelectContent>
@@ -74,12 +74,12 @@ export function AccountInvoicesTab({
       </div>
 
       {/* Invoices Container */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-6 min-h-[380px] flex flex-col justify-center">
+      <div className="rounded-xl border border-border bg-card p-6 min-h-[380px] flex flex-col justify-center">
         {filteredInvoices.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-zinc-800/80 text-zinc-400">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="pb-3 font-medium">Invoice</th>
                   <th className="pb-3 font-medium">Date</th>
                   <th className="pb-3 font-medium">Status</th>
@@ -87,7 +87,7 @@ export function AccountInvoicesTab({
                   <th className="pb-3 font-medium text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/40">
+              <tbody className="divide-y divide-border">
                 {filteredInvoices.map((inv) => {
                   const isPaid = inv.status.toLowerCase() === "paid";
                   const amount = (
@@ -106,23 +106,23 @@ export function AccountInvoicesTab({
                   );
 
                   return (
-                    <tr key={inv.id || inv.stripeInvoiceId} className="hover:bg-zinc-900/30">
-                      <td className="py-3 font-mono text-zinc-300">
+                    <tr key={inv.id || inv.stripeInvoiceId} className="hover:bg-muted/40 transition-colors">
+                      <td className="py-3 font-mono text-foreground">
                         {inv.stripeInvoiceId.slice(0, 16)}...
                       </td>
-                      <td className="py-3 text-zinc-400">{date}</td>
+                      <td className="py-3 text-muted-foreground">{date}</td>
                       <td className="py-3">
                         <span
                           className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                             isPaid
-                              ? "border-emerald-800/80 bg-emerald-950/80 text-emerald-400"
-                              : "border-amber-800/80 bg-amber-950/80 text-amber-400"
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
                           }`}
                         >
                           {isPaid ? "Paid" : "Open"}
                         </span>
                       </td>
-                      <td className="py-3 font-medium text-zinc-200">
+                      <td className="py-3 font-medium text-foreground">
                         {amount}
                       </td>
                       <td className="py-3 text-right">
@@ -133,13 +133,13 @@ export function AccountInvoicesTab({
                             rel="noreferrer noopener"
                             className={cn(
                               buttonVariants({ variant: "ghost", size: "sm" }),
-                              "h-7 gap-1 text-xs text-zinc-300 hover:text-white",
+                              "h-7 gap-1 text-xs text-muted-foreground hover:text-foreground",
                             )}
                           >
                             View <ExternalLink className="size-3" />
                           </a>
                         ) : (
-                          <span className="text-zinc-600">—</span>
+                          <span className="text-muted-foreground">—</span>
                         )}
                       </td>
                     </tr>
@@ -149,15 +149,15 @@ export function AccountInvoicesTab({
             </table>
           </div>
         ) : (
-          /* Exact empty state from the user's screenshot */
+          /* Exact empty state matching Vercel style */
           <div className="flex flex-col items-center justify-center text-center py-16">
-            <div className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 mb-3.5">
+            <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/60 text-muted-foreground mb-3.5">
               <FileText className="size-5" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-200">
+            <h3 className="text-sm font-medium text-foreground">
               No invoices
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               You currently don&apos;t have any invoices.
             </p>
           </div>

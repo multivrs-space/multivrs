@@ -31,7 +31,7 @@ export function AccountBillingItemsTab({
     <div className="space-y-8">
       {/* Teams Section */}
       <div>
-        <h2 className="text-sm font-semibold text-white tracking-tight mb-3">
+        <h2 className="text-sm font-semibold text-foreground tracking-tight mb-3">
           Teams
         </h2>
         {teams.length > 0 ? (
@@ -59,10 +59,10 @@ export function AccountBillingItemsTab({
 
               const statusBadgeClass =
                 rawStatus === "active" || rawStatus === "trialing"
-                  ? "border-emerald-800/80 bg-emerald-950/80 text-emerald-400"
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                   : rawStatus === "past_due"
-                  ? "border-amber-800/80 bg-amber-950/80 text-amber-400"
-                  : "border-zinc-700 bg-zinc-800 text-zinc-400";
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "border-border bg-muted text-muted-foreground";
 
               return (
                 <SettingsCard key={team.id || team.slug}>
@@ -75,12 +75,12 @@ export function AccountBillingItemsTab({
                         size={28}
                       />
 
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         {team.name || team.slug}
                       </span>
 
                       <div className="flex items-center gap-1.5 ml-1">
-                        <span className="rounded-full border border-zinc-700/80 bg-zinc-800/60 px-2 py-0.5 text-[10px] font-medium text-zinc-300">
+                        <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                           {formattedPlan}
                         </span>
                         <span
@@ -96,7 +96,7 @@ export function AccountBillingItemsTab({
                   </SettingsCardBody>
                   <SettingsCardFooter
                     helperText={
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-muted-foreground">
                         Visit {team.name || team.slug}&apos;s billing settings for details.
                       </span>
                     }
@@ -105,7 +105,7 @@ export function AccountBillingItemsTab({
                         href={`/${team.slug}/~/settings`}
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
-                          "h-8 rounded-md border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-medium text-zinc-200 px-4",
+                          "h-8 rounded-md border-border bg-background hover:bg-muted text-xs font-medium text-foreground px-4 cursor-pointer",
                         )}
                       >
                         View Billing Settings
@@ -119,7 +119,7 @@ export function AccountBillingItemsTab({
         ) : (
           <SettingsCard>
             <SettingsCardBody>
-              <div className="py-6 text-center text-xs text-zinc-500">
+              <div className="py-6 text-center text-xs text-muted-foreground">
                 You do not belong to any teams yet.
               </div>
             </SettingsCardBody>

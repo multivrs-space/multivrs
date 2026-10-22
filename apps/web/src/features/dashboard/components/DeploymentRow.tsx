@@ -22,7 +22,7 @@ export function DeploymentRow({ deployment }: DeploymentRowProps) {
       : "bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20";
 
   return (
-    <div className="group relative flex items-center justify-between gap-4 border-b border-[var(--hairline)] px-4 py-3 text-[13px] transition-colors hover:bg-white/[0.02]">
+    <div className="group relative flex items-center justify-between gap-4 border-b border-[var(--hairline)] px-4 py-3 text-[13px] transition-colors hover:bg-foreground/[0.04]">
       {/* 1. Commit Message (Flexes to fill) */}
       <div className="flex flex-1 items-center gap-3 min-w-0 pr-4">
         {/* Status Dot */}

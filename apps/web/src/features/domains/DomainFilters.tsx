@@ -38,13 +38,13 @@ export function DomainFilters({
   return (
     <div className="flex flex-wrap justify-end gap-2">
       <details className="group relative">
-        <summary className="flex h-9 cursor-pointer list-none items-center gap-2 border border-white/15 bg-black px-3 text-xs text-white/75">
+        <summary className="flex h-9 cursor-pointer list-none items-center gap-2 border border-border bg-background px-3 text-xs text-foreground/75">
           {tld ? `.${tld}` : "All TLDs"}
           <ChevronDown className="size-3.5" />
         </summary>
-        <div className="absolute right-0 z-30 mt-1 w-64 border border-white/15 bg-[#080808] shadow-2xl">
-          <label className="relative block border-b border-white/10 p-2">
-            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/35" />
+        <div className="absolute right-0 z-30 mt-1 w-64 border border-border bg-card shadow-2xl">
+          <label className="relative block border-b border-border p-2">
+            <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -56,7 +56,7 @@ export function DomainFilters({
             <button
               type="button"
               onClick={() => onTldChange("")}
-              className="block w-full px-3 py-2 text-left text-sm hover:bg-white/8"
+              className="block w-full px-3 py-2 text-left text-sm hover:bg-foreground/8"
             >
               All TLDs
             </button>
@@ -65,7 +65,7 @@ export function DomainFilters({
                 key={item}
                 type="button"
                 onClick={() => onTldChange(item)}
-                className="block w-full px-3 py-2 text-left text-sm hover:bg-white/8"
+                className="block w-full px-3 py-2 text-left text-sm hover:bg-foreground/8"
               >
                 .{item}
               </button>
@@ -106,19 +106,19 @@ function FilterSelect({
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-9 rounded-none border-white/15 bg-[#080808] text-xs text-white/75">
+      <SelectTrigger className="h-9 rounded-none border-border bg-card text-xs text-foreground/75">
         <SelectValue />
       </SelectTrigger>
       <SelectContent
         position="popper"
         align="end"
-        className="rounded-none border border-white/15 bg-[#080808] text-white"
+        className="rounded-none border border-border bg-card text-foreground"
       >
         {options.map(([option, label]) => (
           <SelectItem
             key={option}
             value={option}
-            className="rounded-none text-xs focus:bg-white/10 focus:text-white"
+            className="rounded-none text-xs focus:bg-muted focus:text-foreground"
           >
             {label}
           </SelectItem>

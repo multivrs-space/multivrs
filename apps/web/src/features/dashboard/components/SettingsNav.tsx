@@ -45,7 +45,7 @@ export function SettingsNav({ sections }: { sections: SettingsSection[] }) {
           aria-current={active === section.id ? "location" : undefined}
           onClick={() => setActive(section.id)}
           className={cn(
-            "shrink-0 rounded-lg px-3 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-white/[0.04] hover:text-foreground",
+            "shrink-0 rounded-lg px-3 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground",
             active === section.id && "bg-white/[0.05] text-foreground",
           )}
         >

@@ -12,7 +12,7 @@ export function SandboxCheckout({
     <div className="py-8 text-center">
       <FlaskConical className="mx-auto size-8 text-cyan-300" />
       <h2 className="mt-4 text-xl font-medium">Local sandbox checkout</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/45">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         This safely simulates registration and DNS. No payment or live domain
         purchase occurs.
       </p>
@@ -35,7 +35,7 @@ export function SandboxCheckout({
 
 export function EmptyCheckout() {
   return (
-    <main className="grid min-h-screen place-items-center bg-black px-5 text-center text-white">
+    <main className="grid min-h-screen place-items-center bg-background px-5 text-center text-foreground">
       <div>
         <h1 className="font-clash text-3xl font-semibold">
           Your cart is empty
@@ -53,8 +53,8 @@ export function EmptyCheckout() {
 
 export function CheckoutLoading() {
   return (
-    <main className="grid min-h-screen place-items-center bg-black text-white">
-      <LoaderCircle className="size-6 animate-spin text-white/40" />
+    <main className="grid min-h-screen place-items-center bg-background text-foreground">
+      <LoaderCircle className="size-6 animate-spin text-muted-foreground" />
     </main>
   );
 }

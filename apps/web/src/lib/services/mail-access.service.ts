@@ -9,6 +9,7 @@ import {
   canAccount,
   ownedOrTeamWhere,
 } from "@/lib/services/account-access";
+import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import {
   projectAccessWhere,
   projectRole,
@@ -68,6 +69,16 @@ export async function mailAccount(
     if (owner && owner.id !== actorId) {
       const role = owner.accountTeam?.members[0]?.role;
       return { ownerId: owner.id, role: allowed(role, action) };
+    }
+    if (!owner) {
+      const ownerId = await accountOwnerIdForSlug(target.account);
+      if (ownerId && ownerId !== actorId) {
+        const membership = await prisma.member.findFirst({
+          where: { userId: actorId, organization: { accountOwnerId: ownerId } },
+          select: { role: true },
+        });
+        return { ownerId, role: allowed(membership?.role, action) };
+      }
     }
   }
   return { ownerId: actorId, role: "owner" };

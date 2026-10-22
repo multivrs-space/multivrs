@@ -7,10 +7,10 @@ export function SpeedInsightsSectionSkeleton() {
         description="Core Web Vitals collected from real visits."
         title="Speed Insights"
       />
-      <div className="grid border-white/8 border-y md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid border-border border-y md:grid-cols-2 xl:grid-cols-4">
         {["CLS", "INP", "LCP", "TTFB"].map((vital) => (
           <article
-            className="h-44 border-white/8 border-b p-5 md:border-r xl:border-b-0"
+            className="h-44 border-border border-b p-5 md:border-r xl:border-b-0"
             key={vital}
           >
             <p className="font-geist-mono text-xs text-muted-foreground">

@@ -48,10 +48,10 @@ export function DomainOverviewPanel(props: DomainOverviewPanelProps) {
       </div>
       <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             {domain.hostname}
           </h1>
-          <p className="mt-2 text-sm text-white/45">
+          <p className="mt-2 text-sm text-muted-foreground">
             {domain.managed
               ? "Registered and managed by Multivrs"
               : "Externally registered domain"}

@@ -58,7 +58,7 @@ export function DashboardMobileNavigation({
       <SheetTrigger asChild>
         <button
           type="button"
-          className="lg:hidden flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+          className="lg:hidden flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
           aria-label="Open navigation"
         >
           <Menu className="size-4" />

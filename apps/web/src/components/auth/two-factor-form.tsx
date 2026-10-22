@@ -51,10 +51,10 @@ export function TwoFactorForm() {
         <KeyRound className="size-4 text-[#A855F7]" />
       </div>
       <div>
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Two-factor verification
         </h1>
-        <p className="mt-2 text-sm leading-6 text-white/50">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {backupMode
             ? "Enter one of your unused recovery codes."
             : "Enter the six-digit code from your authenticator app."}
@@ -64,14 +64,14 @@ export function TwoFactorForm() {
         <div className="space-y-2">
           <Label
             htmlFor="two-factor-code"
-            className="font-mono text-[11px] uppercase tracking-wider text-white/50"
+            className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground"
           >
             {backupMode ? "Recovery code" : "Authenticator code"}
           </Label>
           <Input
             autoComplete="one-time-code"
             autoFocus
-            className="h-11 rounded-lg border-white/10 bg-white/[0.03] font-mono tracking-[0.2em] text-white"
+            className="h-11 rounded-lg border-border bg-muted/40 font-mono tracking-[0.2em] text-foreground"
             id="two-factor-code"
             inputMode={backupMode ? "text" : "numeric"}
             maxLength={backupMode ? 32 : 6}
@@ -80,7 +80,7 @@ export function TwoFactorForm() {
           />
         </div>
         <button
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white hover:bg-[#9333ea] disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground hover:bg-[#9333ea] disabled:opacity-60"
           disabled={loading}
           type="submit"
         >
@@ -88,7 +88,7 @@ export function TwoFactorForm() {
         </button>
       </form>
       <button
-        className="text-sm text-white/45 hover:text-white"
+        className="text-sm text-muted-foreground hover:text-foreground"
         onClick={() => {
           setBackupMode((current) => !current);
           setCode("");

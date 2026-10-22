@@ -60,7 +60,7 @@ export function ProjectCard({ project, href }: ProjectCardProps) {
   return (
     <article className="group rounded-xl border border-[var(--hairline)] bg-[var(--ink-raised)]/65 p-4 transition-colors hover:border-[var(--hairline-strong)] hover:bg-[var(--ink-raised)]/85">
       <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black ring-1 ring-white/5">
+        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background ring-1 ring-border">
           <ProjectFavicon name={project.name} url={project.faviconUrl} />
         </span>
 
@@ -90,7 +90,7 @@ export function ProjectCard({ project, href }: ProjectCardProps) {
         <div className="flex shrink-0 items-center gap-1">
           <span
             aria-label={status.label}
-            className="flex size-8 items-center justify-center rounded-full border border-[var(--hairline)] bg-black/20"
+            className="flex size-8 items-center justify-center rounded-full border border-[var(--hairline)] bg-muted/50"
             role="img"
             title={status.label}
           >

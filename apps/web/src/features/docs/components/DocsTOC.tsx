@@ -43,12 +43,12 @@ export function DocsTOC({ headings = [] }: DocsTOCProps) {
 
   return (
     <nav className="w-56 shrink-0 hidden xl:flex flex-col gap-3 sticky top-20 self-start p-4 text-xs select-none">
-      <div className="flex items-center gap-2 text-zinc-400 font-semibold uppercase tracking-wider text-[11px]">
+      <div className="flex items-center gap-2 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
         <AlignLeft className="size-3.5" />
         <span>On this page</span>
       </div>
 
-      <ul className="flex flex-col gap-2 border-l border-zinc-800/80 pl-3">
+      <ul className="flex flex-col gap-2 border-l border-border pl-3">
         {headings.map((item) => (
           <li key={item.id} className={item.level === 3 ? "pl-2" : ""}>
             <a
@@ -56,7 +56,7 @@ export function DocsTOC({ headings = [] }: DocsTOCProps) {
               className={`block transition-colors line-clamp-1 ${
                 activeId === item.id
                   ? "text-purple-400 font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {item.text}

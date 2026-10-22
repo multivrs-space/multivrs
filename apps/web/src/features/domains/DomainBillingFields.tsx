@@ -64,7 +64,7 @@ export function DomainBillingFields({
           optional
         />
       </div>
-      <label className="grid gap-2 text-sm text-white/55">
+      <label className="grid gap-2 text-sm text-foreground/55">
         Country or region
         <select
           required
@@ -142,10 +142,10 @@ function BillingField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="grid gap-2 text-sm text-white/55">
+    <label className="grid gap-2 text-sm text-foreground/55">
       <span>
         {label}
-        {optional ? <span className="text-white/30"> (optional)</span> : null}
+        {optional ? <span className="text-muted-foreground"> (optional)</span> : null}
       </span>
       <input
         {...props}
@@ -158,4 +158,4 @@ function BillingField({
 }
 
 const inputClass =
-  "h-11 w-full rounded-md border border-white/12 bg-[#0b0b0b] px-3 text-sm text-white outline-hidden transition placeholder:text-white/25 focus:border-white/35 focus:ring-2 focus:ring-white/5";
+  "h-11 w-full rounded-md border border-border bg-muted px-3 text-sm text-foreground outline-hidden transition placeholder:text-muted-foreground focus:border-white/35 focus:ring-2 focus:ring-border";

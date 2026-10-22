@@ -6,6 +6,7 @@ import type {
   ProjectStatus,
 } from "@/features/dashboard/types/project.types";
 import { prisma } from "@/lib/prisma";
+import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import { projectAccessWhere } from "@/lib/services/project-access";
 import { deploymentUrl } from "@/lib/services/serve.service";
 import { SITE_URL } from "@/lib/site";
@@ -64,14 +65,11 @@ export const dashboardProjects = cache(async function dashboardProjects(
   username: string,
   viewerId: string,
 ): Promise<DashboardProject[] | null> {
-  const owner = await prisma.user.findUnique({
-    where: { username },
-    select: { id: true },
-  });
-  if (!owner) return null;
+  const ownerId = await accountOwnerIdForSlug(username);
+  if (!ownerId) return null;
   const projects = await prisma.project.findMany({
     where: {
-      ownerId: owner.id,
+      ownerId,
       OR: projectAccessWhere(viewerId),
     },
     include: {

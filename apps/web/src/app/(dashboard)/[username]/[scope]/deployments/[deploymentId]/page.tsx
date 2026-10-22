@@ -48,32 +48,32 @@ export default async function DeploymentDetailPage({ params }: PageProps) {
           {deployment.errorMessage}
         </p>
       ) : null}
-      <div className="mt-6 overflow-hidden border border-border bg-black font-mono text-xs">
+      <div className="mt-6 overflow-hidden border border-border bg-background font-mono text-xs">
         {deployment.logs.length ? (
           deployment.logs.map((log) => (
             <div
               key={log.id}
-              className="grid grid-cols-[7rem_4rem_1fr] gap-3 border-b border-white/10 p-3"
+              className="grid grid-cols-[7rem_4rem_1fr] gap-3 border-b border-border p-3"
             >
-              <time className="text-white/40">
+              <time className="text-muted-foreground">
                 {new Date(log.createdAt).toLocaleTimeString("en-US", {
                   hour12: false,
                 })}
               </time>
               <span
                 className={
-                  log.level === "error" ? "text-red-400" : "text-white/50"
+                  log.level === "error" ? "text-red-400" : "text-muted-foreground"
                 }
               >
                 {log.level}
               </span>
-              <pre className="whitespace-pre-wrap break-words text-white/80">
+              <pre className="whitespace-pre-wrap break-words text-foreground/80">
                 {log.message}
               </pre>
             </div>
           ))
         ) : (
-          <p className="p-8 text-center text-white/50">
+          <p className="p-8 text-center text-muted-foreground">
             No build logs were recorded.
           </p>
         )}

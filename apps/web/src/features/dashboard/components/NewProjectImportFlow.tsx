@@ -38,8 +38,8 @@ export function NewProjectImportFlow() {
   const deployment = useDeploymentImport(source);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 font-sans text-white">
-      <section className="rounded-2xl border border-white/10 bg-[#09090b] p-6 shadow-2xl">
+    <div className="mx-auto max-w-2xl px-4 py-10 font-sans text-foreground">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-2xl">
         <h1 className="text-xl font-semibold tracking-tight">
           Configure project
         </h1>
@@ -92,7 +92,7 @@ export function NewProjectImportFlow() {
       />
       <Link
         href="/new"
-        className="mt-8 block text-center text-xs text-white/40 hover:text-white"
+        className="mt-8 block text-center text-xs text-muted-foreground hover:text-foreground"
       >
         Import a different repository →
       </Link>

@@ -12,9 +12,9 @@ import { authClient } from "@/lib/auth-client";
 import { type SignInInput, signInSchema } from "@/validators/auth.validators";
 
 const labelClass =
-  "font-mono text-[11px] font-medium uppercase tracking-wider text-white/50";
+  "font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
 const inputClass =
-  "h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-white/30 focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
+  "h-11 rounded-lg border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
 
 /**
  * Email + password sign-in form, with Google/GitHub OAuth.
@@ -103,10 +103,10 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Sign in
         </h1>
-        <p className="text-sm text-white/50">Welcome back to Multivrs.</p>
+        <p className="text-sm text-muted-foreground">Welcome back to Multivrs.</p>
       </div>
 
       <OAuthButtons callbackURL={returnTo} />
@@ -115,7 +115,7 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
         type="button"
         onClick={signInWithPasskey}
         disabled={isLoading}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] text-sm font-medium text-white/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted/40 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:border-[#A855F7]/50 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Fingerprint className="size-4" />
         Sign in with a passkey
@@ -123,10 +123,10 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/10" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-black/40 px-3 font-mono text-[10px] uppercase tracking-widest text-white/30">
+          <span className="bg-muted/70 px-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             or
           </span>
         </div>
@@ -159,7 +159,7 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
             </Label>
             <Link
               href="/forgot-password"
-              className="font-mono text-[11px] text-white/40 transition-colors hover:text-[#A855F7]"
+              className="font-mono text-[11px] text-muted-foreground transition-colors hover:text-[#A855F7]"
             >
               Forgot?
             </Link>
@@ -178,7 +178,7 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground/70"
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -197,17 +197,17 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-white/40">
+      <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link
           href={`/signup?from=${encodeURIComponent(returnTo)}`}
-          className="font-medium text-white transition-colors hover:text-[#A855F7]"
+          className="font-medium text-foreground transition-colors hover:text-[#A855F7]"
         >
           Sign up
         </Link>

@@ -73,16 +73,16 @@ export function AccountInvitesTab({
     <div className="space-y-6">
       {/* Header matching Vercel */}
       <div>
-        <h1 className="text-xl font-semibold text-white tracking-tight">Invites</h1>
-        <p className="mt-1 text-xs text-zinc-400">
+        <h1 className="text-xl font-semibold text-foreground tracking-tight">Invites</h1>
+        <p className="mt-1 text-xs text-muted-foreground">
           Manage your Multivrs team invites.
         </p>
       </div>
 
       {/* Invites Container */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-6 min-h-[380px] flex flex-col justify-center">
+      <div className="rounded-xl border border-border bg-card p-6 min-h-[380px] flex flex-col justify-center">
         {items.length > 0 ? (
-          <div className="divide-y divide-zinc-800/60">
+          <div className="divide-y divide-border">
             {items.map((invite) => (
               <div
                 key={invite.id}
@@ -97,16 +97,16 @@ export function AccountInvitesTab({
 
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         {invite.organizationName}
                       </span>
                       {invite.role && (
-                        <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300 capitalize">
+                        <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground capitalize">
                           {invite.role}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-muted-foreground">
                       Invited by {invite.inviterName || invite.inviterEmail || "team owner"}
                     </p>
                   </div>
@@ -118,7 +118,7 @@ export function AccountInvitesTab({
                     size="sm"
                     disabled={processingId === invite.id}
                     onClick={() => handleReject(invite)}
-                    className="h-8 border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white gap-1"
+                    className="h-8 border-border bg-background text-xs text-foreground hover:bg-muted gap-1 cursor-pointer"
                   >
                     <X className="size-3.5" />
                     Decline
@@ -127,7 +127,7 @@ export function AccountInvitesTab({
                     size="sm"
                     disabled={processingId === invite.id}
                     onClick={() => handleAccept(invite)}
-                    className="h-8 bg-white text-xs font-medium text-black hover:bg-zinc-200 gap-1"
+                    className="h-8 bg-primary text-xs font-medium text-primary-foreground hover:bg-primary/90 gap-1 cursor-pointer"
                   >
                     <Check className="size-3.5" />
                     Accept
@@ -137,15 +137,15 @@ export function AccountInvitesTab({
             ))}
           </div>
         ) : (
-          /* Exact empty state from the user's screenshot */
+          /* Exact empty state matching Vercel style */
           <div className="flex flex-col items-center justify-center text-center py-16">
-            <div className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 mb-3.5">
+            <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/60 text-muted-foreground mb-3.5">
               <Mail className="size-5" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-200">
+            <h3 className="text-sm font-medium text-foreground">
               No Invites Yet
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               When a team invites you, it&apos;ll show up here.
             </p>
           </div>

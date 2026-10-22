@@ -71,7 +71,7 @@ export function TemplateCard({
     <div className="group flex flex-col">
       {/* 1. Preview Card: Image Only Widescreen Rectangle */}
       <button
-        className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#121212] cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-border bg-muted cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={onSelect}
         type="button"
       >
@@ -86,7 +86,7 @@ export function TemplateCard({
         ) : (
           <div className="relative size-full flex flex-col items-center justify-center bg-linear-to-br from-white/5 via-white/1 to-black p-4">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.08),transparent_70%)]" />
-            <div className="relative flex flex-col items-center gap-2 text-white/35 transition-colors group-hover:text-white/60">
+            <div className="relative flex flex-col items-center gap-2 text-muted-foreground transition-colors group-hover:text-foreground/60">
               <Layers className="size-8 stroke-[1.25]" />
               <span className="font-mono text-[10px] tracking-widest uppercase">
                 {template.category}
@@ -100,7 +100,7 @@ export function TemplateCard({
       <div className="mt-3.5 flex items-center justify-between px-1">
         {/* Left: Seller avatar & Name */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="size-6 shrink-0 overflow-hidden rounded-full border border-white/15 bg-zinc-800 flex items-center justify-center text-[10px] font-medium text-white/70">
+          <div className="size-6 shrink-0 overflow-hidden rounded-full border border-border bg-muted flex items-center justify-center text-[10px] font-medium text-foreground/70">
             {sellerImage ? (
               <Image
                 alt={sellerName}
@@ -114,16 +114,16 @@ export function TemplateCard({
               sellerInitial
             )}
           </div>
-          <span className="truncate text-xs font-semibold text-white/90 transition-colors group-hover:text-white">
+          <span className="truncate text-xs font-semibold text-foreground/90 transition-colors group-hover:text-foreground">
             {sellerName}
           </span>
         </div>
 
         {/* Right: Likes & Views */}
-        <div className="flex items-center gap-3.5 shrink-0 text-xs text-white/50">
+        <div className="flex items-center gap-3.5 shrink-0 text-xs text-muted-foreground">
           <button
             aria-label={`Like ${template.name}`}
-            className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer"
             onClick={handleLike}
             type="button"
           >

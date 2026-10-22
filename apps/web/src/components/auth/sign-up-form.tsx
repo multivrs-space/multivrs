@@ -13,9 +13,9 @@ import { authClient } from "@/lib/auth-client";
 import { type SignUpInput, signUpSchema } from "@/validators/auth.validators";
 
 const labelClass =
-  "font-mono text-[11px] font-medium uppercase tracking-wider text-white/50";
+  "font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
 const inputClass =
-  "h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-white/30 focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
+  "h-11 rounded-lg border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
 
 /**
  * Sign-up form: username, email, password, confirm password — plus
@@ -86,10 +86,10 @@ export function SignUpForm({ returnTo }: { returnTo: string }) {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Create an account
         </h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-foreground">
           Get started with Multivrs in seconds.
         </p>
       </div>
@@ -98,10 +98,10 @@ export function SignUpForm({ returnTo }: { returnTo: string }) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/10" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-black/40 px-3 font-mono text-[10px] uppercase tracking-widest text-white/30">
+          <span className="bg-muted/70 px-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             or
           </span>
         </div>
@@ -164,7 +164,7 @@ export function SignUpForm({ returnTo }: { returnTo: string }) {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground/70"
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -198,7 +198,7 @@ export function SignUpForm({ returnTo }: { returnTo: string }) {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground/70"
               tabIndex={-1}
               aria-label={
                 showConfirmPassword ? "Hide password" : "Show password"
@@ -219,17 +219,17 @@ export function SignUpForm({ returnTo }: { returnTo: string }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-white/40">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
           href={buildSignInHref(returnTo)}
-          className="font-medium text-white transition-colors hover:text-[#A855F7]"
+          className="font-medium text-foreground transition-colors hover:text-[#A855F7]"
         >
           Sign in
         </Link>

@@ -17,7 +17,7 @@ export function DomainRow({
   return (
     <div
       className={`group flex min-h-16 items-center gap-4 border-b border-border px-4 last:border-b-0 transition-colors ${
-        selected ? "bg-white/[0.04]" : "hover:bg-white/[0.02]"
+        selected ? "bg-muted/40" : "hover:bg-foreground/[0.04]"
       }`}
     >
       <label className="shrink-0 cursor-pointer">
@@ -31,7 +31,7 @@ export function DomainRow({
         <span
           className={`size-4 rounded-sm flex items-center justify-center border transition-colors ${
             selected
-              ? "border-white bg-white text-black"
+              ? "border-background bg-foreground text-background"
               : "border-white/20 bg-transparent hover:border-white/40"
           }`}
         >

@@ -16,22 +16,22 @@ export function DomainDnsStatusPanels({
   return (
     <>
       <div className="mb-10 grid gap-5 lg:grid-cols-2">
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+        <section className="rounded-xl border border-border bg-foreground/[0.04] p-5">
           <div className="flex items-center gap-2">
-            <Server className="size-4 text-white/45" />
+            <Server className="size-4 text-muted-foreground" />
             <h2 className="font-medium">Nameservers</h2>
           </div>
-          <div className="mt-4 divide-y divide-white/8 border-y border-white/8">
+          <div className="mt-4 divide-y divide-border border-y border-border">
             {nameservers.map((nameserver) => (
               <p
                 key={nameserver}
-                className="py-3 font-mono text-xs text-white/65"
+                className="py-3 font-mono text-xs text-foreground/65"
               >
                 {nameserver}
               </p>
             ))}
           </div>
-          <p className="mt-3 text-xs text-white/35">
+          <p className="mt-3 text-xs text-muted-foreground">
             {overview.delegated
               ? "Delegation is active."
               : "The registry is not currently delegated to Multivrs DNS."}
@@ -46,9 +46,9 @@ export function DomainDnsStatusPanels({
 
 function CertificatePanel({ domain }: { domain: DomainDetail }) {
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+    <section className="rounded-xl border border-border bg-foreground/[0.04] p-5">
       <div className="flex items-center gap-2">
-        <LockKeyhole className="size-4 text-white/45" />
+        <LockKeyhole className="size-4 text-muted-foreground" />
         <h2 className="font-medium">TLS certificate</h2>
       </div>
       <div className="mt-5 flex items-center gap-3">
@@ -56,12 +56,12 @@ function CertificatePanel({ domain }: { domain: DomainDetail }) {
           className={
             domain.certStatus === "active"
               ? "size-5 text-emerald-400"
-              : "size-5 text-white/30"
+              : "size-5 text-muted-foreground"
           }
         />
         <div>
           <p className="text-sm font-medium capitalize">{domain.certStatus}</p>
-          <p className="mt-1 text-xs text-white/40">
+          <p className="mt-1 text-xs text-muted-foreground">
             {domain.projectId
               ? "Certificate state for the connected project."
               : "Connect a project before certificate provisioning."}
@@ -71,7 +71,7 @@ function CertificatePanel({ domain }: { domain: DomainDetail }) {
       {domain.certStatus !== "active" &&
       domain.certVerificationName &&
       domain.certVerificationValue ? (
-        <div className="mt-5 grid gap-px overflow-hidden rounded-lg border border-white/8 bg-white/8">
+        <div className="mt-5 grid gap-px overflow-hidden rounded-lg border border-border bg-foreground/8">
           <DomainVerificationValue
             label="Certificate TXT name"
             value={domain.certVerificationName}
@@ -98,17 +98,17 @@ function RegistrationPanel({ domain }: { domain: DomainDetail }) {
     ["Provider reference", domain.providerDomainId ?? "Not available"],
   ];
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+    <section className="rounded-xl border border-border bg-foreground/[0.04] p-5">
       <h2 className="font-medium">Registration</h2>
       <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
         {items.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-xs text-white/40">{label}</dt>
-            <dd className="mt-1 font-medium text-white">{value}</dd>
+            <dt className="text-xs text-muted-foreground">{label}</dt>
+            <dd className="mt-1 font-medium text-foreground">{value}</dd>
           </div>
         ))}
       </dl>
-      <p className="mt-5 text-xs leading-5 text-white/35">
+      <p className="mt-5 text-xs leading-5 text-muted-foreground">
         Registrant contact information is stored with the registrar and is not
         duplicated into this dashboard.
       </p>

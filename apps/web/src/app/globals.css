@@ -344,7 +344,6 @@
    restrained primary (#A855F7) accent. Typeset in Hanken Grotesk. */
 .dashboard-surface {
   font-family: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
-  --accent: #a855f7;
 }
 
 /* Hairline that reads crisp on near-black without glowing. */
@@ -361,7 +360,7 @@
   height: 16px;
   width: 2px;
   border-radius: 2px;
-  background: var(--accent);
+  background: var(--primary);
   transform: translateY(-50%);
 }
 

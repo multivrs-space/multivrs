@@ -102,7 +102,7 @@ export default function DocsSlugPage({ params }: DocsSlugPageProps) {
     <Suspense
       fallback={
         <div className="flex w-full min-h-screen">
-          <div className="flex-1 p-10 animate-pulse bg-zinc-950" />
+          <div className="flex-1 p-10 animate-pulse bg-card" />
         </div>
       }
     >

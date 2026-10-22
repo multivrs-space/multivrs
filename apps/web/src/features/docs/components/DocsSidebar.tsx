@@ -192,7 +192,7 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
   const renderBadge = (badge?: DocsBadge) => {
     if (!badge || (badge !== "Coming soon" && badge !== ("Soon" as any))) return null;
     return (
-      <span className="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-zinc-700/60 shrink-0">
+      <span className="ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-muted text-foreground border border-border/60 shrink-0">
         Coming soon
       </span>
     );
@@ -206,17 +206,17 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
   };
 
   return (
-    <aside className="w-72 lg:w-80 xl:w-[320px] shrink-0 border-r border-zinc-800/80 bg-[#0a0a0c] h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto px-4 py-4 flex flex-col select-none scrollbar-thin">
+    <aside className="w-72 lg:w-80 xl:w-[320px] shrink-0 border-r border-border bg-card h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto px-4 py-4 flex flex-col select-none scrollbar-thin">
       {/* Mobile-only header lockup */}
       {showMobileHeader && (
-        <div className="flex items-center gap-3 pb-4 mb-3 border-b border-zinc-800">
-          <div className="flex items-center justify-center text-white">
-            <MultivrsMark className="size-7 text-white" />
+        <div className="flex items-center gap-3 pb-4 mb-3 border-b border-border">
+          <div className="flex items-center justify-center text-foreground">
+            <MultivrsMark className="size-7 text-foreground" />
           </div>
-          <span className="font-clash text-lg font-bold tracking-wider text-white">
+          <span className="font-clash text-lg font-bold tracking-wider text-foreground">
             MULTIVRS
           </span>
-          <span className="px-2.5 py-0.5 rounded-md border border-zinc-700/80 bg-zinc-800/90 text-zinc-300 text-[11px] font-mono font-semibold tracking-wider">
+          <span className="px-2.5 py-0.5 rounded-md border border-border bg-muted/90 text-foreground text-[11px] font-mono font-semibold tracking-wider">
             DOCS
           </span>
         </div>
@@ -230,9 +230,9 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           placeholder="Filter sidebar"
-          className="w-full bg-[#141416] text-white placeholder-zinc-500 text-sm rounded-lg pl-3.5 pr-9 py-2.5 border border-zinc-800 focus:outline-none focus:border-zinc-700 transition-colors"
+          className="w-full bg-muted text-foreground placeholder:text-muted-foreground text-sm rounded-lg pl-3.5 pr-9 py-2.5 border border-border focus:outline-none focus:border-ring transition-colors"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rounded bg-[#202024] border border-zinc-700/60 text-zinc-400 font-mono text-[11px] px-2 py-0.5 leading-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rounded bg-background border border-border text-muted-foreground font-mono text-[11px] px-2 py-0.5 leading-none">
           /
         </div>
       </div>
@@ -242,11 +242,11 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
         {filteredCategories.map((category) => (
           <div key={category.id} className="flex flex-col gap-1">
             {/* Section Header: grouping with opacity as requested */}
-            <div className="px-3 pt-3 pb-1.5 text-xs font-bold tracking-wider text-zinc-500 uppercase">
+            <div className="px-3 pt-3 pb-1.5 text-xs font-bold tracking-wider text-muted-foreground uppercase">
               {category.title}
             </div>
 
-            {/* Section Items: pure text-white, no opacity */}
+            {/* Section Items: pure text-foreground, no opacity */}
             <div className="flex flex-col gap-0.5">
               {category.items.map((item) => {
                 const hasChildren = Boolean(item.children && item.children.length > 0);
@@ -266,30 +266,30 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
                         onClick={() => toggleExpand(item.id)}
                         className={`group w-full flex items-center justify-between rounded-md px-3 py-2 text-[13.5px] transition-colors cursor-pointer text-left ${
                           hasActiveChild || isExpanded
-                            ? "bg-[#18181b] text-white font-medium"
-                            : "text-white hover:bg-[#18181b]"
+                            ? "bg-muted text-foreground font-medium"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           {item.prefix && (
-                            <span className="font-mono font-bold text-white text-sm shrink-0">
+                            <span className="font-mono font-bold text-foreground text-sm shrink-0">
                               {item.prefix}
                             </span>
                           )}
 
                           {IconComponent && !item.prefix && (
-                            <IconComponent className="size-4 shrink-0 text-white" />
+                            <IconComponent className="size-4 shrink-0 text-foreground" />
                           )}
 
-                          {/* Pure text-white with zero opacity */}
-                          <span className="truncate text-white font-medium">{item.title}</span>
+                          {/* Pure text-foreground with zero opacity */}
+                          <span className="truncate text-foreground font-medium">{item.title}</span>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
                           {item.badge && renderBadge(item.badge)}
                           <ChevronRight
-                            className={`size-4 text-zinc-400 group-hover:text-white transition-transform duration-150 ${
-                              isExpanded ? "rotate-90 text-white" : ""
+                            className={`size-4 text-muted-foreground group-hover:text-foreground transition-transform duration-150 ${
+                              isExpanded ? "rotate-90 text-foreground" : ""
                             }`}
                           />
                         </div>
@@ -300,22 +300,22 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
                         href={item.href}
                         className={`group flex items-center justify-between rounded-md px-3 py-2 text-[13.5px] transition-colors ${
                           active
-                            ? "bg-[#242424] text-white font-semibold shadow-sm"
-                            : "text-white hover:bg-[#18181b]"
+                            ? "bg-muted text-foreground font-semibold shadow-sm"
+                            : "text-foreground hover:bg-muted"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           {item.prefix && (
-                            <span className="font-mono font-bold text-white text-sm shrink-0">
+                            <span className="font-mono font-bold text-foreground text-sm shrink-0">
                               {item.prefix}
                             </span>
                           )}
 
                           {IconComponent && !item.prefix && (
-                            <IconComponent className="size-4 shrink-0 text-white" />
+                            <IconComponent className="size-4 shrink-0 text-foreground" />
                           )}
 
-                          <span className="truncate text-white font-medium">{item.title}</span>
+                          <span className="truncate text-foreground font-medium">{item.title}</span>
                         </div>
 
                         {item.badge && renderBadge(item.badge)}
@@ -324,7 +324,7 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
 
                     {/* Expandable sub-items: The opened list contains the navigable links */}
                     {hasChildren && isExpanded && (
-                      <div className="flex flex-col gap-0.5 pl-7 pr-1 pt-1.5 pb-1 border-l border-zinc-800/80 ml-5 my-1">
+                      <div className="flex flex-col gap-0.5 pl-7 pr-1 pt-1.5 pb-1 border-l border-border ml-5 my-1">
                         {item.children?.map((child) => {
                           const childActive = isItemActive(child.href);
                           return (
@@ -333,11 +333,11 @@ export function DocsSidebar({ categories, showMobileHeader = false }: DocsSideba
                               href={child.href}
                               className={`flex items-center justify-between rounded px-2.5 py-1.5 text-xs transition-colors ${
                                 childActive
-                                  ? "bg-[#242424] text-white font-semibold"
-                                  : "text-white hover:bg-[#18181b]"
+                                  ? "bg-muted text-foreground font-semibold"
+                                  : "text-foreground hover:bg-muted"
                               }`}
                             >
-                              <span className="truncate text-white font-normal">{child.title}</span>
+                              <span className="truncate text-foreground font-normal">{child.title}</span>
                               {child.badge && renderBadge(child.badge)}
                             </Link>
                           );

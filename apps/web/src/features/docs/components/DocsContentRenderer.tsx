@@ -13,16 +13,16 @@ interface DocsContentRendererProps {
 
 export function DocsContentRenderer({ doc, languages = [] }: DocsContentRendererProps) {
   return (
-    <article className="w-full max-w-4xl px-8 lg:px-12 py-10 flex flex-col gap-8 text-zinc-300">
+    <article className="w-full max-w-4xl px-8 lg:px-12 py-10 flex flex-col gap-8 text-foreground">
       {/* 1. Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
-        <Link href="/docs" className="hover:text-zinc-300 transition-colors">
+      <nav className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+        <Link href="/docs" className="hover:text-foreground transition-colors">
           Docs
         </Link>
         <span>/</span>
         {doc.categoryTitle && (
           <>
-            <span className="text-zinc-400">{doc.categoryTitle}</span>
+            <span className="text-muted-foreground">{doc.categoryTitle}</span>
             <span>/</span>
           </>
         )}
@@ -30,20 +30,20 @@ export function DocsContentRenderer({ doc, languages = [] }: DocsContentRenderer
       </nav>
 
       {/* 2. Header & Badges */}
-      <div className="flex flex-col gap-3 border-b border-zinc-800/80 pb-6">
+      <div className="flex flex-col gap-3 border-b border-border pb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
             {doc.title}
           </h1>
           {doc.badge && (doc.badge === "Coming soon" || (doc.badge as string) === "Soon") && (
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold border bg-zinc-800 text-zinc-300 border-zinc-700/60">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold border bg-muted text-foreground border-border/60">
               Coming soon
             </span>
           )}
         </div>
 
         {doc.summary && (
-          <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
             {doc.summary}
           </p>
         )}
@@ -68,15 +68,15 @@ export function DocsContentRenderer({ doc, languages = [] }: DocsContentRenderer
       </div>
 
       {/* 3. Body Content: Rendered 100% from Sanity PortableText */}
-      <div className="flex flex-col gap-6 text-sm leading-relaxed text-zinc-300">
+      <div className="flex flex-col gap-6 text-sm leading-relaxed text-foreground">
         {doc.body && Array.isArray(doc.body) && doc.body.length > 0 ? (
           <DocPortableText value={doc.body} languages={languages} />
         ) : (
-          <div className="flex flex-col gap-4 text-zinc-400">
-            <h2 id="overview" className="text-2xl font-bold text-white tracking-tight scroll-mt-24">
+          <div className="flex flex-col gap-4 text-muted-foreground">
+            <h2 id="overview" className="text-2xl font-bold text-foreground tracking-tight scroll-mt-24">
               Overview
             </h2>
-            <p className="leading-relaxed text-base text-zinc-300">
+            <p className="leading-relaxed text-base text-foreground">
               {doc.summary || "Comprehensive documentation and developer reference for this topic."}
             </p>
           </div>

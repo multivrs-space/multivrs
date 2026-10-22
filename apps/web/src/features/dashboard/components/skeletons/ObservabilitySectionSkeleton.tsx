@@ -7,11 +7,11 @@ export function ObservabilitySectionSkeleton() {
   return (
     <main className="w-full space-y-3 px-4 py-4 lg:px-5" aria-busy>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex h-9 min-w-36 items-center justify-between gap-4 rounded-md border border-[var(--hairline)] bg-white/[0.015] px-3 text-xs text-foreground">
+        <div className="flex h-9 min-w-36 items-center justify-between gap-4 rounded-md border border-[var(--hairline)] bg-foreground/[0.03] px-3 text-xs text-foreground">
           Production
           <ChevronDown className="size-3.5 text-muted-foreground" />
         </div>
-        <div className="flex h-9 items-center gap-2 rounded-md border border-[var(--hairline)] bg-white/[0.015] px-3 text-xs text-foreground">
+        <div className="flex h-9 items-center gap-2 rounded-md border border-[var(--hairline)] bg-foreground/[0.03] px-3 text-xs text-foreground">
           <CalendarDays className="size-3.5 text-muted-foreground" />
           Last 12 hours
           <ChevronDown className="ml-3 size-3.5 text-muted-foreground" />
@@ -32,13 +32,13 @@ export function ObservabilitySectionSkeleton() {
       <section className="grid gap-3 xl:grid-cols-2">
         {CHART_KEYS.map((key) => (
           <div
-            className="min-h-60 animate-pulse rounded-xl border border-[var(--hairline)] bg-white/[0.012] p-4"
+            className="min-h-60 animate-pulse rounded-xl border border-[var(--hairline)] bg-foreground/[0.02] p-4"
             key={key}
           >
             <div className="h-3 w-32 rounded-sm bg-white/[0.075]" />
-            <div className="mt-4 h-2.5 w-20 rounded-sm bg-white/[0.04]" />
-            <div className="mt-2 h-4 w-16 rounded-sm bg-white/[0.07]" />
-            <div className="mt-6 h-24 rounded-sm bg-white/[0.025]" />
+            <div className="mt-4 h-2.5 w-20 rounded-sm bg-muted/40" />
+            <div className="mt-2 h-4 w-16 rounded-sm bg-foreground/[0.07]" />
+            <div className="mt-6 h-24 rounded-sm bg-foreground/[0.04]" />
           </div>
         ))}
       </section>
@@ -60,7 +60,7 @@ export function ObservabilitySectionSkeleton() {
               key={key}
             >
               <div className="h-3 w-36 rounded-sm bg-white/[0.055]" />
-              <div className="h-3 w-12 rounded-sm bg-white/[0.04]" />
+              <div className="h-3 w-12 rounded-sm bg-muted/40" />
             </div>
           ))}
         </div>

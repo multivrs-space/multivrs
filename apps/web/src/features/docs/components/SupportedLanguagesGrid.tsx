@@ -58,7 +58,7 @@ export function SupportedLanguagesGrid({
     <div className="flex flex-col gap-4 mt-6 w-full">
       {/* Header bar: SUPPORTED LANGUAGES & FRAMEWORKS + View all link */}
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-mono font-semibold tracking-wider text-zinc-400 uppercase">
+        <span className="text-[11px] font-mono font-semibold tracking-wider text-muted-foreground uppercase">
           SUPPORTED LANGUAGES &amp; FRAMEWORKS
         </span>
         {viewAllHref && (
@@ -96,7 +96,7 @@ export function SupportedLanguagesGrid({
             <Link
               key={lang._id}
               href={cardHref}
-              className="rounded-2xl border border-zinc-800/80 bg-[#0d0d10] hover:bg-[#131318] hover:border-zinc-700/80 p-5 flex flex-col justify-between min-h-[105px] transition-all group shadow-sm"
+              className="rounded-2xl border border-border bg-card hover:bg-muted p-5 flex flex-col justify-between min-h-[105px] transition-all group shadow-sm"
             >
               <div className="size-7 flex items-center">
                 {iconUrl ? (
@@ -109,12 +109,12 @@ export function SupportedLanguagesGrid({
                     unoptimized
                   />
                 ) : (
-                  <div className="size-6 rounded bg-zinc-800 flex items-center justify-center text-xs font-mono text-zinc-400">
+                  <div className="size-6 rounded bg-muted flex items-center justify-center text-xs font-mono text-muted-foreground">
                     {name.slice(0, 2).toUpperCase()}
                   </div>
                 )}
               </div>
-              <span className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">
+              <span className="text-sm font-semibold text-foreground group-hover:text-purple-300 transition-colors">
                 {title}
               </span>
             </Link>

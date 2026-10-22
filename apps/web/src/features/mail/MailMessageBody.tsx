@@ -385,7 +385,7 @@ export function MailMessageBody({ message }: { message: MailMessageDetail }) {
                   key={att.id || att.filename}
                   className="group flex items-center gap-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/3 dark:bg-white/4 px-3.5 py-2.5 text-xs transition hover:bg-black/6 dark:hover:bg-white/8"
                 >
-                  <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent/10 text-accent">
+                  <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                     {isImage ? (
                       <ImageIcon className="size-3.5" />
                     ) : (

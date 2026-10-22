@@ -110,7 +110,7 @@ export function TeamSettingsPage({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={32}
-                className="max-w-md h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                className="max-w-md h-10 rounded-md border border-border bg-muted/60 px-3.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 placeholder="Acme Corp"
               />
             </SettingsCardBody>
@@ -119,7 +119,7 @@ export function TeamSettingsPage({
               action={
                 <Button
                   size="sm"
-                  className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+                  className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40"
                   disabled={savingName || name === team.name || !name.trim()}
                   onClick={saveName}
                 >
@@ -135,15 +135,15 @@ export function TeamSettingsPage({
               title="Team URL"
               description="This is your team's URL namespace on Multivrs. Within it, your team can inspect their projects, check out any recent activity, or configure settings to their liking."
             >
-              <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
-                <span className="flex h-10 items-center border-r border-zinc-800 bg-zinc-900/60 px-3.5 text-xs text-zinc-400 select-none font-mono">
+              <div className="flex max-w-md items-center rounded-md border border-border bg-muted/60 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                <span className="flex h-10 items-center border-r border-border bg-muted px-3.5 text-xs text-muted-foreground select-none font-mono">
                   multivrs.space/
                 </span>
                 <input
                   value={slug}
                   onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                   maxLength={48}
-                  className="h-10 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-zinc-600"
+                  className="h-10 flex-1 bg-transparent px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   placeholder="my-team"
                 />
               </div>
@@ -153,7 +153,7 @@ export function TeamSettingsPage({
               action={
                 <Button
                   size="sm"
-                  className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+                  className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40"
                   disabled={savingSlug || slug === team.slug || !slug.trim()}
                   onClick={saveSlug}
                 >
@@ -189,13 +189,13 @@ export function TeamSettingsPage({
               title="Preview Deployment Suffix"
               description="By default, the URL of every new Preview Deployment ends with .multivrs.app. This setting allows you to choose your own custom domain in place of this suffix."
             >
-              <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
+              <div className="flex max-w-md items-center rounded-md border border-border bg-muted/60 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
                 <input
                   readOnly
                   value="my-deployment."
-                  className="h-10 w-36 bg-transparent px-3 text-sm text-zinc-500 font-mono outline-none"
+                  className="h-10 w-36 bg-transparent px-3 text-sm text-muted-foreground font-mono outline-none"
                 />
-                <span className="flex h-10 items-center text-xs text-zinc-400 select-none font-mono">
+                <span className="flex h-10 items-center text-xs text-muted-foreground select-none font-mono">
                   multivrs.app
                 </span>
               </div>
@@ -205,7 +205,7 @@ export function TeamSettingsPage({
               action={
                 <Button
                   size="sm"
-                  className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4"
+                  className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4"
                 >
                   Upgrade
                 </Button>
@@ -223,13 +223,13 @@ export function TeamSettingsPage({
                 <Input
                   readOnly
                   value={team.id}
-                  className="h-10 font-mono text-xs text-zinc-400 bg-black/60 border-zinc-800 select-all"
+                  className="h-10 font-mono text-xs text-muted-foreground bg-muted/60 border-border select-all"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-10 shrink-0 gap-1.5 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs"
+                  className="h-10 shrink-0 gap-1.5 border-border bg-muted hover:bg-muted text-xs"
                   onClick={copyTeamId}
                 >
                   {copiedId ? (
@@ -381,9 +381,9 @@ function TeamAvatarField({
           size={76}
           className="size-full"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-          <Upload className="size-4 text-white" />
-          <span className="mt-0.5 text-[9px] font-medium text-white">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted opacity-0 transition-opacity group-hover:opacity-100">
+          <Upload className="size-4 text-foreground" />
+          <span className="mt-0.5 text-[9px] font-medium text-foreground">
             {busy ? "Uploading…" : "Upload"}
           </span>
         </div>
@@ -393,7 +393,7 @@ function TeamAvatarField({
           type="button"
           onClick={remove}
           disabled={busy}
-          className="mt-1 block w-full text-center text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="mt-1 block w-full text-center text-[10px] text-muted-foreground hover:text-foreground transition-colors"
         >
           Remove
         </button>

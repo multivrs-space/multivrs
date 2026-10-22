@@ -76,10 +76,10 @@ export function ApiTokensPage({
         />
       ) : null}
 
-      <section className="overflow-hidden rounded-xl border border-zinc-800 dark:border-[#262626] bg-black dark:bg-[#000000]">
-        <div className="border-b border-zinc-800 dark:border-[#262626] p-6">
-          <h2 className="text-[17px] font-semibold text-white tracking-tight">Developer tokens</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+      <section className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground">
+        <div className="border-b border-border p-6">
+          <h2 className="text-[17px] font-semibold text-foreground tracking-tight">Developer tokens</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage CLI access to your account.
           </p>
         </div>
@@ -89,12 +89,13 @@ export function ApiTokensPage({
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={80}
-              className="h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white placeholder:text-zinc-600"
+              placeholder="e.g. CI/CD or CLI"
+              className="h-10 rounded-md border border-border bg-background px-3.5 text-sm text-foreground placeholder:text-muted-foreground"
             />
             <Button
               onClick={createToken}
               disabled={busy || !name.trim()}
-              className="h-10 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 shrink-0"
+              className="h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 shrink-0"
             >
               <Plus className="mr-2 size-3.5" /> Create
             </Button>

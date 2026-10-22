@@ -218,27 +218,27 @@ export function AccountBillingInformationTab({
           description="Payments for domains, add-ons, and other usage are made using the default card."
         >
           {paymentMethod?.hasPaymentMethod ? (
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-black/60 p-4">
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded border border-zinc-800 bg-zinc-900 text-white">
+                <div className="flex size-10 items-center justify-center rounded border border-border bg-background text-foreground">
                   <CreditCard className="size-5" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-white capitalize">
+                  <div className="text-sm font-medium text-foreground capitalize">
                     {paymentMethod.brand ?? "Card"} •••• {paymentMethod.last4 ?? "0000"}
                   </div>
-                  <div className="text-xs text-zinc-400">
+                  <div className="text-xs text-muted-foreground">
                     Expires {paymentMethod.expMonth}/{paymentMethod.expYear}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-zinc-800 bg-black/60 p-8 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-500 mb-2.5">
+            <div className="rounded-lg border border-border bg-muted/40 p-8 text-center">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground mb-2.5">
                 <CreditCard className="size-6" strokeWidth={1.5} />
               </div>
-              <div className="text-xs text-zinc-400">No payment methods added</div>
+              <div className="text-xs text-muted-foreground">No payment methods added</div>
             </div>
           )}
         </SettingsCardBody>
@@ -249,7 +249,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={portalLoading}
               onClick={handleOpenAddCard}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 cursor-pointer"
             >
               {portalLoading ? "Loading…" : "Add Card"}
             </Button>
@@ -270,7 +270,7 @@ export function AccountBillingInformationTab({
               value={invoiceEmail}
               onChange={(e) => setInvoiceEmail(e.target.value)}
               placeholder="john@doe.com"
-              className="h-10 text-sm bg-black/60 border-zinc-800 placeholder:text-zinc-600 font-normal"
+              className="h-10 text-sm bg-background border-border text-foreground placeholder:text-muted-foreground font-normal"
             />
           </div>
         </SettingsCardBody>
@@ -281,7 +281,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingEmail || invoiceEmail === savedInvoiceEmail}
               onClick={handleSaveInvoiceEmail}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40 cursor-pointer"
             >
               {savingEmail ? "Saving…" : "Save"}
             </Button>
@@ -301,7 +301,7 @@ export function AccountBillingInformationTab({
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="Company name"
-              className="h-10 text-sm bg-black/60 border-zinc-800 placeholder:text-zinc-600"
+              className="h-10 text-sm bg-background border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </SettingsCardBody>
@@ -312,7 +312,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingCompany || companyName === savedCompanyName}
               onClick={handleSaveCompany}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40 cursor-pointer"
             >
               {savingCompany ? "Saving…" : "Save"}
             </Button>
@@ -325,33 +325,33 @@ export function AccountBillingInformationTab({
         <SettingsCardBody title="Billing Address">
           <div className="space-y-4 max-w-md">
             <div>
-              <Label className="text-xs text-zinc-400 font-normal mb-1.5 block">
+              <Label className="text-xs text-muted-foreground font-normal mb-1.5 block">
                 Organization Name
               </Label>
               <Input
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
                 placeholder="Organization name"
-                className="h-10 text-sm bg-black/60 border-zinc-800"
+                className="h-10 text-sm bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <div>
-              <Label className="text-xs text-zinc-400 font-normal mb-1.5 block">
+              <Label className="text-xs text-muted-foreground font-normal mb-1.5 block">
                 Country Or Region
               </Label>
               <DropdownMenu open={countryOpen} onOpenChange={setCountryOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-zinc-800 bg-black/60 px-3 text-sm text-white hover:border-zinc-700 transition-colors"
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
                   >
                     <span>{selectedCountry.name}</span>
-                    <ChevronDown className="size-4 text-zinc-500" />
+                    <ChevronDown className="size-4 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-80 bg-zinc-950 border-zinc-800 p-1">
-                  <div className="p-1 border-b border-zinc-800/80">
+                <DropdownMenuContent align="start" className="w-80 bg-popover border-border text-popover-foreground p-1">
+                  <div className="p-1 border-b border-border">
                     <input
                       type="text"
                       placeholder="Search countries..."
@@ -359,14 +359,14 @@ export function AccountBillingInformationTab({
                       onChange={(e) => setCountrySearch(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
                       onKeyDown={(e) => e.stopPropagation()}
-                      className="h-8 w-full bg-black/60 border border-zinc-800 rounded px-2.5 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-zinc-700"
+                      className="h-8 w-full bg-background border border-border rounded px-2.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                     />
                   </div>
                   <div className="max-h-56 overflow-y-auto hide-scrollbar pt-1">
                     {filteredCountries.map((c) => (
                       <DropdownMenuItem
                         key={c.code}
-                        className="flex items-center gap-2 text-xs cursor-pointer py-2 px-2.5 text-zinc-200 hover:text-white"
+                        className="flex items-center gap-2 text-xs cursor-pointer py-2 px-2.5 text-foreground hover:bg-muted"
                         onClick={() => {
                           setSelectedCountry(c);
                           setCountrySearch("");
@@ -376,7 +376,7 @@ export function AccountBillingInformationTab({
                         <span className="text-sm shrink-0">{c.flag}</span>
                         <span className="flex-1 truncate">{c.name}</span>
                         {c.code === selectedCountry.code && (
-                          <Check className="size-3.5 text-white" />
+                          <Check className="size-3.5 text-primary" />
                         )}
                       </DropdownMenuItem>
                     ))}
@@ -386,14 +386,14 @@ export function AccountBillingInformationTab({
             </div>
 
             <div>
-              <Label className="text-xs text-zinc-400 font-normal mb-1.5 block">
+              <Label className="text-xs text-muted-foreground font-normal mb-1.5 block">
                 Address Line 1
               </Label>
               <Input
                 value={addressLine1}
                 onChange={(e) => setAddressLine1(e.target.value)}
                 placeholder="Street address or P.O. Box"
-                className="h-10 text-sm bg-black/60 border-zinc-800"
+                className="h-10 text-sm bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -404,7 +404,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingAddress}
               onClick={handleSaveAddress}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 cursor-pointer"
             >
               {savingAddress ? "Saving…" : "Save"}
             </Button>
@@ -423,21 +423,21 @@ export function AccountBillingInformationTab({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-zinc-800 bg-black/60 px-3 text-sm text-white hover:border-zinc-700 transition-colors"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                   <span>{language}</span>
-                  <ChevronDown className="size-4 text-zinc-500" />
+                  <ChevronDown className="size-4 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 bg-zinc-950 border-zinc-800 p-1">
+              <DropdownMenuContent align="start" className="w-64 bg-popover border-border text-popover-foreground p-1">
                 {INVOICE_LANGUAGES.map((lang) => (
                   <DropdownMenuItem
                     key={lang}
-                    className="text-xs cursor-pointer py-2 px-3 text-zinc-200 hover:text-white"
+                    className="text-xs cursor-pointer py-2 px-3 text-foreground hover:bg-muted"
                     onClick={() => setLanguage(lang)}
                   >
                     <span>{lang}</span>
-                    {lang === language && <Check className="ml-auto size-3.5 text-white" />}
+                    {lang === language && <Check className="ml-auto size-3.5 text-primary" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -451,7 +451,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingLanguage || language === savedLanguage}
               onClick={handleSaveLanguage}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40 cursor-pointer"
             >
               {savingLanguage ? "Saving…" : "Save"}
             </Button>
@@ -471,7 +471,7 @@ export function AccountBillingInformationTab({
               value={poNumber}
               onChange={(e) => setPoNumber(e.target.value)}
               placeholder="PO-000000"
-              className="h-10 text-sm bg-black/60 border-zinc-800"
+              className="h-10 text-sm bg-background border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </SettingsCardBody>
@@ -482,7 +482,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingPo || poNumber === savedPoNumber}
               onClick={handleSavePo}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40 cursor-pointer"
             >
               {savingPo ? "Saving…" : "Save"}
             </Button>
@@ -501,14 +501,14 @@ export function AccountBillingInformationTab({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex h-10 w-56 shrink-0 items-center justify-between rounded-md border border-zinc-800 bg-black/60 px-3 text-xs text-white hover:border-zinc-700 transition-colors"
+                  className="flex h-10 w-56 shrink-0 items-center justify-between rounded-md border border-border bg-background px-3 text-xs text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                   <span className="truncate">{taxType.label}</span>
-                  <ChevronDown className="size-3.5 text-zinc-500 ml-1 shrink-0" />
+                  <ChevronDown className="size-3.5 text-muted-foreground ml-1 shrink-0" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-80 bg-zinc-950 border-zinc-800 p-1">
-                <div className="p-1 border-b border-zinc-800/80">
+              <DropdownMenuContent align="start" className="w-80 bg-popover border-border text-popover-foreground p-1">
+                <div className="p-1 border-b border-border">
                   <input
                     type="text"
                     placeholder="Search tax IDs..."
@@ -516,14 +516,14 @@ export function AccountBillingInformationTab({
                     onChange={(e) => setTaxSearch(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => e.stopPropagation()}
-                    className="h-8 w-full bg-black/60 border border-zinc-800 rounded px-2.5 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-zinc-700"
+                    className="h-8 w-full bg-background border border-border rounded px-2.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                   />
                 </div>
                 <div className="max-h-64 overflow-y-auto hide-scrollbar pt-1">
                   {filteredTaxTypes.map((t) => (
                     <DropdownMenuItem
                       key={t.id}
-                      className="flex items-center gap-2 text-xs cursor-pointer py-2 px-2.5 text-zinc-200 hover:text-white"
+                      className="flex items-center gap-2 text-xs cursor-pointer py-2 px-2.5 text-foreground hover:bg-muted"
                       onClick={() => {
                         setTaxType(t);
                         setTaxSearch("");
@@ -531,11 +531,11 @@ export function AccountBillingInformationTab({
                       }}
                     >
                       <span className="flex-1 truncate">{t.label}</span>
-                      {t.id === taxType.id && <Check className="ml-auto size-3.5 text-white shrink-0" />}
+                      {t.id === taxType.id && <Check className="ml-auto size-3.5 text-primary shrink-0" />}
                     </DropdownMenuItem>
                   ))}
                   {filteredTaxTypes.length === 0 && (
-                    <div className="py-6 text-center text-xs text-zinc-500">
+                    <div className="py-6 text-center text-xs text-muted-foreground">
                       No tax ID types match your search
                     </div>
                   )}
@@ -547,7 +547,7 @@ export function AccountBillingInformationTab({
               value={taxIdValue}
               onChange={(e) => setTaxIdValue(e.target.value)}
               placeholder={taxType.placeholder}
-              className="h-10 flex-1 text-sm font-mono bg-black/60 border-zinc-800"
+              className="h-10 flex-1 text-sm font-mono bg-background border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </SettingsCardBody>
@@ -558,7 +558,7 @@ export function AccountBillingInformationTab({
               size="sm"
               disabled={savingTax || taxIdValue === savedTaxIdValue}
               onClick={handleSaveTax}
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40 cursor-pointer"
             >
               {savingTax ? "Saving…" : "Save"}
             </Button>

@@ -26,22 +26,22 @@ export function GitHubRepositoryList({
 }) {
   if (loading)
     return (
-      <div className="flex h-40 items-center justify-center gap-2 text-xs text-white/40">
+      <div className="flex h-40 items-center justify-center gap-2 text-xs text-muted-foreground">
         <Loader2 className="size-4 animate-spin" /> Fetching repositories…
       </div>
     );
   if (!repositories.length)
     return (
-      <div className="py-12 text-center text-xs text-white/40">
+      <div className="py-12 text-center text-xs text-muted-foreground">
         {error ?? "No repositories found"}
       </div>
     );
   return repositories.map((repository) => (
     <div
       key={repository.id}
-      className="flex items-center gap-4 p-3.5 hover:bg-white/[0.025]"
+      className="flex items-center gap-4 p-3.5 hover:bg-foreground/[0.04]"
     >
-      <span className="grid size-8 shrink-0 place-items-center rounded-full border border-white/15 bg-white/10 text-xs font-bold uppercase">
+      <span className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-muted text-xs font-bold uppercase">
         {repository.name[0]}
       </span>
       <span className="min-w-0 flex-1">
@@ -50,12 +50,12 @@ export function GitHubRepositoryList({
             {repository.name}
           </span>
           {repository.private ? (
-            <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/50">
+            <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
               Private
             </span>
           ) : null}
         </span>
-        <span className="mt-1 block text-xs text-white/40">
+        <span className="mt-1 block text-xs text-muted-foreground">
           Updated {relativeTime(repository.updated_at)} ·{" "}
           {repository.language ?? "Unknown framework"}
         </span>

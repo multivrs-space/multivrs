@@ -26,35 +26,35 @@ export function AssignDomainNameStep({
   return (
     <>
       <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-lg font-semibold text-white">
+        <DialogTitle className="text-lg font-semibold text-foreground">
           Connect Domain
         </DialogTitle>
-        <DialogDescription className="text-xs text-white/50">
+        <DialogDescription className="text-xs text-muted-foreground">
           Enter a subdomain to connect, or leave blank to use the apex.
         </DialogDescription>
       </DialogHeader>
       <div className="my-4 space-y-2">
         <label
           htmlFor="connected-domain"
-          className="block text-xs font-medium text-white/80"
+          className="block text-xs font-medium text-foreground/80"
         >
           Domain
         </label>
-        <div className="flex h-10 w-full items-center rounded-lg border border-white/10 bg-black/60 px-3 text-sm focus-within:border-white/40">
+        <div className="flex h-10 w-full items-center rounded-lg border border-border bg-muted px-3 text-sm focus-within:border-white/40">
           <input
             id="connected-domain"
             value={subdomain}
             onChange={(event) => onSubdomainChange(event.target.value)}
             placeholder="subdomain"
-            className="w-full bg-transparent text-white outline-hidden placeholder:text-white/30"
+            className="w-full bg-transparent text-foreground outline-hidden placeholder:text-muted-foreground"
           />
-          <span className="shrink-0 select-none text-sm text-white/40">
+          <span className="shrink-0 select-none text-sm text-muted-foreground">
             .{hostname}
           </span>
         </div>
-        <p className="pt-1 text-xs text-white/40">
+        <p className="pt-1 text-xs text-muted-foreground">
           Will connect{" "}
-          <span className="font-medium text-white/70">{fullDomain}</span>
+          <span className="font-medium text-foreground/70">{fullDomain}</span>
         </p>
       </div>
       <DialogFooter className="flex items-center justify-between pt-2 sm:justify-between">

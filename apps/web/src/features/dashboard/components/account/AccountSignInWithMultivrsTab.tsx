@@ -48,12 +48,12 @@ export function AccountSignInWithMultivrsTab({
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold text-white tracking-tight">
+        <h1 className="text-xl font-semibold text-foreground tracking-tight">
           Sign in with Multivrs
         </h1>
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1 text-xs text-muted-foreground">
           Use your Multivrs account to log in to third-party applications.{" "}
-          <span className="text-zinc-300 underline underline-offset-4 cursor-pointer hover:text-white inline-flex items-center gap-0.5">
+          <span className="text-foreground underline underline-offset-4 cursor-pointer inline-flex items-center gap-0.5">
             Learn More <ExternalLink className="size-3" />
           </span>
         </p>
@@ -62,13 +62,13 @@ export function AccountSignInWithMultivrsTab({
       {/* Filter and Search Bar (Always visible) */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <input
             type="text"
             placeholder="Filter..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="h-9 w-full rounded-md border border-zinc-800 bg-black/60 pl-8 pr-3 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+            className="h-9 w-full rounded-md border border-border bg-background pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
           />
         </div>
         <DropdownMenu>
@@ -76,13 +76,13 @@ export function AccountSignInWithMultivrsTab({
             <Button
               variant="outline"
               size="sm"
-              className="h-9 gap-1.5 border-zinc-800 bg-black/60 text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white"
+              className="h-9 gap-1.5 border-border bg-background text-xs text-foreground hover:bg-muted"
             >
               <span>{selectedFilter}</span>
-              <ChevronDown className="size-3 text-zinc-500" />
+              <ChevronDown className="size-3 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36 bg-zinc-950 border-zinc-800 p-1">
+          <DropdownMenuContent align="end" className="w-36 bg-popover border-border text-popover-foreground p-1">
             {["All", "Owned by Multivrs", "Third-party"].map((option) => (
               <DropdownMenuItem
                 key={option}
@@ -97,17 +97,17 @@ export function AccountSignInWithMultivrsTab({
       </div>
 
       {/* Applications List Container */}
-      <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+      <div className="rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
         {filteredApps.length > 0 ? (
           filteredApps.map((app) => (
             <div key={app.id} className="flex items-center justify-between px-4 py-3.5">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-white truncate">{app.name}</div>
-                  <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+                  <div className="text-sm font-medium text-foreground truncate">{app.name}</div>
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <span>Owned by {app.owner}</span>
                     {app.verified && (
-                      <span className="inline-flex items-center justify-center size-3.5 rounded-full bg-zinc-800 text-[9px] text-zinc-300">
+                      <span className="inline-flex items-center justify-center size-3.5 rounded-full bg-muted text-[9px] text-muted-foreground">
                         ✓
                       </span>
                     )}
@@ -116,21 +116,21 @@ export function AccountSignInWithMultivrsTab({
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs text-zinc-500 font-mono">
+                <span className="text-xs text-muted-foreground font-mono">
                   Connected {app.connectedDate}
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="size-7 flex items-center justify-center rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+                      className="size-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                     >
                       <MoreHorizontal className="size-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44 bg-zinc-950 border-zinc-800 p-1">
+                  <DropdownMenuContent align="end" className="w-44 bg-popover border-border text-popover-foreground p-1">
                     <DropdownMenuItem
-                      className="text-xs cursor-pointer text-red-400 hover:text-red-300"
+                      className="text-xs cursor-pointer text-destructive focus:text-destructive"
                       onClick={() => handleDisconnect(app.id, app.name)}
                     >
                       Disconnect
@@ -141,7 +141,7 @@ export function AccountSignInWithMultivrsTab({
             </div>
           ))
         ) : (
-          <div className="py-12 text-center text-xs text-zinc-500">
+          <div className="py-12 text-center text-xs text-muted-foreground">
             No applications found
           </div>
         )}

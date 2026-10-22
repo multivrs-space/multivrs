@@ -55,7 +55,7 @@ export function EnvironmentVariableForm({ projectId }: { projectId: string }) {
   return (
     <form
       onSubmit={submit}
-      className="grid gap-4 border-b border-[var(--hairline)] bg-white/[0.015] p-5 lg:grid-cols-[1fr_1.5fr_auto]"
+      className="grid gap-4 border-b border-[var(--hairline)] bg-foreground/[0.03] p-5 lg:grid-cols-[1fr_1.5fr_auto]"
     >
       <Input
         aria-label="Variable name"

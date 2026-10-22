@@ -71,7 +71,7 @@ export function NewProjectFlow({ username }: { username?: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10 text-white">
+    <div className="mx-auto max-w-5xl px-6 py-10 text-foreground">
       <header>
         <p className="font-geist-mono text-[10px] uppercase tracking-[0.16em] text-purple-400">
           New deployment
@@ -79,16 +79,16 @@ export function NewProjectFlow({ username }: { username?: string }) {
         <h1 className="mt-2 text-4xl font-semibold tracking-tight">
           Import a Git repository
         </h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/45">
+        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
           Choose a repository, configure the detected framework, and run an
           isolated cloud build.
         </p>
       </header>
-      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-6 shadow-2xl">
+      <section className="mt-8 rounded-2xl border border-border bg-foreground/[0.04] p-6 shadow-2xl">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex h-10 flex-1 items-center gap-2 rounded-lg border border-white/10 bg-black/60 px-3">
+          <label className="flex h-10 flex-1 items-center gap-2 rounded-lg border border-border bg-muted px-3">
             <span className="sr-only">Repository URL</span>
-            <GitHubMark className="size-4 text-white/40" />
+            <GitHubMark className="size-4 text-muted-foreground" />
             <input
               value={repositoryUrl}
               onChange={(event) => setRepositoryUrl(event.target.value)}
@@ -99,20 +99,20 @@ export function NewProjectFlow({ username }: { username?: string }) {
           <button
             type="button"
             onClick={importUrl}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-white px-4 text-xs font-semibold text-black"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-foreground px-4 text-xs font-semibold text-background"
           >
             Continue <ArrowRight className="size-4" />
           </button>
         </div>
-        <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-wider text-white/25">
-          <span className="h-px flex-1 bg-white/10" /> or choose from GitHub{" "}
-          <span className="h-px flex-1 bg-white/10" />
+        <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="h-px flex-1 bg-muted" /> or choose from GitHub{" "}
+          <span className="h-px flex-1 bg-muted" />
         </div>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={connect}
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/15 px-3 text-xs font-medium"
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-xs font-medium"
           >
             <GitHubMark className="size-4" />{" "}
             {github.connected ? github.owner : "Connect GitHub"}
@@ -124,7 +124,7 @@ export function NewProjectFlow({ username }: { username?: string }) {
             placeholder="Search repositories"
           />
         </div>
-        <div className="divide-y divide-white/5 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/70">
           <GitHubRepositoryList
             error={github.error}
             importingId={importingId}

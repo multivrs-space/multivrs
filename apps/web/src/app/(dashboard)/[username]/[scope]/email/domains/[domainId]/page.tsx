@@ -56,7 +56,7 @@ export default async function MailDomainDnsPage({
     <div className="w-full space-y-6 px-5 py-6">
       <Link
         href={`/${username}/${scope}/emails?view=domains`}
-        className="flex w-fit items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
+        className="flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeft className="size-4" />
         Back to domains
@@ -89,16 +89,16 @@ export default async function MailDomainDnsPage({
                   : "pending"
             }
           />
-          <span className="text-white/45">
-            Receiving: <span className="text-white/70">{receiving}</span>
+          <span className="text-muted-foreground">
+            Receiving: <span className="text-foreground/70">{receiving}</span>
           </span>
-          <span className="text-white/45">
+          <span className="text-muted-foreground">
             Region:{" "}
-            <span className="text-white/70">{regionName(domain.region)}</span>
+            <span className="text-foreground/70">{regionName(domain.region)}</span>
           </span>
-          <span className="text-white/45">
+          <span className="text-muted-foreground">
             DNS:{" "}
-            <span className="text-white/70">
+            <span className="text-foreground/70">
               {automatic ? "Managed by Multivrs" : "External provider"}
             </span>
           </span>
@@ -113,7 +113,7 @@ export default async function MailDomainDnsPage({
         }`}
       >
         <div className="flex items-start gap-4">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-black/20">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/50">
             {automatic ? (
               <CloudCog className="size-5 text-emerald-300" />
             ) : (
@@ -121,12 +121,12 @@ export default async function MailDomainDnsPage({
             )}
           </span>
           <div>
-            <h2 className="text-sm font-semibold text-white">
+            <h2 className="text-sm font-semibold text-foreground">
               {automatic
                 ? "Automatic DNS setup"
                 : "Add records at your DNS provider"}
             </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-white/50">
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
               {automatic
                 ? "This domain is registered and DNS-managed by Multivrs. Required sending records are installed and verified automatically; no registrar changes or manual verification are needed."
                 : "Keep your domain at Vercel, Namecheap, Cloudflare, or its current provider. Add the records below there. Multivrs automatically detects verification afterward, and you do not need a separate delivery-provider account."}
@@ -138,10 +138,10 @@ export default async function MailDomainDnsPage({
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-medium text-white">
+            <h2 className="text-lg font-medium text-foreground">
               Authentication records
             </h2>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="mt-1 text-sm text-muted-foreground">
               SPF authorizes the sending network, DKIM signs each message, and
               DMARC tells inboxes how to validate the visible sender. The MX
               record on the domain itself receives mail into Multivrs: add it
@@ -150,16 +150,16 @@ export default async function MailDomainDnsPage({
             </p>
           </div>
           {domain.verificationCheckedAt ? (
-            <p className="font-geist-mono text-[10px] text-white/30">
+            <p className="font-geist-mono text-[10px] text-muted-foreground">
               Last checked{" "}
               <LocalTime value={domain.verificationCheckedAt.toISOString()} />
             </p>
           ) : null}
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-white/[0.08] bg-[#090a0d]">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <div className="min-w-[1040px]">
-            <div className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] gap-4 border-b border-white/[0.08] bg-white/[0.025] px-4 py-3 font-geist-mono text-[10px] uppercase tracking-[0.13em] text-white/40">
+            <div className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] gap-4 border-b border-border bg-foreground/[0.04] px-4 py-3 font-geist-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">
               <span>Type</span>
               <span>Name</span>
               <span>Value</span>
@@ -170,9 +170,9 @@ export default async function MailDomainDnsPage({
             {domain.dnsRecords.map((record) => (
               <div
                 key={record.id}
-                className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] items-center gap-4 border-b border-white/[0.055] px-4 py-4 text-sm last:border-0"
+                className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] items-center gap-4 border-b border-border px-4 py-4 text-sm last:border-0"
               >
-                <span className="w-fit rounded-md border border-white/10 bg-white/5 px-2 py-1 font-geist-mono text-[11px] font-semibold text-white/70">
+                <span className="w-fit rounded-md border border-border bg-foreground/5 px-2 py-1 font-geist-mono text-[11px] font-semibold text-foreground/70">
                   {record.type}
                 </span>
                 <RecordValue value={record.name} />
@@ -190,7 +190,7 @@ export default async function MailDomainDnsPage({
         </div>
       </section>
 
-      <div className="flex items-start gap-3 border-t border-white/[0.08] pt-5 text-xs leading-5 text-white/40">
+      <div className="flex items-start gap-3 border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-400" />
         Verification refreshes automatically. Messages remain blocked until the
         sending domain is authenticated, preventing unauthenticated mail from
@@ -202,7 +202,7 @@ export default async function MailDomainDnsPage({
 
 function RecordMetadata({ value }: { value: string }) {
   return (
-    <span className="font-geist-mono text-[12px] tabular-nums text-white/55">
+    <span className="font-geist-mono text-[12px] tabular-nums text-foreground/55">
       {value}
     </span>
   );
@@ -216,7 +216,7 @@ function DomainStatus({
   status: string;
 }) {
   return (
-    <span className="flex items-center gap-1.5 text-white/70">
+    <span className="flex items-center gap-1.5 text-foreground/70">
       {verified ? (
         <CheckCircle2 className="size-4 text-emerald-400" />
       ) : (
@@ -231,7 +231,7 @@ function RecordValue({ value }: { value: string }) {
   return (
     <div className="group flex min-w-0 items-center gap-2">
       <span
-        className="truncate font-geist-mono text-[12px] text-white/70"
+        className="truncate font-geist-mono text-[12px] text-foreground/70"
         title={value}
       >
         {value}
@@ -269,7 +269,7 @@ function RecordStatus({
       ? { label: "Add to receive", tone: "wait" as RecordTone }
       : (RECORD_STATUS[status] ?? PENDING_RECORD);
   return (
-    <span className="flex items-center gap-1.5 text-xs text-white/45">
+    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
       {tone === "ok" ? (
         <CheckCircle2 className="size-3.5 text-emerald-400" />
       ) : tone === "bad" ? (

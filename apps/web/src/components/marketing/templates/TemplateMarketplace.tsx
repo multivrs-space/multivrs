@@ -59,7 +59,7 @@ export function TemplateMarketplace({
   return (
     <>
       <section className="mx-auto max-w-7xl px-6 py-8 sm:py-10">
-        <div className="flex flex-col gap-5 border-b border-white/8 pb-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5 border-b border-border pb-6 lg:flex-row lg:items-center lg:justify-between">
           <nav
             aria-label="Template categories"
             className="-mx-2 flex max-w-full overflow-x-auto px-2"
@@ -70,8 +70,8 @@ export function TemplateMarketplace({
                 <button
                   className={`shrink-0 cursor-pointer border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "border-white text-white"
-                      : "border-transparent text-white/50 hover:text-white/80"
+                      ? "border-foreground text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground/80"
                   }`}
                   key={category}
                   onClick={() => setActiveCategory(category)}
@@ -84,11 +84,11 @@ export function TemplateMarketplace({
           </nav>
 
           <div className="flex w-full gap-2.5 lg:w-auto">
-            <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg border border-white/15 bg-white/2 px-3 text-white/45 transition-colors focus-within:border-white/30 focus-within:bg-white/4 lg:w-72">
+            <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg border border-border bg-foreground/4 px-3 text-muted-foreground transition-colors focus-within:border-ring focus-within:bg-foreground/6 lg:w-72">
               <Search className="size-4" />
               <span className="sr-only">Search templates</span>
               <input
-                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search templates, stack, keywords…"
                 type="search"
@@ -97,7 +97,7 @@ export function TemplateMarketplace({
             </label>
             <Select onValueChange={setSort} value={sort}>
               <SelectTrigger
-                className="size-10 cursor-pointer justify-center rounded-lg border-white/15 bg-white/2 p-0 text-white/70 hover:bg-white/6 hover:text-white"
+                className="size-10 cursor-pointer justify-center rounded-lg border-border bg-foreground/4 p-0 text-foreground/70 hover:bg-foreground/8 hover:text-foreground"
                 aria-label="Filter templates"
                 hideChevron
               >
@@ -106,28 +106,28 @@ export function TemplateMarketplace({
               <SelectContent
                 position="popper"
                 align="end"
-                className="w-48 rounded-lg border border-white/10 bg-[#141414]/95 backdrop-blur-xl text-white shadow-2xl"
+                className="w-48 rounded-lg border border-border bg-popover/95 backdrop-blur-xl text-foreground shadow-2xl"
               >
                 <SelectItem
-                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-white/10 focus:text-white"
+                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-foreground/10 focus:text-foreground"
                   value="recent"
                 >
                   Newest
                 </SelectItem>
                 <SelectItem
-                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-white/10 focus:text-white"
+                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-foreground/10 focus:text-foreground"
                   value="popular"
                 >
                   Most popular
                 </SelectItem>
                 <SelectItem
-                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-white/10 focus:text-white"
+                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-foreground/10 focus:text-foreground"
                   value="price-low"
                 >
                   Price: low to high
                 </SelectItem>
                 <SelectItem
-                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-white/10 focus:text-white"
+                  className="cursor-pointer rounded-md text-xs py-2 focus:bg-foreground/10 focus:text-foreground"
                   value="price-high"
                 >
                   Price: high to low
@@ -149,11 +149,11 @@ export function TemplateMarketplace({
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Layers className="size-10 text-white/20" />
-            <h3 className="mt-4 font-semibold text-lg text-white">
+            <Layers className="size-10 text-muted-foreground" />
+            <h3 className="mt-4 font-semibold text-lg text-foreground">
               No templates found
             </h3>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="mt-1 text-sm text-muted-foreground">
               Try adjusting your search or category filter.
             </p>
           </div>

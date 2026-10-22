@@ -37,7 +37,7 @@ export function ProjectOverviewPage({
           <>
             <Link
               href={`${base}/settings`}
-              className="inline-flex h-9 items-center gap-2 border border-[var(--hairline)] px-3 text-xs font-medium hover:bg-white/[0.04]"
+              className="inline-flex h-9 items-center gap-2 border border-[var(--hairline)] px-3 text-xs font-medium hover:bg-muted/40"
             >
               <Settings2 className="size-4" /> Settings
             </Link>

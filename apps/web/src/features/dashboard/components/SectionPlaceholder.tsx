@@ -19,7 +19,7 @@ export function SectionPlaceholder({
     <div className="w-full space-y-6 px-5 py-6">
       <DashboardPageHeader title={title} description={description} />
       <div>
-        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--hairline-strong)] bg-white/[0.012] px-6 text-center">
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--hairline-strong)] bg-foreground/[0.02] px-6 text-center">
           <span className="font-geist-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground/60">
             Coming soon
           </span>

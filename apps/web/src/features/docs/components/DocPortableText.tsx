@@ -17,15 +17,15 @@ function CodeBlockRenderer({ value }: { value: any }) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-[#0d0d10] overflow-hidden my-3 shadow-lg">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-[#121216] text-xs font-mono text-zinc-400">
-        <span className="text-zinc-300 font-medium">
+    <div className="rounded-xl border border-border bg-muted overflow-hidden my-3 shadow-lg">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card text-xs font-mono text-muted-foreground">
+        <span className="text-foreground font-medium">
           {value?.filename || value?.language || "Code"}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2 py-1 rounded bg-muted hover:bg-muted text-foreground hover:text-foreground transition-colors cursor-pointer"
           title="Copy code"
         >
           {copied ? (
@@ -41,7 +41,7 @@ function CodeBlockRenderer({ value }: { value: any }) {
           )}
         </button>
       </div>
-      <pre className="p-4 sm:p-5 overflow-x-auto text-[12.5px] font-mono leading-relaxed text-zinc-200 bg-[#0a0a0c]">
+      <pre className="p-4 sm:p-5 overflow-x-auto text-[12.5px] font-mono leading-relaxed text-foreground bg-card">
         <code>{value?.code}</code>
       </pre>
     </div>
@@ -76,7 +76,7 @@ function CalloutRenderer({ value }: { value: any }) {
         {value?.title && (
           <span className={`font-semibold ${titleColor}`}>{value.title}</span>
         )}
-        <p className="text-zinc-300 leading-relaxed">{value?.message}</p>
+        <p className="text-foreground leading-relaxed">{value?.message}</p>
       </div>
     </div>
   );
@@ -90,7 +90,7 @@ export const docPortableTextComponents: PortableTextComponents = {
       return (
         <h2
           id={id || undefined}
-          className="text-2xl font-bold text-white tracking-tight scroll-mt-24 pt-6 border-t border-zinc-800/60 first:border-t-0 first:pt-0"
+          className="text-2xl font-bold text-foreground tracking-tight scroll-mt-24 pt-6 border-t border-border first:border-t-0 first:pt-0"
         >
           {children}
         </h2>
@@ -102,36 +102,36 @@ export const docPortableTextComponents: PortableTextComponents = {
       return (
         <h3
           id={id || undefined}
-          className="text-lg font-semibold text-zinc-100 tracking-tight scroll-mt-24 pt-4"
+          className="text-lg font-semibold text-foreground tracking-tight scroll-mt-24 pt-4"
         >
           {children}
         </h3>
       );
     },
     h4: ({ children }) => (
-      <h4 className="text-base font-semibold text-zinc-200 tracking-tight pt-2">
+      <h4 className="text-base font-semibold text-foreground tracking-tight pt-2">
         {children}
       </h4>
     ),
     normal: ({ children }) => (
-      <p className="text-[15px] text-zinc-300 leading-relaxed">
+      <p className="text-[15px] text-foreground leading-relaxed">
         {children}
       </p>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-2 border-purple-500/70 pl-4 py-1 text-zinc-400 italic">
+      <blockquote className="border-l-2 border-purple-500/70 pl-4 py-1 text-muted-foreground italic">
         {children}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="list-disc pl-5 space-y-2 text-zinc-300 marker:text-zinc-500 text-[15px]">
+      <ul className="list-disc pl-5 space-y-2 text-foreground marker:text-muted-foreground text-[15px]">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="list-decimal pl-5 space-y-2 text-zinc-300 marker:text-zinc-500 text-[15px]">
+      <ol className="list-decimal pl-5 space-y-2 text-foreground marker:text-muted-foreground text-[15px]">
         {children}
       </ol>
     ),
@@ -142,13 +142,13 @@ export const docPortableTextComponents: PortableTextComponents = {
   },
   marks: {
     strong: ({ children }) => (
-      <strong className="font-semibold text-white">{children}</strong>
+      <strong className="font-semibold text-foreground">{children}</strong>
     ),
     em: ({ children }) => (
-      <em className="italic text-zinc-200">{children}</em>
+      <em className="italic text-foreground">{children}</em>
     ),
     code: ({ children }) => (
-      <code className="px-1.5 py-0.5 rounded bg-zinc-800 text-purple-300 font-mono text-xs">
+      <code className="px-1.5 py-0.5 rounded bg-muted text-purple-300 font-mono text-xs">
         {children}
       </code>
     ),
@@ -160,7 +160,7 @@ export const docPortableTextComponents: PortableTextComponents = {
         return (
           <Link
             href={href}
-            className="underline underline-offset-4 decoration-zinc-600 hover:decoration-white text-white font-medium transition-colors"
+            className="underline underline-offset-4 decoration-border hover:decoration-foreground text-foreground font-medium transition-colors"
           >
             {children}
           </Link>
@@ -172,7 +172,7 @@ export const docPortableTextComponents: PortableTextComponents = {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-4 decoration-zinc-600 hover:decoration-white text-purple-400 hover:text-purple-300 font-medium inline-flex items-center gap-1 transition-colors"
+          className="underline underline-offset-4 decoration-border hover:decoration-foreground text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1 transition-colors"
         >
           <span>{children}</span>
           <ExternalLink className="size-3 inline" />

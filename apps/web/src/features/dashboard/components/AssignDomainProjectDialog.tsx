@@ -75,7 +75,7 @@ export function AssignDomainProjectDialog({
       >
         Connect
       </SpecularButton>
-      <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#09090b] p-6 text-white shadow-2xl">
+      <DialogContent className="max-w-md rounded-2xl border border-border bg-card p-6 text-foreground shadow-2xl">
         {step === 1 ? (
           <AssignDomainNameStep
             fullDomain={fullDomain}

@@ -135,7 +135,7 @@ export function AccountProfileForm({
             maxLength={32}
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="max-w-md h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+            className="max-w-md h-10 rounded-md border border-border bg-muted/60 px-3.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             placeholder="Your name"
           />
         </SettingsCardBody>
@@ -144,7 +144,7 @@ export function AccountProfileForm({
           action={
             <Button
               size="sm"
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 disabled:opacity-40"
               disabled={savingName || name === profile.name || !name.trim()}
               onClick={() => saveField("name", name.trim())}
             >
@@ -160,8 +160,8 @@ export function AccountProfileForm({
           title="Username"
           description="This is your URL namespace within Multivrs."
         >
-          <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
-            <span className="flex h-10 items-center border-r border-zinc-800 bg-zinc-900/60 px-3.5 text-xs text-zinc-400 select-none font-mono">
+          <div className="flex max-w-md items-center rounded-md border border-border bg-muted/60 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+            <span className="flex h-10 items-center border-r border-border bg-muted px-3.5 text-xs text-muted-foreground select-none font-mono">
               multivrs.space/
             </span>
             <input
@@ -171,7 +171,7 @@ export function AccountProfileForm({
               onChange={(event) =>
                 setUsername(event.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
               }
-              className="h-10 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-zinc-600"
+              className="h-10 flex-1 bg-transparent px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
               placeholder="username"
             />
           </div>
@@ -181,7 +181,7 @@ export function AccountProfileForm({
           action={
             <Button
               size="sm"
-              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="h-8 rounded-md bg-foreground text-background hover:bg-foreground/90 text-xs font-medium px-4 disabled:opacity-40"
               disabled={savingUsername || username === profile.username || !username.trim()}
               onClick={() => saveField("username", username.trim())}
             >
@@ -285,7 +285,7 @@ function AvatarField({
         type="button"
         disabled={busy}
         onClick={() => input.current?.click()}
-        className="relative flex size-18 sm:size-20 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-700/80 bg-zinc-900 overflow-hidden shadow-md transition-transform group-hover:scale-105"
+        className="relative flex size-18 sm:size-20 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-muted overflow-hidden shadow-md transition-transform group-hover:scale-105"
         title="Click to upload custom avatar"
       >
         {profile.image ? (
@@ -298,13 +298,13 @@ function AvatarField({
             className="size-full object-cover"
           />
         ) : (
-          <span className="font-geist-mono text-2xl font-bold text-white uppercase">
+          <span className="font-geist-mono text-2xl font-bold text-foreground uppercase">
             {(profile.name[0] ?? profile.username[0] ?? "M").toUpperCase()}
           </span>
         )}
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-          <Upload className="size-4 text-white" />
-          <span className="mt-0.5 text-[9px] font-medium text-white">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted opacity-0 transition-opacity group-hover:opacity-100">
+          <Upload className="size-4 text-foreground" />
+          <span className="mt-0.5 text-[9px] font-medium text-foreground">
             {busy ? "Uploading…" : "Upload"}
           </span>
         </div>
@@ -314,7 +314,7 @@ function AvatarField({
           type="button"
           onClick={remove}
           disabled={busy}
-          className="mt-1 block w-full text-center text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="mt-1 block w-full text-center text-[10px] text-muted-foreground hover:text-foreground transition-colors"
         >
           Remove
         </button>
@@ -393,25 +393,25 @@ function DefaultTeamField({
       >
         <div className="flex items-center gap-2 max-w-md">
           {selectedTeam ? (
-            <div className="inline-flex items-center gap-2.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200">
+            <div className="inline-flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground">
               <TeamAvatar
                 name={selectedTeam.name || selectedTeam.slug}
                 logo={selectedTeam.logo}
                 size={20}
               />
-              <span className="font-mono text-xs text-white">{selectedTeam.slug}</span>
+              <span className="font-mono text-xs text-foreground">{selectedTeam.slug}</span>
               {teams.length > 1 && (
                 <DropdownMenu open={open} onOpenChange={setOpen}>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="ml-1 rounded p-0.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                      className="ml-1 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
                       title="Switch default team"
                     >
                       <X className="size-3.5" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56 bg-zinc-950 border-zinc-800 p-1">
+                  <DropdownMenuContent align="start" className="w-56 bg-popover border-border p-1">
                     {teams.map((t) => (
                       <DropdownMenuItem
                         key={t.slug}
@@ -427,7 +427,7 @@ function DefaultTeamField({
                           size={16}
                         />
                         <span className="font-mono">{t.slug}</span>
-                        {t.slug === selectedSlug && <Check className="ml-auto size-3.5 text-white" />}
+                        {t.slug === selectedSlug && <Check className="ml-auto size-3.5 text-foreground" />}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -435,20 +435,20 @@ function DefaultTeamField({
               )}
             </div>
           ) : (
-            <span className="text-xs text-zinc-500">No teams available</span>
+            <span className="text-xs text-muted-foreground">No teams available</span>
           )}
         </div>
       </SettingsCardBody>
       <SettingsCardFooter
         helperText={
           <span className="flex items-center gap-1">
-            Learn more about <span className="text-zinc-300 underline underline-offset-4 cursor-pointer">Default Teams ↗</span>
+            Learn more about <span className="text-foreground underline underline-offset-4 cursor-pointer">Default Teams ↗</span>
           </span>
         }
         action={
           <Button
             size="sm"
-            className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+            className="h-8 rounded-md bg-foreground text-background hover:bg-foreground/90 text-xs font-medium px-4 disabled:opacity-40"
             disabled={saving || selectedSlug === savedSlug}
             onClick={handleSave}
           >
@@ -514,11 +514,11 @@ function EmailListField({
         description="Enter the email addresses you want to use to log in with Multivrs. Your primary email will be used for account-related notifications."
       >
         <div className="space-y-3 max-w-2xl">
-          <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+          <div className="rounded-lg border border-border bg-muted/60 divide-y divide-border overflow-hidden">
             {emails.map((item) => (
               <div key={item.address} className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-normal text-white truncate">{item.address}</span>
+                  <span className="text-sm font-normal text-foreground truncate">{item.address}</span>
                   {item.verified && (
                     <span className="rounded-full bg-blue-950/80 border border-blue-800/80 px-2 py-0.5 text-[11px] font-medium text-blue-400">
                       Verified
@@ -534,12 +534,12 @@ function EmailListField({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="size-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+                      className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       <MoreHorizontal className="size-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-zinc-950 border-zinc-800 p-1">
+                  <DropdownMenuContent align="end" className="w-48 bg-popover border-border p-1">
                     {!item.isPrimary && (
                       <DropdownMenuItem
                         className="text-xs cursor-pointer"
@@ -576,13 +576,13 @@ function EmailListField({
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 autoFocus
-                className="h-9 rounded-md border border-zinc-800 bg-black/60 px-3 text-sm text-white placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+                className="h-9 rounded-md border border-border bg-muted/60 px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               <Button
                 type="submit"
                 size="sm"
                 disabled={busy || !newEmail.trim()}
-                className="h-9 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-3.5"
+                className="h-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-3.5"
               >
                 {busy ? "Sending…" : "Add"}
               </Button>
@@ -594,7 +594,7 @@ function EmailListField({
                   setAdding(false);
                   setNewEmail("");
                 }}
-                className="h-9 text-xs text-zinc-400 hover:text-white"
+                className="h-9 text-xs text-muted-foreground hover:text-foreground"
               >
                 Cancel
               </Button>
@@ -605,7 +605,7 @@ function EmailListField({
               variant="outline"
               size="sm"
               onClick={() => setAdding(true)}
-              className="h-8 gap-1.5 rounded-md border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-medium text-zinc-200"
+              className="h-8 gap-1.5 rounded-md border-border bg-muted hover:bg-muted text-xs font-medium text-foreground"
             >
               <Plus className="size-3.5" />
               Add Another
@@ -653,19 +653,19 @@ function PhoneNumberField() {
         title="Your Phone Number"
         description="Enter a phone number to receive important service updates by SMS."
       >
-        <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
+        <div className="flex max-w-md items-center rounded-md border border-border bg-muted/60 overflow-hidden focus-within:ring-1 focus-within:ring-ring">
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex h-10 items-center gap-1.5 border-r border-zinc-800 bg-zinc-900/60 px-3 text-xs text-zinc-300 hover:text-white transition-colors shrink-0"
+                className="flex h-10 items-center gap-1.5 border-r border-border bg-muted px-3 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
               >
                 <span className="text-sm">{selectedCountry.flag}</span>
-                <ChevronDown className="size-3 text-zinc-500" />
+                <ChevronDown className="size-3 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64 bg-zinc-950 border-zinc-800 p-1">
-              <div className="p-1 border-b border-zinc-800/80">
+            <DropdownMenuContent align="start" className="w-64 bg-popover border-border p-1">
+              <div className="p-1 border-b border-border">
                 <input
                   type="text"
                   placeholder="Search countries..."
@@ -673,10 +673,10 @@ function PhoneNumberField() {
                   onChange={(e) => setCountrySearch(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
-                  className="h-7 w-full bg-black/60 border border-zinc-800 rounded px-2 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-zinc-700"
+                  className="h-7 w-full bg-muted/60 border border-border rounded px-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring"
                 />
               </div>
-              <div className="max-h-60 overflow-y-auto hide-scrollbar pt-1 divide-y divide-zinc-900">
+              <div className="max-h-60 overflow-y-auto hide-scrollbar pt-1 divide-y divide-border">
                 {countrySearch.trim() ? (
                   filteredCountries.length > 0 ? (
                     filteredCountries.map((c) => (
@@ -694,7 +694,7 @@ function PhoneNumberField() {
                       </DropdownMenuItem>
                     ))
                   ) : (
-                    <div className="py-4 text-center text-xs text-zinc-500">
+                    <div className="py-4 text-center text-xs text-muted-foreground">
                       No countries found
                     </div>
                   )
@@ -716,7 +716,7 @@ function PhoneNumberField() {
                       ))}
                     </div>
                     <div className="pt-1">
-                      <div className="px-2 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+                      <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                         All Countries
                       </div>
                       {COUNTRIES.map((c) => (
@@ -743,7 +743,7 @@ function PhoneNumberField() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(201) 555-0123"
-            className="h-10 flex-1 bg-transparent px-3.5 text-sm text-white outline-none placeholder:text-zinc-600 font-mono"
+            className="h-10 flex-1 bg-transparent px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground font-mono"
           />
         </div>
       </SettingsCardBody>
@@ -752,7 +752,7 @@ function PhoneNumberField() {
         action={
           <Button
             size="sm"
-            className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+            className="h-8 rounded-md bg-foreground text-background hover:bg-foreground/90 text-xs font-medium px-4 disabled:opacity-40"
             disabled={saving || !phone.trim() || saved}
             onClick={handleSave}
           >
@@ -787,7 +787,7 @@ function ResetTipsField() {
           <Button
             size="sm"
             variant="outline"
-            className="h-8 rounded-md border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-medium text-white px-4"
+            className="h-8 rounded-md border-border bg-muted hover:bg-muted text-xs font-medium text-foreground px-4"
             disabled={resetting}
             onClick={handleReset}
           >
@@ -813,7 +813,7 @@ function DeleteAccountField() {
           <Button
             size="sm"
             variant="destructive"
-            className="h-8 rounded-md text-xs font-medium px-4 bg-red-600 hover:bg-red-700 text-white"
+            className="h-8 rounded-md text-xs font-medium px-4 bg-destructive hover:bg-destructive/90 text-white"
             onClick={() => toast.error("Account deletion requires confirmation")}
           >
             Delete Personal Account
@@ -844,13 +844,13 @@ function UserIdField({ userId }: { userId: string }) {
           <Input
             readOnly
             value={userId}
-            className="h-10 font-mono text-xs text-zinc-400 bg-black/60 border-zinc-800 select-all"
+            className="h-10 font-mono text-xs text-muted-foreground bg-muted/60 border-border select-all"
           />
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-10 shrink-0 gap-1.5 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs text-zinc-200"
+            className="h-10 shrink-0 gap-1.5 border-border bg-muted hover:bg-muted text-xs text-foreground"
             onClick={copyUserId}
           >
             {copied ? (

@@ -124,7 +124,7 @@ export function MailProvider({
     const nextView = searchParams.get("view");
     if (nextView) {
       setViewState(parseMailView(nextView));
-    } else if (pathname.endsWith("/emails")) {
+    } else if (pathname.endsWith("/emails") || pathname.endsWith("/email")) {
       setViewState(initialView);
     }
   }, [searchParams, pathname, initialView]);

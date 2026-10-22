@@ -56,7 +56,7 @@ export function BillingAddOns({
           onClick={() =>
             window.dispatchEvent(new CustomEvent("open-upgrade-sheet"))
           }
-          className="text-foreground underline underline-offset-4 hover:text-white cursor-pointer transition-colors"
+          className="text-foreground underline underline-offset-4 hover:text-foreground cursor-pointer transition-colors"
         >
           Upgrade to Pro
         </button>{" "}

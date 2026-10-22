@@ -54,7 +54,7 @@ export function ProjectScopeSwitcher({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-white/[0.02] px-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-[var(--hairline-strong)] hover:bg-white/[0.04]"
+          className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-foreground/[0.04] px-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-[var(--hairline-strong)] hover:bg-muted/40"
         >
           <span className="max-w-[110px] sm:max-w-[180px] truncate">
             {isAllProjects ? "All Projects" : scope}

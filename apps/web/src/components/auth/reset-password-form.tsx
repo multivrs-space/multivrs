@@ -14,9 +14,9 @@ import {
 } from "@/validators/auth.validators";
 
 const labelClass =
-  "font-mono text-[11px] font-medium uppercase tracking-wider text-white/50";
+  "font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
 const inputClass =
-  "h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-white/30 focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
+  "h-11 rounded-lg border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus-visible:border-[#A855F7] focus-visible:ring-[#A855F7]/30";
 
 /**
  * Set a new password using the `token` from the reset email link. On success
@@ -96,17 +96,17 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-6 text-center">
         <div className="space-y-1.5">
-          <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+          <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
             Link expired
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             This password reset link is invalid or has expired. Request a fresh
             one to continue.
           </p>
         </div>
         <Link
           href="/forgot-password"
-          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea]"
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea]"
         >
           Request new link
         </Link>
@@ -121,17 +121,17 @@ export function ResetPasswordForm() {
           <CheckCircle2 className="size-5 text-[#A855F7]" />
         </div>
         <div className="space-y-1.5">
-          <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+          <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
             Password updated
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             Your password has been changed. You can now sign in with it.
           </p>
         </div>
         <button
           type="button"
           onClick={() => router.push("/login")}
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea]"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea]"
         >
           Continue to sign in
         </button>
@@ -142,10 +142,10 @@ export function ResetPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="font-clash text-2xl font-semibold tracking-tight text-white">
+        <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Reset password
         </h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-foreground">
           Choose a strong password with at least 8 characters.
         </p>
       </div>
@@ -169,7 +169,7 @@ export function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground/70"
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -203,7 +203,7 @@ export function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors hover:text-white/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground/70"
               tabIndex={-1}
               aria-label={showConfirm ? "Hide password" : "Show password"}
             >
@@ -222,7 +222,7 @@ export function ResetPasswordForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-white transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-[#A855F7] text-sm font-semibold text-foreground transition-colors hover:bg-[#9333ea] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? "Updating…" : "Update password"}
         </button>
@@ -230,7 +230,7 @@ export function ResetPasswordForm() {
 
       <Link
         href="/login"
-        className="flex items-center justify-center gap-1.5 text-sm text-white/40 transition-colors hover:text-white"
+        className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
         Back to sign in

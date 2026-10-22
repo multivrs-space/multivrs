@@ -117,7 +117,7 @@ export function SandboxesPage({
                 {state === "running" ? "Running…" : "Run"}
               </Button>
             </div>
-            <pre className="min-h-64 overflow-auto rounded-xl border border-[var(--hairline)] bg-black/50 p-4 font-geist-mono text-xs leading-5 text-emerald-300">
+            <pre className="min-h-64 overflow-auto rounded-xl border border-[var(--hairline)] bg-muted p-4 font-geist-mono text-xs leading-5 text-emerald-300">
               {output || "$ Ready"}
             </pre>
           </div>

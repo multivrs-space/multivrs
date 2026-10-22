@@ -156,7 +156,7 @@ export function MailThreadList({
               className={cn(
                 "group relative flex w-full items-start transition-colors",
                 isSelected
-                  ? "bg-accent/12 dark:bg-white/[0.07] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-r-full before:bg-accent"
+                  ? "bg-muted dark:bg-white/[0.07] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-r-full before:bg-primary"
                   : "hover:bg-black/4 dark:hover:bg-white/4",
                 thread.unread &&
                   !isSelected &&
@@ -178,7 +178,7 @@ export function MailThreadList({
                     size="md"
                   />
                   {thread.unread && (
-                    <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background dark:border-[#07080a] bg-accent" />
+                    <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background dark:border-[#07080a] bg-primary" />
                   )}
                 </div>
 

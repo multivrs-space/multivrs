@@ -83,7 +83,7 @@ export function SidebarSearch() {
         aria-controls={listId}
         aria-expanded={open}
         aria-label="Search dashboard"
-        containerClassName="bg-white/[0.015] focus-within:bg-white/[0.03]"
+        containerClassName="bg-foreground/[0.03] focus-within:bg-muted/40"
         onValueChange={(value) => {
           setQuery(value);
           setActive(0);
@@ -94,7 +94,7 @@ export function SidebarSearch() {
         placeholder="Search…"
         role="combobox"
         trailing={
-          <kbd className="shrink-0 rounded-md border border-[var(--hairline)] bg-white/[0.02] px-1.5 py-0.5 font-geist-mono text-[10px] text-muted-foreground/80">
+          <kbd className="shrink-0 rounded-md border border-[var(--hairline)] bg-foreground/[0.04] px-1.5 py-0.5 font-geist-mono text-[10px] text-muted-foreground/80">
             ⌘K
           </kbd>
         }

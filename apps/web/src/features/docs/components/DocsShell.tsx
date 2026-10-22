@@ -14,7 +14,7 @@ export function DocsShell({ categories, children }: DocsShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-black text-white antialiased flex flex-col">
+    <div className="min-h-screen w-full bg-background text-foreground antialiased flex flex-col">
       <DocsHeader
         categories={categories}
         mobileSidebarOpen={mobileMenuOpen}
@@ -30,11 +30,11 @@ export function DocsShell({ categories, children }: DocsShellProps) {
         {/* Mobile Sidebar Overlay Drawer */}
         {mobileMenuOpen && (
           <div
-            className="fixed inset-0 z-40 lg:hidden bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+            className="fixed inset-0 z-40 lg:hidden bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setMobileMenuOpen(false)}
           >
             <div
-              className="w-80 max-w-[85vw] h-full bg-[#0a0a0c] border-r border-zinc-800 overflow-y-auto"
+              className="w-80 max-w-[85vw] h-full bg-card border-r border-border overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <DocsSidebar

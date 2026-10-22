@@ -28,15 +28,15 @@ export default async function DocsLayout({
 
   return (
     <div
-      className={`dark min-h-screen w-full bg-black text-white antialiased flex flex-col ${acari.variable} ${clashDisplay.variable}`}
+      className={`min-h-screen w-full bg-background text-foreground antialiased flex flex-col ${acari.variable} ${clashDisplay.variable}`}
     >
       <Suspense
         fallback={
-          <div className="min-h-screen w-full bg-black text-white flex flex-col">
-            <div className="h-16 w-full border-b border-zinc-800/80 bg-[#0a0a0a]" />
+          <div className="min-h-screen w-full bg-background text-foreground flex flex-col">
+            <div className="h-16 w-full border-b border-border bg-card" />
             <div className="flex-1 flex">
-              <div className="w-72 lg:w-80 xl:w-[320px] border-r border-zinc-800/80 bg-[#0a0a0c] animate-pulse p-4" />
-              <div className="flex-1 p-8 animate-pulse bg-zinc-950" />
+              <div className="w-72 lg:w-80 xl:w-[320px] border-r border-border bg-card animate-pulse p-4" />
+              <div className="flex-1 p-8 animate-pulse bg-card" />
             </div>
           </div>
         }

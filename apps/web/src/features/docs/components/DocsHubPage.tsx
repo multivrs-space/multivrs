@@ -112,7 +112,7 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
   ];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen w-full overflow-hidden bg-background text-foreground">
       {/* 1. Acid Squares Background Canvas (Interactive grid reacting to mouse) */}
       <AcidSquaresBackground className="opacity-60" cellSize={56} hoverRadius={180} />
 
@@ -137,26 +137,26 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
             <span>Multivrs Edge Platform · Developer Documentation</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
             Build, optimize, and deploy at the speed of Rust.
           </h1>
 
-          <p className="max-w-3xl text-base sm:text-lg text-zinc-400 leading-relaxed">
+          <p className="max-w-3xl text-base sm:text-lg text-muted-foreground leading-relaxed">
             Welcome to the official developer hub for the Multivrs Platform. Purpose-built from the ground up for{" "}
             <span className="text-purple-300 font-semibold">swift-rust 🦀</span>, Next.js, and high-performance serverless edge computing.
           </p>
 
           {/* Clerk / Cloudflare style Agent Prompt Bar */}
-          <div className="w-full max-w-xl flex items-center justify-between p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 backdrop-blur-md shadow-inner text-xs font-mono">
-            <div className="flex items-center gap-2 text-zinc-300 truncate">
+          <div className="w-full max-w-xl flex items-center justify-between p-2.5 rounded-xl bg-muted/70 border border-border backdrop-blur-md shadow-inner text-xs font-mono">
+            <div className="flex items-center gap-2 text-foreground truncate">
               <span className="flex size-5 rounded-md bg-purple-500/20 text-purple-400 items-center justify-center text-[10px]">🤖</span>
-              <span className="text-zinc-400">Agent setup:</span>
+              <span className="text-muted-foreground">Agent setup:</span>
               <span className="text-purple-300 truncate">multivrs deploy --prod</span>
             </div>
             <button
               type="button"
               onClick={() => handleCopy("multivrs deploy --prod")}
-              className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors shrink-0"
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
               title="Copy prompt"
             >
               {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
@@ -213,7 +213,7 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
                 forceTheme="dark"
               >
                 <span className="flex items-center gap-1.5 font-medium text-xs">
-                  <Terminal className="size-3.5 text-zinc-400" />
+                  <Terminal className="size-3.5 text-muted-foreground" />
                   <span>CLI Reference</span>
                 </span>
               </SpecularButton>
@@ -222,20 +222,20 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
         </div>
 
         {/* INTERACTIVE TERMINAL COMPONENT (Vercel & Cloudflare style) */}
-        <div className="w-full rounded-xl border border-zinc-800/90 bg-zinc-950/80 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="w-full rounded-xl border border-border/90 bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden">
           {/* Terminal Tabs Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-2.5 bg-zinc-900/60">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5 bg-muted">
             <div className="flex items-center gap-2">
               <div className="flex gap-1.5">
-                <span className="size-2.5 rounded-full bg-zinc-700" />
-                <span className="size-2.5 rounded-full bg-zinc-700" />
-                <span className="size-2.5 rounded-full bg-zinc-700" />
+                <span className="size-2.5 rounded-full bg-muted-foreground/40" />
+                <span className="size-2.5 rounded-full bg-muted-foreground/40" />
+                <span className="size-2.5 rounded-full bg-muted-foreground/40" />
               </div>
-              <span className="text-[11px] font-mono text-zinc-400 ml-2">terminal</span>
+              <span className="text-[11px] font-mono text-muted-foreground ml-2">terminal</span>
             </div>
 
             {/* Framework Switcher Pills */}
-            <div className="flex items-center gap-1 bg-zinc-950 p-0.5 rounded-lg border border-zinc-800">
+            <div className="flex items-center gap-1 bg-card p-0.5 rounded-lg border border-border">
               {(Object.keys(CLI_SNIPPETS) as Array<keyof typeof CLI_SNIPPETS>).map((key) => (
                 <button
                   key={key}
@@ -244,7 +244,7 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                     activeTab === key
                       ? "bg-purple-500/20 text-purple-200 border border-purple-500/40"
-                      : "text-zinc-400 hover:text-white"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {key === "swift-rust" ? "🦀 swift-rust" : key}
@@ -254,18 +254,18 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
           </div>
 
           {/* Terminal Code Body */}
-          <div className="p-4 sm:p-5 flex items-center justify-between font-mono text-xs text-zinc-300">
+          <div className="p-4 sm:p-5 flex items-center justify-between font-mono text-xs text-foreground">
             <div className="flex flex-col gap-1.5">
-              <div className="text-zinc-500"># 1. Install native CLI</div>
+              <div className="text-muted-foreground"># 1. Install native CLI</div>
               <div className="text-purple-300">$ {snippet.install}</div>
-              <div className="text-zinc-500 mt-2"># 2. Deploy to global edge (atomic instant rollback)</div>
+              <div className="text-muted-foreground mt-2"># 2. Deploy to global edge (atomic instant rollback)</div>
               <div className="text-emerald-400">$ {snippet.deploy}</div>
             </div>
 
             <button
               type="button"
               onClick={() => handleCopy(`${snippet.install}\n${snippet.deploy}`)}
-              className="p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white transition-colors self-start"
+              className="p-2 rounded-lg bg-muted hover:bg-muted border border-border text-foreground hover:text-foreground transition-colors self-start"
               title="Copy commands"
             >
               {copied ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
@@ -276,15 +276,15 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
         {/* 4 CLERK-STYLE BENTO SPOTLIGHT CARDS */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-white">Explore Core Primitives</h2>
-            <span className="text-xs text-zinc-500 font-mono">Architecture v2</span>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Explore Core Primitives</h2>
+            <span className="text-xs text-muted-foreground font-mono">Architecture v2</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Card 1: swift-rust Flagship */}
             <Link
               href="/docs/swift-rust"
-              className="group relative rounded-xl border border-purple-500/30 bg-zinc-900/40 hover:bg-zinc-900/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-purple-500/60 flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-purple-500/10"
+              className="group relative rounded-xl border border-purple-500/30 bg-muted/40 hover:bg-muted/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-purple-500/60 flex flex-col justify-between overflow-hidden shadow-lg hover:shadow-purple-500/10"
             >
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
@@ -292,10 +292,10 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
                     🦀
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">
+                <h3 className="text-lg font-bold text-foreground group-hover:text-purple-300 transition-colors">
                   swift-rust Framework
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   TSX compiled with a high-performance Rust + Bun engine. Four render modes: static WASM, streaming SSR, htmx, and client hydration.
                 </p>
               </div>
@@ -308,22 +308,22 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
             {/* Card 2: multivrs CLI */}
             <Link
               href="/docs/products/cli"
-              className="group relative rounded-xl border border-zinc-800/80 bg-zinc-900/40 hover:bg-zinc-900/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-zinc-700 flex flex-col justify-between overflow-hidden shadow-md"
+              className="group relative rounded-xl border border-border bg-muted/40 hover:bg-muted/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-border flex flex-col justify-between overflow-hidden shadow-md"
             >
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted border border-border text-foreground">
                     <Terminal className="size-5" />
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-zinc-200 transition-colors">
+                <h3 className="text-lg font-bold text-foreground group-hover:text-foreground transition-colors">
                   multivrs CLI
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Single native binary for macOS, Linux, and Windows. Microsecond cold-starts, parallel Rayon asset hashing, and instant alias promotion.
                 </p>
               </div>
-              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-zinc-300 group-hover:translate-x-0.5 transition-transform">
+              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-foreground group-hover:translate-x-0.5 transition-transform">
                 <span>View CLI commands</span>
                 <ArrowRight className="size-3" />
               </div>
@@ -332,22 +332,22 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
             {/* Card 3: Edge Services */}
             <Link
               href="/docs/services/anycast-cdn"
-              className="group relative rounded-xl border border-zinc-800/80 bg-zinc-900/40 hover:bg-zinc-900/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-zinc-700 flex flex-col justify-between overflow-hidden shadow-md"
+              className="group relative rounded-xl border border-border bg-muted/40 hover:bg-muted/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-border flex flex-col justify-between overflow-hidden shadow-md"
             >
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted border border-border text-foreground">
                     <ShieldAlert className="size-5" />
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-zinc-200 transition-colors">
+                <h3 className="text-lg font-bold text-foreground group-hover:text-foreground transition-colors">
                   Global Edge Services
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Anycast CDN, WASM regex routing, isolated serverless compute, micro-sandboxes, WAF firewall, and durable scheduler workflows.
                 </p>
               </div>
-              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-zinc-300 group-hover:translate-x-0.5 transition-transform">
+              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-foreground group-hover:translate-x-0.5 transition-transform">
                 <span>Explore all services</span>
                 <ArrowRight className="size-3" />
               </div>
@@ -356,22 +356,22 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
             {/* Card 4: Multivrs Mail */}
             <Link
               href="/docs/mail"
-              className="group relative rounded-xl border border-zinc-800/80 bg-zinc-900/40 hover:bg-zinc-900/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-zinc-700 flex flex-col justify-between overflow-hidden shadow-md"
+              className="group relative rounded-xl border border-border bg-muted/40 hover:bg-muted/70 p-6 backdrop-blur-md transition-all duration-300 hover:border-border flex flex-col justify-between overflow-hidden shadow-md"
             >
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted border border-border text-foreground">
                     <Mail className="size-5" />
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-zinc-200 transition-colors">
+                <h3 className="text-lg font-bold text-foreground group-hover:text-foreground transition-colors">
                   Multivrs Mail
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Transactional sending via @multivrs/mail SDK & SMTP, mass marketing broadcasts & audiences, and custom domain business mailboxes.
                 </p>
               </div>
-              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-zinc-300 group-hover:translate-x-0.5 transition-transform">
+              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-foreground group-hover:translate-x-0.5 transition-transform">
                 <span>Explore Mail platform</span>
                 <ArrowRight className="size-3" />
               </div>
@@ -381,10 +381,10 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
 
         {/* PRODUCTS SECTION (9 items) */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">Products</h2>
-              <p className="text-xs text-zinc-400">Developer tools, web console, and embeddable software kits.</p>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">Products</h2>
+              <p className="text-xs text-muted-foreground">Developer tools, web console, and embeddable software kits.</p>
             </div>
             <span className="text-xs text-purple-400 font-mono font-medium">{products.length} products</span>
           </div>
@@ -394,22 +394,22 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
               <Link
                 key={p.id}
                 href={p.href}
-                className="group flex flex-col justify-between p-4 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all duration-200"
+                className="group flex flex-col justify-between p-4 rounded-xl border border-border bg-card/60 hover:bg-muted/70 hover:border-border transition-all duration-200"
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-white group-hover:text-purple-300 transition-colors">
+                    <span className="font-semibold text-sm text-foreground group-hover:text-purple-300 transition-colors">
                       {p.title}
                     </span>
                     {p.badge === "Coming soon" && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800 text-zinc-300 border border-zinc-700/60">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-muted text-foreground border border-border/60">
                         Coming soon
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{p.summary}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{p.summary}</p>
                 </div>
-                <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-zinc-500 group-hover:text-purple-400 transition-colors">
+                <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-muted-foreground group-hover:text-purple-400 transition-colors">
                   <span>Learn more</span>
                   <ArrowRight className="size-2.5" />
                 </div>
@@ -420,10 +420,10 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
 
         {/* SERVICES SECTION */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">Edge Services</h2>
-              <p className="text-xs text-zinc-400">Underlying distributed infrastructure, networking, and security primitives.</p>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">Edge Services</h2>
+              <p className="text-xs text-muted-foreground">Underlying distributed infrastructure, networking, and security primitives.</p>
             </div>
             <span className="text-xs text-purple-400 font-mono font-medium">{services.length} services</span>
           </div>
@@ -433,16 +433,16 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
               <Link
                 key={s.id}
                 href={s.href}
-                className="group flex items-start gap-3.5 p-4 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/70 hover:border-zinc-700 transition-all duration-200"
+                className="group flex items-start gap-3.5 p-4 rounded-xl border border-border bg-card/60 hover:bg-muted/70 hover:border-border transition-all duration-200"
               >
-                <div className="size-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-purple-400 shrink-0 mt-0.5">
+                <div className="size-8 rounded-lg bg-muted border border-border flex items-center justify-center text-purple-400 shrink-0 mt-0.5">
                   <Sparkles className="size-4" />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-sm text-white group-hover:text-purple-300 transition-colors">
+                  <span className="font-semibold text-sm text-foreground group-hover:text-purple-300 transition-colors">
                     {s.title}
                   </span>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{s.summary}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.summary}</p>
                 </div>
               </Link>
             ))}
@@ -450,10 +450,10 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
         </div>
 
         {/* FRAMEWORK QUICKSTARTS (Resend style) */}
-        <div className="flex flex-col gap-4 border-t border-zinc-800/80 pt-10">
+        <div className="flex flex-col gap-4 border-t border-border pt-10">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">Framework Quickstarts</h2>
-            <p className="text-xs text-zinc-400">Deploy your preferred framework with zero manual configuration.</p>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Framework Quickstarts</h2>
+            <p className="text-xs text-muted-foreground">Deploy your preferred framework with zero manual configuration.</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -464,11 +464,11 @@ export function DocsHubPage({ categories = [] }: DocsHubPageProps) {
                 className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
                   fw.flag
                     ? "bg-purple-500/10 border-purple-500/30 text-purple-200 hover:bg-purple-500/20"
-                    : "bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    : "bg-muted/50 border-border text-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <span className="text-xs font-semibold">{fw.label}</span>
-                <ArrowRight className="size-3 text-zinc-500" />
+                <ArrowRight className="size-3 text-muted-foreground" />
               </Link>
             ))}
           </div>

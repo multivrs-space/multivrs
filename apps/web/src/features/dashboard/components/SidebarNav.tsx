@@ -35,8 +35,8 @@ export function SidebarNav({
                 className={cn(
                   "nav-item group relative flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] transition-colors duration-150",
                   isActive
-                    ? "nav-rail-active bg-white/8 font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-white/2.5 hover:text-foreground",
+                    ? "nav-rail-active bg-foreground/8 font-medium text-foreground"
+                    : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                 )}
               >
                 <item.icon
@@ -53,7 +53,7 @@ export function SidebarNav({
                 </span>
                 <div className="ml-auto flex shrink-0 items-center gap-1.5">
                   {item.badge && (
-                    <span className="rounded-lg border border-accent/20 bg-accent/10 px-1.5 py-px text-[9.5px] font-medium text-accent">
+                    <span className="rounded-lg border border-primary/20 bg-primary/10 px-1.5 py-px text-[9.5px] font-medium text-primary">
                       {item.badge}
                     </span>
                   )}

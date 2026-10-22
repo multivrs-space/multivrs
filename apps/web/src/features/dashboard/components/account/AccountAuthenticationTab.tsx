@@ -365,21 +365,21 @@ export function AccountAuthenticationTab({
           title="Sign-in Methods"
           description="Customize how you access your account. Link your Git profiles and set up passkeys for seamless, secure authentication."
         >
-          <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+          <div className="rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
             {/* Email */}
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
-                <Mail className="size-4 shrink-0 text-zinc-400" />
+                <Mail className="size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-white">Email</div>
-                  <div className="text-xs text-zinc-400 truncate">{email}</div>
+                  <div className="text-sm font-medium text-foreground">Email</div>
+                  <div className="text-xs text-muted-foreground truncate">{email}</div>
                 </div>
               </div>
               <Link
                 href="/account/settings"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
-                  "h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200",
+                  "h-7 text-xs border-border bg-background hover:bg-muted text-foreground",
                 )}
               >
                 Manage
@@ -390,10 +390,10 @@ export function AccountAuthenticationTab({
             <div className="px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <KeyRound className="size-4 shrink-0 text-zinc-400" />
+                  <KeyRound className="size-4 shrink-0 text-muted-foreground" />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-white">Password</div>
-                    <div className="text-xs text-zinc-400">
+                    <div className="text-sm font-medium text-foreground">Password</div>
+                    <div className="text-xs text-muted-foreground">
                       {signIn.hasPassword
                         ? "Sign in with your email and password."
                         : "No password set. You sign in with social login or passkeys."}
@@ -404,7 +404,7 @@ export function AccountAuthenticationTab({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-background hover:bg-muted text-foreground"
                     onClick={() => setChangingPassword(!changingPassword)}
                   >
                     {changingPassword ? "Cancel" : "Change Password"}
@@ -413,25 +413,25 @@ export function AccountAuthenticationTab({
               </div>
 
               {changingPassword && (
-                <form onSubmit={handleChangePassword} className="mt-3.5 pt-3 border-t border-zinc-800/80 max-w-sm space-y-3">
+                <form onSubmit={handleChangePassword} className="mt-3.5 pt-3 border-t border-border max-w-sm space-y-3">
                   <div>
-                    <Label className="text-xs text-zinc-300">Current Password</Label>
+                    <Label className="text-xs text-foreground">Current Password</Label>
                     <Input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="h-8 text-xs bg-zinc-950 border-zinc-800 mt-1"
+                      className="h-8 text-xs bg-background border-border mt-1 text-foreground"
                       required
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-zinc-300">New Password (min 8 chars)</Label>
+                    <Label className="text-xs text-foreground">New Password (min 8 chars)</Label>
                     <Input
                       type="password"
                       value={newPassword}
                       minLength={8}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="h-8 text-xs bg-zinc-950 border-zinc-800 mt-1"
+                      className="h-8 text-xs bg-background border-border mt-1 text-foreground"
                       required
                     />
                   </div>
@@ -441,9 +441,9 @@ export function AccountAuthenticationTab({
                       id="sign-out-others"
                       checked={signOutOthers}
                       onChange={(e) => setSignOutOthers(e.target.checked)}
-                      className="rounded border-zinc-800 bg-zinc-900"
+                      className="rounded border-border bg-background"
                     />
-                    <label htmlFor="sign-out-others" className="text-xs text-zinc-400 cursor-pointer">
+                    <label htmlFor="sign-out-others" className="text-xs text-muted-foreground cursor-pointer">
                       Sign out of other devices
                     </label>
                   </div>
@@ -451,7 +451,7 @@ export function AccountAuthenticationTab({
                     type="submit"
                     size="sm"
                     disabled={passwordBusy || !currentPassword || newPassword.length < 8}
-                    className="h-7 text-xs bg-white text-black hover:bg-zinc-200"
+                    className="h-7 text-xs bg-foreground text-background hover:bg-foreground/90"
                   >
                     {passwordBusy ? "Updating…" : "Update Password"}
                   </Button>
@@ -463,10 +463,10 @@ export function AccountAuthenticationTab({
             <div className="px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Fingerprint className="size-4 shrink-0 text-zinc-400" />
+                  <Fingerprint className="size-4 shrink-0 text-muted-foreground" />
                   <div>
-                    <div className="text-sm font-medium text-white">Passkeys</div>
-                    <div className="text-xs text-zinc-400">
+                    <div className="text-sm font-medium text-foreground">Passkeys</div>
+                    <div className="text-xs text-muted-foreground">
                       {signIn.passkeys && signIn.passkeys.length > 0
                         ? `${signIn.passkeys.length} passkey${signIn.passkeys.length > 1 ? "s" : ""} registered`
                         : "No passkeys registered"}
@@ -478,7 +478,7 @@ export function AccountAuthenticationTab({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 text-xs text-zinc-400 hover:text-white"
+                      className="h-7 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => setShowPasskeysList(!showPasskeysList)}
                     >
                       {showPasskeysList ? "Hide" : "View"}
@@ -487,7 +487,7 @@ export function AccountAuthenticationTab({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                     disabled={busy === "add-passkey"}
                     onClick={handleAddPasskey}
                   >
@@ -499,13 +499,13 @@ export function AccountAuthenticationTab({
 
               {/* Passkeys List */}
               {showPasskeysList && signIn.passkeys && signIn.passkeys.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-zinc-800/80 divide-y divide-zinc-800/60">
+                <div className="mt-3 pt-3 border-t border-border/80 divide-y divide-border/60">
                   {signIn.passkeys.map((p) => (
                     <div key={p.id} className="flex items-center justify-between py-2">
                       <div>
-                        <div className="text-xs font-medium text-zinc-200">{p.name || p.provider || "Passkey"}</div>
+                        <div className="text-xs font-medium text-foreground">{p.name || p.provider || "Passkey"}</div>
                         {p.createdAt && (
-                          <div className="text-[11px] text-zinc-500">
+                          <div className="text-[11px] text-muted-foreground">
                             Added {new Date(p.createdAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
                           </div>
                         )}
@@ -532,8 +532,8 @@ export function AccountAuthenticationTab({
                   G
                 </span>
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-white">Google</div>
-                  <div className="text-xs text-zinc-400 truncate">
+                  <div className="text-sm font-medium text-foreground">Google</div>
+                  <div className="text-xs text-muted-foreground truncate">
                     {isGoogleConnected ? email : "Not connected"}
                   </div>
                 </div>
@@ -544,12 +544,12 @@ export function AccountAuthenticationTab({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="size-7 flex items-center justify-center rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+                        className="size-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
                         <MoreHorizontal className="size-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 bg-zinc-950 border-zinc-800 p-1">
+                    <DropdownMenuContent align="end" className="w-40 bg-popover border-border p-1">
                       <DropdownMenuItem
                         className="text-xs cursor-pointer text-red-400 hover:text-red-300"
                         onClick={() => handleDisconnectSocial("google")}
@@ -564,7 +564,7 @@ export function AccountAuthenticationTab({
                     variant="outline"
                     disabled={busy === "connect-google"}
                     onClick={() => handleConnectSocial("google")}
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                   >
                     {busy === "connect-google" ? "Connecting…" : "Connect"}
                   </Button>
@@ -575,12 +575,12 @@ export function AccountAuthenticationTab({
             {/* GitHub */}
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
-                <svg className="size-5 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+                <svg className="size-5 shrink-0 fill-current text-foreground" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-white">GitHub</div>
-                  <div className="text-xs text-zinc-400 truncate">
+                  <div className="text-sm font-medium text-foreground">GitHub</div>
+                  <div className="text-xs text-muted-foreground truncate">
                     {isGitHubConnected ? "Connected" : "Not connected"}
                   </div>
                 </div>
@@ -591,12 +591,12 @@ export function AccountAuthenticationTab({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="size-7 flex items-center justify-center rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+                        className="size-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
                         <MoreHorizontal className="size-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 bg-zinc-950 border-zinc-800 p-1">
+                    <DropdownMenuContent align="end" className="w-40 bg-popover border-border p-1">
                       <DropdownMenuItem
                         className="text-xs cursor-pointer text-red-400 hover:text-red-300"
                         onClick={() => handleDisconnectSocial("github")}
@@ -611,7 +611,7 @@ export function AccountAuthenticationTab({
                     variant="outline"
                     disabled={busy === "connect-github"}
                     onClick={() => handleConnectSocial("github")}
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                   >
                     {busy === "connect-github" ? "Connecting…" : "Connect"}
                   </Button>
@@ -624,7 +624,7 @@ export function AccountAuthenticationTab({
               <button
                 type="button"
                 onClick={() => setShowMoreMethods(!showMoreMethods)}
-                className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <div className="flex items-center gap-1.5">
                   <ChevronRight
@@ -632,21 +632,21 @@ export function AccountAuthenticationTab({
                   />
                   <span>More options</span>
                 </div>
-                <div className="flex items-center gap-2 text-zinc-500">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <span className="text-xs">GitLab</span>
                   <span className="text-xs">Bitbucket</span>
                   <span className="text-xs">Apple</span>
                 </div>
               </button>
               {showMoreMethods && (
-                <div className="border-t border-zinc-800/60 px-4 py-3 bg-zinc-950/40 space-y-2">
+                <div className="border-t border-border/60 px-4 py-3 bg-muted/40 space-y-2">
                   {["GitLab", "Bitbucket", "Apple"].map((provider) => (
                     <div key={provider} className="flex items-center justify-between py-1">
-                      <span className="text-xs text-zinc-300">{provider}</span>
+                      <span className="text-xs text-foreground">{provider}</span>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300"
+                        className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                         onClick={() =>
                           toast.info(`${provider} OAuth is not configured on this server.`)
                         }
@@ -673,21 +673,21 @@ export function AccountAuthenticationTab({
                 Active
               </span>
             ) : (
-              <span className="rounded-full bg-zinc-800/80 border border-zinc-700/80 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
+              <span className="rounded-full bg-muted/80 border border-border/80 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                 Off
               </span>
             )
           }
         >
-          <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+          <div className="rounded-lg border border-border bg-muted/60 divide-y divide-border overflow-hidden">
             {/* Authenticator App (TOTP) */}
             <div className="px-4 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Smartphone className="size-4 shrink-0 text-zinc-400" />
+                  <Smartphone className="size-4 shrink-0 text-muted-foreground" />
                   <div>
-                    <div className="text-sm font-medium text-white">Authenticator App (TOTP)</div>
-                    <div className="text-xs text-zinc-400">
+                    <div className="text-sm font-medium text-foreground">Authenticator App (TOTP)</div>
+                    <div className="text-xs text-muted-foreground">
                       {isTwoFactorActive ? "Enrolled" : "Not enrolled"}
                     </div>
                   </div>
@@ -696,7 +696,7 @@ export function AccountAuthenticationTab({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                     disabled={mfaLoading}
                     onClick={handleDisableTotp}
                   >
@@ -706,7 +706,7 @@ export function AccountAuthenticationTab({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                    className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                     disabled={mfaLoading}
                     onClick={handleBeginTotp}
                   >
@@ -717,10 +717,10 @@ export function AccountAuthenticationTab({
 
               {/* TOTP Enrollment Drawer */}
               {showTotpSetup && enrollment && (
-                <div className="mt-4 pt-3 border-t border-zinc-800 max-w-md space-y-3.5">
+                <div className="mt-4 pt-3 border-t border-border max-w-md space-y-3.5">
                   <div>
-                    <div className="text-xs font-medium text-zinc-200">Authenticator Secret Key</div>
-                    <div className="mt-1 flex items-center gap-2 font-mono text-xs bg-zinc-950 p-2 rounded border border-zinc-800 text-zinc-300">
+                    <div className="text-xs font-medium text-foreground">Authenticator Secret Key</div>
+                    <div className="mt-1 flex items-center gap-2 font-mono text-xs bg-background p-2 rounded border border-border text-foreground">
                       <span className="truncate flex-1">{enrollment.secret}</span>
                       <button
                         type="button"
@@ -728,7 +728,7 @@ export function AccountAuthenticationTab({
                           navigator.clipboard.writeText(enrollment.secret);
                           toast.success("Secret copied");
                         }}
-                        className="text-zinc-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <Copy className="size-3.5" />
                       </button>
@@ -736,20 +736,20 @@ export function AccountAuthenticationTab({
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium text-zinc-200">Verification Code</div>
+                    <div className="text-xs font-medium text-foreground">Verification Code</div>
                     <div className="mt-1 flex gap-2">
                       <Input
                         maxLength={6}
                         placeholder="123456"
                         value={totpCode}
                         onChange={(e) => setTotpCode(e.target.value)}
-                        className="h-8 text-xs font-mono bg-zinc-950 border-zinc-800 max-w-44"
+                        className="h-8 text-xs font-mono bg-background border-border max-w-44"
                       />
                       <Button
                         size="sm"
                         disabled={mfaLoading || totpCode.trim().length !== 6}
                         onClick={handleConfirmTotp}
-                        className="h-8 text-xs bg-white text-black hover:bg-zinc-200"
+                        className="h-8 text-xs bg-foreground text-background hover:bg-foreground/90"
                       >
                         {mfaLoading ? "Verifying…" : "Confirm & Enable"}
                       </Button>
@@ -762,10 +762,10 @@ export function AccountAuthenticationTab({
             {/* Passkeys 2FA */}
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
-                <Fingerprint className="size-4 shrink-0 text-zinc-400" />
+                <Fingerprint className="size-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <div className="text-sm font-medium text-white">Passkeys</div>
-                  <div className="text-xs text-zinc-400">
+                  <div className="text-sm font-medium text-foreground">Passkeys</div>
+                  <div className="text-xs text-muted-foreground">
                     {signIn.passkeys && signIn.passkeys.length > 0
                       ? `${signIn.passkeys.length} registered passkey(s) can be used for 2FA`
                       : "No passkeys registered"}
@@ -775,7 +775,7 @@ export function AccountAuthenticationTab({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
                 onClick={handleAddPasskey}
               >
                 Add Passkey
@@ -797,13 +797,13 @@ export function AccountAuthenticationTab({
                 placeholder="My CLI"
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
-                className="h-9 text-xs bg-black/60 border-zinc-800 placeholder:text-zinc-600"
+                className="h-9 text-xs bg-muted/60 border-border placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
                 size="sm"
                 disabled={creatingToken || !tokenName.trim()}
-                className="h-9 px-3.5 text-xs bg-white text-black hover:bg-zinc-200 font-medium shrink-0"
+                className="h-9 px-3.5 text-xs bg-foreground text-background hover:bg-foreground/90 font-medium shrink-0"
               >
                 <Plus className="size-3.5 mr-1" />
                 {creatingToken ? "Creating…" : "Create"}
@@ -814,14 +814,14 @@ export function AccountAuthenticationTab({
             {createdTokenSecret && (
               <div className="rounded-lg border border-emerald-800/60 bg-emerald-950/20 p-3 text-xs space-y-1.5">
                 <div className="font-medium text-emerald-400">New Token Created</div>
-                <div className="text-zinc-400 text-[11px]">
+                <div className="text-muted-foreground text-[11px]">
                   Copy this token now. It will not be shown again.
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <Input
                     readOnly
                     value={createdTokenSecret}
-                    className="h-8 font-mono text-xs bg-black/80 border-emerald-800/60 text-emerald-300 select-all"
+                    className="h-8 font-mono text-xs bg-muted border-emerald-800/60 text-emerald-300 select-all"
                   />
                   <Button
                     size="sm"
@@ -842,13 +842,13 @@ export function AccountAuthenticationTab({
             )}
 
             {/* Existing Tokens List */}
-            <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+            <div className="rounded-lg border border-border bg-muted/60 divide-y divide-border overflow-hidden">
               {apiTokens.length > 0 ? (
                 apiTokens.map((t) => (
                   <div key={t.id} className="flex items-center justify-between px-4 py-3">
                     <div className="min-w-0">
-                      <div className="text-xs font-medium text-white">{t.name}</div>
-                      <div className="text-[11px] text-zinc-500 font-mono">
+                      <div className="text-xs font-medium text-foreground">{t.name}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono">
                         {t.hint ? `${t.hint}••••` : "Active token"} · Created{" "}
                         {new Date(t.createdAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
                       </div>
@@ -864,7 +864,7 @@ export function AccountAuthenticationTab({
                   </div>
                 ))
               ) : (
-                <div className="py-6 text-center text-xs text-zinc-500">
+                <div className="py-6 text-center text-xs text-muted-foreground">
                   No developer tokens active
                 </div>
               )}
@@ -885,31 +885,31 @@ export function AccountAuthenticationTab({
                 variant="outline"
                 disabled={busy === "session-others"}
                 onClick={handleSignOutOtherSessions}
-                className="h-7 text-xs border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                className="h-7 text-xs border-border bg-muted hover:bg-foreground/10 text-foreground"
               >
                 {busy === "session-others" ? "Signing out…" : "Sign out others"}
               </Button>
             ) : undefined
           }
         >
-          <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+          <div className="rounded-lg border border-border bg-muted/60 divide-y divide-border overflow-hidden">
             {signIn.sessions.map((session) => {
               const device = describeDevice(session.userAgent);
               const Icon = device.mobile ? Smartphone : Monitor;
               return (
                 <div key={session.id} className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Icon className="size-4 shrink-0 text-zinc-400" />
+                    <Icon className="size-4 shrink-0 text-muted-foreground" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-white">{device.label}</span>
+                        <span className="text-xs font-medium text-foreground">{device.label}</span>
                         {session.current && (
-                          <span className="rounded-full bg-zinc-800 border border-zinc-700 px-1.5 py-0.2 text-[10px] text-zinc-300">
+                          <span className="rounded-full bg-muted border border-border px-1.5 py-0.2 text-[10px] text-foreground">
                             This device
                           </span>
                         )}
                       </div>
-                      <div className="text-[11px] text-zinc-500 truncate" suppressHydrationWarning>
+                      <div className="text-[11px] text-muted-foreground truncate" suppressHydrationWarning>
                         {[session.ipAddress, `Last active ${relativeTime(session.lastActiveAt)}`]
                           .filter(Boolean)
                           .join(" · ")}
@@ -922,7 +922,7 @@ export function AccountAuthenticationTab({
                       variant="ghost"
                       disabled={busy === `session-${session.id}`}
                       onClick={() => handleSignOutSession(session.id, session.token)}
-                      className="h-7 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+                      className="h-7 text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       {busy === `session-${session.id}` ? "Signing out…" : "Sign out"}
                     </Button>
@@ -944,7 +944,7 @@ export function AccountAuthenticationTab({
           helperText={
             <span className="flex items-center gap-1">
               Learn more about{" "}
-              <span className="text-zinc-300 underline underline-offset-4 cursor-pointer">
+              <span className="text-foreground underline underline-offset-4 cursor-pointer">
                 SAML Single Sign-On ↗
               </span>
             </span>

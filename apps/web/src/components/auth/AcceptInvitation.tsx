@@ -44,29 +44,29 @@ export function AcceptInvitation({
   }
 
   if (isPending)
-    return <p className="text-sm text-white/50">Checking invitation…</p>;
+    return <p className="text-sm text-muted-foreground">Checking invitation…</p>;
   if (!session) {
     const from = encodeURIComponent(
       `/accept-invitation?id=${encodeURIComponent(invitationId)}`,
     );
     return (
       <div className="space-y-4">
-        <h1 className="font-clash text-2xl font-semibold text-white">
+        <h1 className="font-clash text-2xl font-semibold text-foreground">
           Join {account ?? "your workspace"}
         </h1>
-        <p className="text-sm leading-6 text-white/50">
+        <p className="text-sm leading-6 text-muted-foreground">
           Sign in, or create an account, with the email address this invitation
           was sent to.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link
-            className="inline-flex h-11 items-center rounded-lg bg-[#A855F7] px-5 text-sm font-semibold text-white"
+            className="inline-flex h-11 items-center rounded-lg bg-[#A855F7] px-5 text-sm font-semibold text-foreground"
             href={`/login?from=${from}`}
           >
             Sign in
           </Link>
           <Link
-            className="inline-flex h-11 items-center rounded-lg border border-white/10 px-5 text-sm font-semibold text-white"
+            className="inline-flex h-11 items-center rounded-lg border border-border px-5 text-sm font-semibold text-foreground"
             href={`/signup?from=${from}`}
           >
             Create account
@@ -77,14 +77,14 @@ export function AcceptInvitation({
   }
   return (
     <div className="space-y-5">
-      <h1 className="font-clash text-2xl font-semibold text-white">
+      <h1 className="font-clash text-2xl font-semibold text-foreground">
         Join {account ?? "this workspace"}
       </h1>
-      <p className="text-sm leading-6 text-white/50">
+      <p className="text-sm leading-6 text-muted-foreground">
         Accept this invitation as {session.user.email}.
       </p>
       <button
-        className="h-11 rounded-lg bg-[#A855F7] px-5 text-sm font-semibold text-white disabled:opacity-60"
+        className="h-11 rounded-lg bg-[#A855F7] px-5 text-sm font-semibold text-foreground disabled:opacity-60"
         disabled={!invitationId || loading}
         onClick={accept}
         type="button"

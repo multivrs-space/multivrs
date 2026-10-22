@@ -19,10 +19,10 @@ export function DashboardAuthFallback({ className }: { className?: string }) {
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[268px] flex-col border-r border-[var(--hairline)] bg-[var(--ink)] lg:flex">
         <SidebarHeaderIdentitySkeleton />
         <div className="px-3 pb-1 pt-3">
-          <div className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-white/[0.015] px-2.5 text-muted-foreground">
+          <div className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-foreground/[0.03] px-2.5 text-muted-foreground">
             <Search className="size-3.5" />
             <span className="flex-1 text-xs">Search…</span>
-            <kbd className="rounded-md border border-[var(--hairline)] bg-white/[0.02] px-1.5 py-0.5 font-geist-mono text-[10px]">
+            <kbd className="rounded-md border border-[var(--hairline)] bg-foreground/[0.04] px-1.5 py-0.5 font-geist-mono text-[10px]">
               ⌘K
             </kbd>
           </div>
@@ -41,7 +41,7 @@ export function DashboardAuthFallback({ className }: { className?: string }) {
                       {item.name}
                     </span>
                     {item.badge ? (
-                      <span className="ml-auto rounded-md border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-geist-mono text-[9px] font-medium uppercase tracking-widest text-accent">
+                      <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-geist-mono text-[9px] font-medium uppercase tracking-widest text-primary">
                         {item.badge}
                       </span>
                     ) : null}
@@ -76,9 +76,9 @@ export function DashboardAuthFallback({ className }: { className?: string }) {
 function SidebarHeaderIdentitySkeleton() {
   return (
     <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-[var(--hairline)] px-5">
-      <span className="size-8 animate-pulse rounded-md bg-white/[0.07]" />
+      <span className="size-8 animate-pulse rounded-md bg-foreground/[0.07]" />
       <span className="min-w-0 flex-1 space-y-2">
-        <span className="block h-3 w-24 animate-pulse rounded-sm bg-white/[0.08]" />
+        <span className="block h-3 w-24 animate-pulse rounded-sm bg-foreground/[0.08]" />
         <span className="block h-2 w-12 animate-pulse rounded-sm bg-white/[0.045]" />
       </span>
     </div>
@@ -89,7 +89,7 @@ function SidebarFooterIdentitySkeleton() {
   return (
     <div className="flex items-center gap-2 border-t border-[var(--hairline)] px-4 py-3">
       <span className="size-7 animate-pulse rounded-full bg-white/[0.07]" />
-      <span className="h-3 flex-1 animate-pulse rounded-sm bg-white/[0.07]" />
+      <span className="h-3 flex-1 animate-pulse rounded-sm bg-foreground/[0.07]" />
       <button
         type="button"
         disabled

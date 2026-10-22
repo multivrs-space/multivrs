@@ -15,8 +15,7 @@ const Beams = dynamic(() => import("@/components/Beams"), { ssr: false });
 export function DomainMarketplaceShell({ children }: { children: ReactNode }) {
   return (
     <main
-      id="dark-marketing-header"
-      className="relative min-h-screen overflow-hidden bg-black pt-16 text-white"
+      className="relative min-h-screen overflow-hidden bg-background pt-16 text-foreground"
     >
       <div className="pointer-events-none absolute inset-0 opacity-30">
         <Beams

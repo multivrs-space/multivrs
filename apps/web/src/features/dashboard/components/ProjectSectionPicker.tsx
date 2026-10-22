@@ -57,9 +57,9 @@ export function ProjectSectionPicker({
               <Link
                 key={project.slug}
                 href={`/${username}/${project.slug}/${section}`}
-                className="group flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/[0.07] focus-visible:bg-white/[0.07] focus-visible:outline-hidden"
+                className="group flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-foreground/[0.06] focus-visible:bg-foreground/[0.06] focus-visible:outline-hidden"
               >
-                <span className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black ring-1 ring-white/5">
+                <span className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background ring-1 ring-border">
                   <ProjectFavicon
                     className="size-5 rounded-md"
                     name={project.name}
@@ -106,7 +106,7 @@ export function ProjectSectionPickerSkeleton({
             className="flex h-10 animate-pulse items-center gap-3 rounded-lg px-3"
             key={key}
           >
-            <span className="size-5 rounded-md bg-white/[0.07]" />
+            <span className="size-5 rounded-md bg-foreground/[0.07]" />
             <span className="h-3 w-2/5 rounded-sm bg-white/[0.055]" />
           </div>
         ))}

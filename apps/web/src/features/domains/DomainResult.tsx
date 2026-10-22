@@ -42,13 +42,13 @@ export function DomainResult({
     <article
       className={
         featured
-          ? "min-h-32 border border-white/12 bg-white/[0.025] p-5"
-          : "flex min-h-20 items-center border-b border-r border-white/8 px-4"
+          ? "min-h-32 border border-border bg-foreground/[0.04] p-5"
+          : "flex min-h-20 items-center border-b border-r border-border px-4"
       }
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-white">
+          <p className="truncate text-sm font-medium text-foreground">
             {result.domain}
           </p>
           {result.premium ? (
@@ -60,22 +60,22 @@ export function DomainResult({
         {result.available && price ? (
           <div className="mt-2">
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-sm font-medium text-white">{price}</span>
-              <span className="text-xs text-white/45">first year</span>
+              <span className="text-sm font-medium text-foreground">{price}</span>
+              <span className="text-xs text-muted-foreground">first year</span>
               {discounted && renewalPrice ? (
-                <span className="text-xs text-white/30 line-through">
+                <span className="text-xs text-muted-foreground line-through">
                   {renewalPrice}
                 </span>
               ) : null}
             </div>
             {renewalPrice ? (
-              <p className="mt-1 text-[11px] text-white/35">
+              <p className="mt-1 text-[11px] text-muted-foreground">
                 Renews at {renewalPrice}/year
               </p>
             ) : null}
           </div>
         ) : (
-          <p className="mt-2 text-xs text-white/35">Unavailable</p>
+          <p className="mt-2 text-xs text-muted-foreground">Unavailable</p>
         )}
       </div>
       {result.available ? (
@@ -89,7 +89,7 @@ export function DomainResult({
                   ? `Remove ${result.domain} from saved`
                   : `Save ${result.domain}`
               }
-              className="grid size-8 place-items-center text-white/40 hover:text-white"
+              className="grid size-8 place-items-center text-muted-foreground hover:text-foreground"
             >
               <Bookmark
                 className="size-4"
@@ -108,7 +108,7 @@ export function DomainResult({
             className={`group/cart grid size-8 place-items-center border transition-colors ${
               inCart
                 ? "border-emerald-400/35 bg-emerald-400/10 text-emerald-300 hover:border-red-300/35 hover:bg-red-300/10 hover:text-red-300"
-                : "border-white/12 text-white/65 hover:bg-white hover:text-black"
+                : "border-border text-foreground/65 hover:bg-foreground hover:text-background"
             }`}
           >
             {inCart ? (

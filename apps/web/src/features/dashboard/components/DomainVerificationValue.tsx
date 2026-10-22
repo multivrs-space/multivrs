@@ -15,7 +15,7 @@ export function DomainVerificationValue({
   copy = false,
 }: DomainVerificationValueProps) {
   return (
-    <div className="min-w-0 bg-black/25 p-3">
+    <div className="min-w-0 bg-muted/205 p-3">
       <p className="mb-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>

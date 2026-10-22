@@ -9,6 +9,10 @@ import {
 } from "@/components/marketing/pricing-plans";
 import { authClient } from "@/lib/auth-client";
 import type { StripePlan } from "@/lib/payments/pricing";
+import {
+  calculateProMaxPrice,
+  PRO_BASE_PRICE_USD,
+} from "@/lib/payments/pro-modular-catalog";
 
 export function PricingSection({
   hobbyPlan,
@@ -19,6 +23,7 @@ export function PricingSection({
 }) {
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const proMaxPrice = calculateProMaxPrice();
 
   function handleProAction() {
     if (!proPlan.configured) {
@@ -59,7 +64,7 @@ export function PricingSection({
         </div>
         <div className="grid grid-cols-1 divide-y divide-border border border-border bg-background shadow-2xl lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           <PricingCard
-            title={hobbyPlan.name}
+            title="Hobby"
             price={hobbyPlan.priceLabel}
             suffix={hobbyPlan.priceSuffix}
             description={hobbyPlan.description}
@@ -73,11 +78,12 @@ export function PricingSection({
             }
           />
           <PricingCard
-            title={proPlan.name}
+            title="Pro"
             eyebrow="Popular"
-            price={proPlan.priceLabel}
-            suffix={proPlan.priceSuffix}
-            description={proPlan.description}
+            price={`$${PRO_BASE_PRICE_USD} – $${proMaxPrice}`}
+            suffix={proPlan.priceSuffix || "/mo."}
+            description={`Modular plan starting at $${PRO_BASE_PRICE_USD}/mo platform base, up to $${proMaxPrice}/mo with all add-on modules.`}
+            featureIntro="All Hobby features, plus:"
             features={proPlan.features.map((text) => ({
               text,
               icon: iconForPricingFeature(text),

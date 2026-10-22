@@ -15,8 +15,8 @@ export function DomainDnsRecordsSection(props: DomainDnsRecordsSectionProps) {
     <section className="mb-10">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-white">DNS</h2>
-          <p className="mt-1 text-sm text-white/45">
+          <h2 className="text-xl font-semibold text-foreground">DNS</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             These records come directly from the configured authoritative zone.
           </p>
         </div>

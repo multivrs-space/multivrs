@@ -14,10 +14,10 @@ export function DomainConnectionSection({
     <section className="mb-10">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-foreground">
             Connected project
           </h2>
-          <p className="mt-1 text-sm text-white/45">
+          <p className="mt-1 text-sm text-muted-foreground">
             Choose where requests for this domain should be served.
           </p>
         </div>
@@ -29,24 +29,24 @@ export function DomainConnectionSection({
           />
         )}
       </div>
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+      <div className="rounded-xl border border-border bg-foreground/[0.04] p-5">
         {domain.projectId ? (
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Globe2 className="size-4 text-white/45" />
+              <Globe2 className="size-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">{domain.hostname}</p>
-                <p className="mt-1 text-xs text-white/40">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Routes to {domain.projectName}
                 </p>
               </div>
             </div>
-            <span className="font-mono text-xs text-white/45">
+            <span className="font-mono text-xs text-muted-foreground">
               {domain.projectSlug}
             </span>
           </div>
         ) : (
-          <p className="text-sm text-white/45">
+          <p className="text-sm text-muted-foreground">
             This domain is not connected to a project yet. DNS can still be
             managed independently.
           </p>

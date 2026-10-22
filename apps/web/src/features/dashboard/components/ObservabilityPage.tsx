@@ -47,7 +47,7 @@ export function ObservabilityPage({
     <main className="w-full space-y-3 px-4 py-4 lg:px-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
-          className="flex h-9 min-w-36 items-center justify-between gap-4 rounded-md border border-[var(--hairline)] bg-white/[0.015] px-3 text-xs text-foreground transition-colors hover:bg-white/[0.035]"
+          className="flex h-9 min-w-36 items-center justify-between gap-4 rounded-md border border-[var(--hairline)] bg-foreground/[0.03] px-3 text-xs text-foreground transition-colors hover:bg-white/[0.035]"
           type="button"
         >
           Production
@@ -96,7 +96,7 @@ export function ObservabilityPage({
       <section className="grid gap-3 xl:grid-cols-2">
         {CHARTS.map((chart) => (
           <article
-            className="min-h-60 rounded-xl border border-[var(--hairline)] bg-white/[0.012] p-4"
+            className="min-h-60 rounded-xl border border-[var(--hairline)] bg-foreground/[0.02] p-4"
             key={chart.key}
           >
             <div className="flex items-start justify-between gap-4">

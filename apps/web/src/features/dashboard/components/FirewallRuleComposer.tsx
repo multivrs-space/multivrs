@@ -52,7 +52,7 @@ export function FirewallRuleComposer({ projectId }: { projectId: string }) {
   return (
     <form
       action={submit}
-      className="grid gap-3 border-y border-[var(--hairline)] bg-white/[0.015] p-4 lg:grid-cols-[1.2fr_.8fr_.8fr_1.2fr_auto]"
+      className="grid gap-3 border-y border-[var(--hairline)] bg-foreground/[0.03] p-4 lg:grid-cols-[1.2fr_.8fr_.8fr_1.2fr_auto]"
     >
       <Input name="name" required minLength={2} placeholder="Rule name" />
       <Select value={conditionType} onValueChange={setConditionType}>

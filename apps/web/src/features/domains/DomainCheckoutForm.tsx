@@ -74,20 +74,20 @@ export function DomainCheckoutForm({
       onSubmit={submit}
       className="mt-10 grid items-start gap-5 lg:grid-cols-[1.25fr_0.9fr]"
     >
-      <section className="border border-white/12 bg-[#080808] p-5 sm:p-7">
-        <div className="mb-7 border-b border-white/10 pb-6">
+      <section className="border border-border bg-card p-5 sm:p-7">
+        <div className="mb-7 border-b border-border pb-6">
           <h2 className="text-lg font-semibold">Billing information</h2>
-          <p className="mt-2 text-sm text-white/45">
+          <p className="mt-2 text-sm text-muted-foreground">
             Used for payment verification and domain registration.
           </p>
         </div>
         <DomainBillingFields value={billing} onChange={setBilling} />
-        <div className="my-7 border-t border-white/10" />
+        <div className="my-7 border-t border-border" />
         <div className="mb-4 flex items-center gap-2">
-          <CreditCard className="size-4 text-white/45" />
+          <CreditCard className="size-4 text-muted-foreground" />
           <h2 className="text-lg font-semibold">Payment method</h2>
         </div>
-        <div className="rounded-md border border-white/12 bg-[#0b0b0b] p-3">
+        <div className="rounded-md border border-border bg-muted p-3">
           <PaymentElement
             options={{
               layout: { type: "tabs", defaultCollapsed: false },
@@ -96,7 +96,7 @@ export function DomainCheckoutForm({
           />
         </div>
         {checkoutState.type === "loading" ? (
-          <p className="mt-4 flex items-center gap-2 text-sm text-white/40">
+          <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <LoaderCircle className="size-4 animate-spin" />
             Preparing secure payment…
           </p>

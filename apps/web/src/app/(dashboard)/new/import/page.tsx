@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function NewProjectImportPage() {
   return (
-    <div className="min-h-screen w-full bg-[#030303] text-white">
+    <div className="min-h-screen w-full bg-background text-foreground">
       <NewProjectHeader />
       <main className="w-full">
         <Suspense

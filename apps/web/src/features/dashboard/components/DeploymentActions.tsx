@@ -68,7 +68,7 @@ export function DeploymentActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[180px] border-white/10 bg-background/95"
+        className="w-[180px] border-border bg-background/95"
       >
         <DropdownMenuItem asChild>
           <Link href={deployment.detailsUrl}>View logs</Link>

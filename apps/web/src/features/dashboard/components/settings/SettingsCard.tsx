@@ -11,10 +11,10 @@ export function SettingsCard({ children, className, danger }: SettingsCardProps)
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border bg-black dark:bg-[#000000] transition-colors",
+        "overflow-hidden rounded-xl border bg-card dark:bg-[#000000] transition-colors",
         danger
           ? "border-red-500/30 bg-red-950/5 hover:border-red-500/50"
-          : "border-zinc-800 dark:border-[#262626] hover:border-zinc-700 dark:hover:border-[#333333]",
+          : "border-border dark:border-[#262626] hover:border-zinc-400/50 dark:hover:border-[#333333]",
         className,
       )}
     >
@@ -48,14 +48,14 @@ export function SettingsCardBody({
           <div className="min-w-0 flex-1">
             {title && (
               <div className="flex items-center gap-2.5">
-                <h2 className="text-[17px] font-semibold text-white tracking-tight">
+                <h2 className="text-[17px] font-semibold text-foreground tracking-tight">
                   {title}
                 </h2>
                 {badge}
               </div>
             )}
             {description && (
-              <p className="mt-1 text-sm text-zinc-400 leading-normal whitespace-pre-line">
+              <p className="mt-1 text-sm text-muted-foreground leading-normal whitespace-pre-line">
                 {description}
               </p>
             )}
@@ -87,11 +87,11 @@ export function SettingsCardFooter({
         "flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t px-6 py-3.5 text-xs",
         danger
           ? "border-red-500/20 bg-red-950/10 text-red-400"
-          : "border-zinc-800 dark:border-[#262626] bg-zinc-950/40 dark:bg-[#080808] text-zinc-400",
+          : "border-border dark:border-[#262626] bg-muted/40 dark:bg-[#080808] text-muted-foreground",
         className,
       )}
     >
-      <div className="min-w-0 text-xs text-zinc-400">{helperText}</div>
+      <div className="min-w-0 text-xs text-muted-foreground">{helperText}</div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
   );

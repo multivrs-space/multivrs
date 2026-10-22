@@ -25,15 +25,21 @@ export interface SectionMeta {
   description: string;
 }
 
+/** `email` is the domain-detail folder; the mailbox nav slug is `emails`. */
+export function canonicalSectionSlug(slug: string): string {
+  return slug === "email" ? "emails" : slug;
+}
+
 /** Resolve metadata for a section slug, or `null` if it isn't a known route. */
 export function getSectionMeta(slug: string): SectionMeta | null {
+  const canonical = canonicalSectionSlug(slug);
   const item = DASHBOARD_NAV_ITEMS.find(
-    (i) => i.slug === slug && i.slug !== "",
+    (i) => i.slug === canonical && i.slug !== "",
   );
   if (!item) return null;
   return {
-    slug,
+    slug: canonical,
     title: item.name,
-    description: SECTION_DESCRIPTIONS[slug] ?? "",
+    description: SECTION_DESCRIPTIONS[canonical] ?? "",
   };
 }

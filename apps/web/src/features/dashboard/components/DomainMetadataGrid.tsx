@@ -25,7 +25,7 @@ export function DomainMetadataGrid({
     domain.verified &&
     domain.certStatus === "active";
   return (
-    <section className="mb-10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
+    <section className="mb-10 overflow-hidden rounded-xl border border-border bg-foreground/[0.04]">
       <div className="grid sm:grid-cols-2 xl:grid-cols-7">
         <MetadataItem label="Expiration" value={expiresAt} icon={RefreshCw} />
         <MetadataItem
@@ -36,10 +36,10 @@ export function DomainMetadataGrid({
           label="Registrar"
           value={domain.managed ? "Multivrs" : "Third party"}
         />
-        <div className="border-b border-white/8 p-4 sm:border-r xl:border-b-0">
-          <p className="text-xs text-white/40">Auto renewal</p>
+        <div className="border-b border-border p-4 sm:border-r xl:border-b-0">
+          <p className="text-xs text-muted-foreground">Auto renewal</p>
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-sm font-medium text-white">
+            <span className="text-sm font-medium text-foreground">
               {autoRenew ? "On" : "Off"}
             </span>
             <button
@@ -49,7 +49,7 @@ export function DomainMetadataGrid({
               aria-label={`Turn auto renewal ${autoRenew ? "off" : "on"} for ${domain.hostname}`}
               disabled={!domain.managed || renewPending}
               onClick={onToggleRenew}
-              className={`relative h-5 w-9 rounded-full transition-colors ${autoRenew ? "bg-purple-600" : "bg-white/20"} disabled:opacity-40`}
+              className={`relative h-5 w-9 rounded-full transition-colors ${autoRenew ? "bg-purple-600" : "bg-foreground/20"} disabled:opacity-40`}
             >
               <span
                 className={`absolute top-0.5 size-4 rounded-full bg-white transition-[left] ${autoRenew ? "left-[18px]" : "left-0.5"}`}
@@ -91,11 +91,11 @@ function MetadataItem({
 }) {
   return (
     <div
-      className={`border-b border-white/8 p-4 sm:border-r xl:border-b-0 ${last ? "sm:border-r-0" : ""}`}
+      className={`border-b border-border p-4 sm:border-r xl:border-b-0 ${last ? "sm:border-r-0" : ""}`}
     >
-      <p className="text-xs text-white/40">{label}</p>
-      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-white">
-        {Icon ? <Icon className="size-3.5 text-white/40" /> : null}
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-foreground">
+        {Icon ? <Icon className="size-3.5 text-muted-foreground" /> : null}
         {value}
       </p>
     </div>

@@ -39,7 +39,7 @@ export function AnalyticsMetrics({ data }: { data: PlatformAnalytics }) {
       {metrics.map((metric) => (
         <article
           key={metric.label}
-          className="group px-5 py-6 transition-colors hover:bg-white/[0.02]"
+          className="group px-5 py-6 transition-colors hover:bg-foreground/[0.04]"
         >
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
