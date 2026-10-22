@@ -5,11 +5,16 @@ import { createSubscriptionCheckout } from "@/lib/services/subscription-checkout
 export async function POST(request: Request) {
   try {
     const userId = await requireUserId();
-    let body: { organizationId?: string; returnSlug?: string } = {};
+    let body: {
+      organizationId?: string;
+      returnSlug?: string;
+      addOns?: ("developer_seat" | "mail_volume" | "observability_plus")[];
+    } = {};
     try {
       body = (await request.json()) as {
         organizationId?: string;
         returnSlug?: string;
+        addOns?: ("developer_seat" | "mail_volume" | "observability_plus")[];
       };
     } catch {
       // Body is optional
@@ -18,6 +23,7 @@ export async function POST(request: Request) {
       await createSubscriptionCheckout(userId, {
         organizationId: body.organizationId,
         returnSlug: body.returnSlug,
+        addOns: body.addOns,
       }),
       201,
     );

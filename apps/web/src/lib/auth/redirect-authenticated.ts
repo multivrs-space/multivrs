@@ -1,7 +1,6 @@
-import "server-only";
-
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
+import { findAccountTeam } from "@/lib/services/account-team.service";
 
 /**
  * Keeps authenticated users out of sign-in and recovery screens while still
@@ -20,5 +19,7 @@ export async function redirectAuthenticatedUser({
     redirect(`/verify-email?email=${encodeURIComponent(session.user.email)}`);
   }
 
-  redirect(session.user.username ? `/${session.user.username}` : "/home");
+  const team = await findAccountTeam(session.user.id);
+  const target = team?.slug ?? session.user.username;
+  redirect(target ? `/${target}` : "/home");
 }

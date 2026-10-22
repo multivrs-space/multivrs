@@ -41,6 +41,7 @@ const publicPrefixes = [
   "/customers",
   "/templates",
   "/build",
+  "/studio",
 ];
 
 export default async function proxy(req: NextRequest) {

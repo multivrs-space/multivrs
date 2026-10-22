@@ -48,19 +48,19 @@ export function SidebarNav({
                   )}
                   strokeWidth={1.75}
                 />
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="truncate tracking-[-0.01em]">
-                    {item.name}
-                  </span>
+                <span className="truncate tracking-[-0.01em]">
+                  {item.name}
+                </span>
+                <div className="ml-auto flex shrink-0 items-center gap-1.5">
                   {item.badge && (
-                    <span className="shrink-0 rounded-lg border border-accent/20 bg-accent/10 px-1.5 py-px text-[9.5px] font-medium text-accent">
+                    <span className="rounded-lg border border-accent/20 bg-accent/10 px-1.5 py-px text-[9.5px] font-medium text-accent">
                       {item.badge}
                     </span>
                   )}
+                  {(item.slug === "emails" || item.slug === "observability") && (
+                    <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground/80" />
+                  )}
                 </div>
-                {(item.slug === "emails" || item.slug === "observability") && (
-                  <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground/80" />
-                )}
               </Link>
             </li>
           );

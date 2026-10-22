@@ -85,9 +85,13 @@ async function getStripePlan(
     | "STRIPE_PRO_MONTHLY_LOOKUP_KEY",
   priceIdName: "STRIPE_HOBBY_MONTHLY_PRICE_ID" | "STRIPE_PRO_MONTHLY_PRICE_ID",
 ): Promise<StripePlan> {
+  const defaultLookupKey =
+    lookupKeyName === "STRIPE_HOBBY_MONTHLY_LOOKUP_KEY"
+      ? "multivrs_hobby_v2"
+      : "multivrs_pro_base_v2";
   const config = priceConfigSchema.safeParse({
     priceId: process.env[priceIdName] || undefined,
-    lookupKey: process.env[lookupKeyName] || undefined,
+    lookupKey: process.env[lookupKeyName] || defaultLookupKey,
   });
   if (!config.success) return unavailablePlan(name);
 

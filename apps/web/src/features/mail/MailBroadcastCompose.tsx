@@ -162,7 +162,7 @@ export function MailBroadcastCompose({
                 >
                   {audiences.map((aud) => (
                     <option key={aud.id} value={aud.id}>
-                      {aud.name} {aud.hint ? `(${aud.hint})` : ""}
+                      {aud.name} {aud.detail ? `(${aud.detail})` : ""}
                     </option>
                   ))}
                 </select>

@@ -82,7 +82,7 @@ export function resolveSanityImageUrl(
       const dimensions = parts[2];
       const format = parts[3];
       const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "1vyq7p16";
-      const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "development";
+      const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
       return `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}-${dimensions}.${format}`;
     }
   }

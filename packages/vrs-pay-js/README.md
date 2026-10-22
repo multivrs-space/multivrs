@@ -5,13 +5,13 @@
 [![npm version](https://img.shields.io/npm/v/@vrs-pay/js.svg)](https://www.npmjs.com/package/@vrs-pay/js)
 [![license](https://img.shields.io/npm/l/@vrs-pay/js.svg)](https://github.com/vrs-pay/multivrs)
 
-`@vrs-pay/js` is the core JavaScript client for VRS Pay in the browser. It works seamlessly with **any frontend framework** (Vanilla JS, React, Vue, Svelte, Angular, Solid) or static websites to load pricing plans, trigger Stripe checkout sessions, query customer billing records, and verify feature entitlements.
+`@vrs-pay/js` is the core JavaScript client for VRS Pay in the browser. It works seamlessly with **any frontend framework** (**swift-rust**, React, Vue, Svelte, Angular, Solid, Vanilla JS) or static websites to load pricing plans, trigger Stripe checkout sessions, query customer billing records, and verify feature entitlements.
 
 ---
 
 ## Features
 
-- 🌐 **Framework-agnostic**: Zero framework dependencies. Use in Vanilla JS, Vue, Svelte, Angular, React, or Astro.
+- 🌐 **Framework-agnostic**: Zero framework dependencies. Native support for swift-rust, React, Vue, Svelte, Angular, Astro, or Vanilla JS.
 - 🔒 **Safe client-side access**: Operates strictly using your publishable key (`pk_test_...` or `pk_live_...`). Rejects secret keys to prevent accidental leaks.
 - 💳 **Direct Checkout**: Redirect users straight to Stripe-powered checkout sessions with custom return URLs.
 - 👤 **Customer Self-Service**: Fetch active subscriptions, view past invoices, cancel or resume subscriptions.
@@ -83,7 +83,7 @@ VRS Pay provides 3 public packages for different parts of your stack:
 
 | Package | Environment | Compatible Frameworks | Purpose & Auth |
 | :--- | :--- | :--- | :--- |
-| **`@vrs-pay/js`** *(This package)* | **Browser / Client** | **ANY frontend framework** (Vanilla JS, Vue, Svelte, Angular, Solid, plain HTML) | Lightweight browser client for pricing, checkout redirects, and portal sessions. Uses your **Publishable Key** (`pk_...`). |
+| **`@vrs-pay/js`** *(This package)* | **Browser / Client** | **ANY frontend framework** (**swift-rust**, React, Vue, Svelte, Angular, Solid, plain HTML) | Lightweight browser client for pricing, checkout redirects, and portal sessions. Uses your **Publishable Key** (`pk_...`). |
 | **`@vrs-pay/react`** | **Browser / Client** | **swift-rust**, React 18 & 19, Next.js, Remix, Vite, Astro | Drop-in UI components (`<PricingTable />`, `<PricingComparisonTable />`, `<CustomerPortal />`, `<Gate />`) and hooks. Uses your **Publishable Key** (`pk_...`). |
 | **`@vrs-pay/sdk`** | **Server / Backend** | **swift-rust (server)**, Next.js API/actions, Express, Hono, Bun, Node, Cloudflare Workers | Server SDK to create checkout sessions, issue customer tokens, and verify webhooks. Uses your **Secret Key** (`sk_...`). |
 

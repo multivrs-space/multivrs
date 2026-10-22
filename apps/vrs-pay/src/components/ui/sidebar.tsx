@@ -66,7 +66,7 @@ export function SidebarTrigger({ className, ...props }: React.ButtonHTMLAttribut
       className={cn("inline-flex cursor-pointer size-9 items-center justify-center rounded-lg border border-border hover:bg-muted", className)}
       {...props}
     >
-      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
+      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></svg>
     </button>
   );
 }

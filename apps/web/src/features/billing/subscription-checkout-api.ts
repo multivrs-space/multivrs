@@ -8,6 +8,7 @@ const apiErrorSchema = z.object({
 export async function startSubscriptionCheckout(options?: {
   organizationId?: string | null;
   returnSlug?: string | null;
+  addOns?: ("developer_seat" | "mail_volume" | "observability_plus")[];
 }): Promise<string> {
   const response = await fetch("/api/stripe/checkout/subscriptions", {
     method: "POST",

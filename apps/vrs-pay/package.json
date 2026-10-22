@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "swift-rust dev",
-    "build": "swift-rust build",
+    "build": "NODE_ENV=production swift-rust build && bun scripts/postbuild.mjs",
     "start": "swift-rust start",
     "lint": "biome check .",
     "test": "bun test",

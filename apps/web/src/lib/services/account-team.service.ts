@@ -7,6 +7,7 @@ import {
   teamSlugBase,
   teamSlugCandidates,
 } from "@/lib/services/account-team.helpers";
+import { accountPlan } from "@/lib/services/billing-entitlement.service";
 
 /**
  * Every account has one team. People on it can open the account's
@@ -162,6 +163,9 @@ export async function teamsJoined(userId: string) {
       organization: {
         select: {
           id: true,
+          name: true,
+          slug: true,
+          logo: true,
           accountOwner: {
             select: { name: true, username: true, image: true },
           },
@@ -170,36 +174,39 @@ export async function teamsJoined(userId: string) {
     },
     orderBy: { createdAt: "asc" },
   });
-  return memberships.flatMap(({ role, organization }) =>
-    organization.accountOwner?.username
-      ? [
-          {
-            organizationId: organization.id,
-            role,
-            name: organization.accountOwner.name,
-            username: organization.accountOwner.username,
-            image: organization.accountOwner.image,
-          },
-        ]
-      : [],
-  );
+  return memberships.flatMap(({ role, organization }) => {
+    const slug = organization.slug || organization.accountOwner?.username;
+    if (!slug) return [];
+    return [
+      {
+        organizationId: organization.id,
+        role,
+        name: organization.name || organization.accountOwner?.name || slug,
+        username: slug,
+        image: organization.logo || organization.accountOwner?.image || null,
+      },
+    ];
+  });
 }
 
 /** Dashboards you can open: your own account first, then teams you're on. */
 export async function dashboardWorkspaces(
   userId: string,
 ): Promise<DashboardWorkspace[]> {
-  const [user, joined] = await Promise.all([
+  const [user, team, joined] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, username: true, image: true },
     }),
+    findAccountTeam(userId),
     teamsJoined(userId),
   ]);
-  const own = user?.username
-    ? [{ username: user.username, name: user.name, image: user.image }]
-    : [];
-  return [
+  const own = team
+    ? [{ username: team.slug, name: team.name, image: team.logo ?? null }]
+    : user?.username
+      ? [{ username: user.username, name: user.name, image: user.image }]
+      : [];
+  const rawList = [
     ...own,
     ...joined.map(({ username, name, image, role }) => ({
       username,
@@ -208,14 +215,27 @@ export async function dashboardWorkspaces(
       role,
     })),
   ];
+  return Promise.all(
+    rawList.map(async (item) => {
+      const plan = await accountPlan(item.username).catch(() => undefined);
+      return { ...item, plan };
+    }),
+  );
 }
 
-/** The account a dashboard belongs to. */
-export function workspaceOwner(username: string) {
-  return prisma.user.findUnique({
+/** The account or team a dashboard belongs to. */
+export async function workspaceOwner(username: string) {
+  const user = await prisma.user.findUnique({
     where: { username },
     select: { name: true, image: true },
   });
+  if (user) return user;
+  const org = await prisma.organization.findUnique({
+    where: { slug: username },
+    select: { name: true, logo: true },
+  });
+  if (org) return { name: org.name, image: org.logo };
+  return null;
 }
 
 /** Your workspaces from before teams existed, and whether each could become your team. */

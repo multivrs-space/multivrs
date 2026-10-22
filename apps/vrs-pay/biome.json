@@ -9,10 +9,16 @@
     "includes": [
       "**",
       "!.swift-rust",
+      "!.vercel",
       "!node_modules",
       "!dist",
       "!.turbo"
     ]
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   },
   "formatter": {
     "enabled": true,

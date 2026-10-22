@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
+import { findAccountTeam } from "@/lib/services/account-team.service";
 
 /**
  * `/dashboard` — a redirect resolver, not a rendered page (mirrors the root
@@ -41,10 +42,11 @@ export default async function DashboardPage(props: {
     redirect(`/login?next=${encodeURIComponent(nextUrl)}`);
   }
 
-  const username = session.user.username;
+  const team = await findAccountTeam(session.user.id);
+  const targetSlug = team?.slug ?? session.user.username;
   redirect(
-    username
-      ? `/${username}${qs ? `?${qs}` : ""}`
+    targetSlug
+      ? `/${targetSlug}${qs ? `?${qs}` : ""}`
       : `/signup?step=username${qs ? `&${qs}` : ""}`,
   );
 }

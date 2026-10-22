@@ -161,4 +161,59 @@ mod tests {
         assert!(result.is_redirect);
         assert_eq!(result.redirect_location.as_deref(), Some("/new/docs"));
     }
+
+    #[test]
+    fn rewrites_with_backreferences() {
+        let routes: Vec<Route> = serde_json::from_str(
+            r#"[{"src":"/api/(.*)","dest":"/functions/$1"}]"#,
+        )
+        .unwrap();
+        let result = match_routes(&routes, "/api/users", Some("GET"));
+        assert!(result.matched);
+        assert!(!result.is_redirect);
+        assert_eq!(result.pathname, "/functions/users");
+    }
+
+    #[test]
+    fn redirects_on_3xx_and_stops() {
+        let routes: Vec<Route> = serde_json::from_str(
+            r#"[{"src":"/old","dest":"/new","status":308},{"src":"/new","dest":"/should-not-apply"}]"#,
+        )
+        .unwrap();
+        let result = match_routes(&routes, "/old", None);
+        assert!(result.is_redirect);
+        assert_eq!(result.redirect_location.as_deref(), Some("/new"));
+        assert_eq!(result.status, Some(308));
+    }
+
+    #[test]
+    fn headers_rules_with_continue_accumulate() {
+        let routes: Vec<Route> = serde_json::from_str(
+            r#"[{"src":"/(.*)","headers":{"x-frame-options":"DENY"},"continue":true},{"src":"/page","dest":"/page.html"}]"#,
+        )
+        .unwrap();
+        let result = match_routes(&routes, "/page", None);
+        assert_eq!(result.headers.get("x-frame-options").map(String::as_str), Some("DENY"));
+        assert_eq!(result.pathname, "/page.html");
+    }
+
+    #[test]
+    fn respects_methods_filter() {
+        let routes: Vec<Route> = serde_json::from_str(
+            r#"[{"src":"/(.*)","methods":["POST"],"status":405}]"#,
+        )
+        .unwrap();
+        let get_res = match_routes(&routes, "/", Some("GET"));
+        assert!(!get_res.matched);
+        let post_res = match_routes(&routes, "/", Some("POST"));
+        assert!(post_res.matched);
+        assert_eq!(post_res.status, Some(405));
+    }
+
+    #[test]
+    fn reports_no_match() {
+        let routes: Vec<Route> = serde_json::from_str(r#"[{"src":"/x"}]"#).unwrap();
+        let result = match_routes(&routes, "/y", None);
+        assert!(!result.matched);
+    }
 }

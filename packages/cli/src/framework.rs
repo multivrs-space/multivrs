@@ -104,11 +104,11 @@ pub(crate) fn resolve_output_dir(framework: Framework, root: &Path) -> Result<Pa
 
 pub(crate) fn detect_framework(root: &Path) -> Result<Framework> {
     let package_json = fs::read_to_string(root.join("package.json")).unwrap_or_default();
-    if package_json.contains("\"next\"") {
-        return Ok(Framework::Next);
-    }
     if package_json.contains("\"swift-rust\"") || root.join("swift-rust.config.ts").exists() {
         return Ok(Framework::SwiftRust);
+    }
+    if package_json.contains("\"next\"") {
+        return Ok(Framework::Next);
     }
     if package_json.contains("\"@remix-run/dev\"") || root.join("remix.config.ts").exists() {
         return Ok(Framework::Remix);
@@ -198,6 +198,20 @@ mod tests {
         fs::write(
             root.path().join("package.json"),
             r#"{"dependencies":{"swift-rust":"1.0.0","vite":"1.0.0"}}"#,
+        )
+        .expect("package file");
+        assert_eq!(
+            detect_framework(root.path()).expect("framework"),
+            Framework::SwiftRust
+        );
+    }
+
+    #[test]
+    fn detects_swift_rust_before_next() {
+        let root = tempdir().expect("temp directory");
+        fs::write(
+            root.path().join("package.json"),
+            r#"{"dependencies":{"swift-rust":"1.0.0","next":"15.0.0"}}"#,
         )
         .expect("package file");
         assert_eq!(

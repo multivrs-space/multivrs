@@ -50,28 +50,20 @@ export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
 
   return (
     <div className="text-[14px]">
-      <div className="flex items-start justify-between gap-3 px-3 py-2.5">
+      <Link
+        href="/account/settings"
+        onClick={onClose}
+        className="group mx-1 my-1 flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/10 dark:hover:bg-white/10"
+        aria-label="Account settings"
+      >
         <div className="min-w-0">
-          <p className="truncate font-medium text-foreground">{name}</p>
+          <p className="truncate font-medium text-foreground group-hover:text-foreground">{name}</p>
           <p className="truncate text-[12px] text-muted-foreground">{email}</p>
         </div>
-        <Link
-          href="/account/settings"
-          className="shrink-0 rounded-md p-1 text-muted-foreground/70 transition-colors hover:text-foreground"
-          aria-label="Account settings"
-        >
-          <Settings className="size-4" strokeWidth={1.75} />
-        </Link>
-      </div>
+        <Settings className="size-4 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" strokeWidth={1.75} />
+      </Link>
 
       <DropdownMenuSeparator />
-
-      <DropdownMenuItem className="rounded-lg" asChild>
-        <Link href="/account/settings">
-          <Settings className="text-muted-foreground" strokeWidth={1.75} />
-          Account Settings
-        </Link>
-      </DropdownMenuItem>
 
       <DropdownMenuItem className="rounded-lg">
         <SmilePlus className="text-muted-foreground" strokeWidth={1.75} />
@@ -100,16 +92,29 @@ export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
       {plan === "hobby" && (
         <div className="px-1.5 pt-1.5">
           <Button
-            className="w-full h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-all text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-500/20"
-            size="lg"
+            className="w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs"
+            size="sm"
             onClick={() => {
               onClose?.();
-              window.dispatchEvent(
-                new CustomEvent("open-upgrade-sheet", { detail: { step: 2 } }),
-              );
+              window.dispatchEvent(new CustomEvent("open-upgrade-sheet"));
             }}
           >
             Upgrade to Pro
+          </Button>
+        </div>
+      )}
+
+      {plan === "pro" && (
+        <div className="px-1.5 pt-1.5">
+          <Button
+            className="w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs"
+            size="sm"
+            asChild
+            onClick={onClose}
+          >
+            <Link href="/contact/sales">
+              Upgrade to Enterprise
+            </Link>
           </Button>
         </div>
       )}

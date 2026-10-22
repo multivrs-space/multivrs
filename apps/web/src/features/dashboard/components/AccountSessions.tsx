@@ -32,21 +32,22 @@ export function AccountSessions({ sessions }: { sessions: AccountSession[] }) {
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-(--hairline) bg-background/70"
+      className="overflow-hidden rounded-xl border border-zinc-800 dark:border-[#262626] bg-black dark:bg-[#000000]"
       aria-labelledby="sessions-title"
     >
-      <div className="flex items-center justify-between gap-4 border-b border-(--hairline) px-5 py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 dark:border-[#262626] p-6">
         <div>
-          <h2 id="sessions-title" className="text-sm font-semibold">
+          <h2 id="sessions-title" className="text-[17px] font-semibold text-white tracking-tight">
             Active sessions
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-zinc-400">
             Devices signed in to your account. Sign out any you don't recognise.
           </p>
         </div>
         {others.length > 0 && (
           <Button
-            variant="outline"
+            size="sm"
+            className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 shrink-0"
             disabled={busy !== null}
             onClick={() =>
               run(

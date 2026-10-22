@@ -25,7 +25,7 @@ export const NativeSelect = React.forwardRef<HTMLSelectElement, NativeSelectProp
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        aria-hidden
+        aria-hidden="true"
       >
         <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

@@ -30,15 +30,15 @@ export const ADD_ON_CATALOG: Record<
   { lookupKey: string; projectScoped: boolean }
 > = {
   developer_seat: {
-    lookupKey: "multivrs_developer_seat_monthly",
+    lookupKey: "multivrs_team_seats_v2",
     projectScoped: false,
   },
   mail_volume: {
-    lookupKey: "multivrs_mail_volume_monthly",
+    lookupKey: "multivrs_mail_volume_v2",
     projectScoped: false,
   },
   observability_plus: {
-    lookupKey: "multivrs_observability_plus_monthly",
+    lookupKey: "multivrs_observability_plus_v2",
     projectScoped: false,
   },
   speed_insights: {

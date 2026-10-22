@@ -11,10 +11,10 @@ export function SettingsCard({ children, className, danger }: SettingsCardProps)
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border bg-background/50 backdrop-blur-xs transition-colors",
+        "overflow-hidden rounded-xl border bg-black dark:bg-[#000000] transition-colors",
         danger
-          ? "border-destructive/30 hover:border-destructive/50"
-          : "border-(--hairline) hover:border-(--hairline-strong)",
+          ? "border-red-500/30 bg-red-950/5 hover:border-red-500/50"
+          : "border-zinc-800 dark:border-[#262626] hover:border-zinc-700 dark:hover:border-[#333333]",
         className,
       )}
     >
@@ -24,11 +24,12 @@ export function SettingsCard({ children, className, danger }: SettingsCardProps)
 }
 
 interface SettingsCardBodyProps {
-  title: string;
+  title?: string;
   description?: string;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   badge?: ReactNode;
+  aside?: ReactNode;
 }
 
 export function SettingsCardBody({
@@ -37,23 +38,32 @@ export function SettingsCardBody({
   children,
   className,
   badge,
+  aside,
 }: SettingsCardBodyProps) {
+  const hasHeader = Boolean(title || description || aside);
   return (
-    <div className={cn("p-5 sm:p-6", className)}>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-[14.5px] font-medium tracking-[-0.01em] text-foreground">
-            {title}
-          </h3>
-          {description && (
-            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-              {description}
-            </p>
-          )}
+    <div className={cn("p-6", className)}>
+      {hasHeader && (
+        <div className="flex items-start justify-between gap-6">
+          <div className="min-w-0 flex-1">
+            {title && (
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-[17px] font-semibold text-white tracking-tight">
+                  {title}
+                </h2>
+                {badge}
+              </div>
+            )}
+            {description && (
+              <p className="mt-1 text-sm text-zinc-400 leading-normal whitespace-pre-line">
+                {description}
+              </p>
+            )}
+          </div>
+          {aside && <div className="shrink-0">{aside}</div>}
         </div>
-        {badge}
-      </div>
-      <div className="mt-4 sm:mt-5">{children}</div>
+      )}
+      {children && <div className={cn(hasHeader && "mt-5")}>{children}</div>}
     </div>
   );
 }
@@ -74,14 +84,14 @@ export function SettingsCardFooter({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t px-5 sm:px-6 py-3 text-xs",
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t px-6 py-3.5 text-xs",
         danger
-          ? "border-destructive/20 bg-destructive/5 text-destructive/90"
-          : "border-(--hairline) bg-white/[0.02] dark:bg-white/[0.01] text-muted-foreground",
+          ? "border-red-500/20 bg-red-950/10 text-red-400"
+          : "border-zinc-800 dark:border-[#262626] bg-zinc-950/40 dark:bg-[#080808] text-zinc-400",
         className,
       )}
     >
-      <div className="min-w-0 text-xs text-muted-foreground">{helperText}</div>
+      <div className="min-w-0 text-xs text-zinc-400">{helperText}</div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
   );

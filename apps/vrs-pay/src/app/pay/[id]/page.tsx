@@ -1,3 +1,5 @@
+"use node";
+
 import { ArrowLeft, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import NotFound from "@/app/not-found";
 import { formatMoney } from "@/components/dashboard/format";

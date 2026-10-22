@@ -42,11 +42,7 @@ export const sanityFetch: typeof liveSanityFetch = async function sanityFetch(
   } catch (error) {
     if (
       error instanceof Error &&
-      (error.message.includes("cacheTag") ||
-        error.message.includes("blocking-route") ||
-        error.message.includes("connection()") ||
-        error.message.includes("Suspense") ||
-        error.message.includes("use cache"))
+      error.message.includes("cacheTag")
     ) {
       const resolvedParams = options.params ? await options.params : {};
       const result = await client.fetch(options.query, resolvedParams, {

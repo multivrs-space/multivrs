@@ -16,20 +16,27 @@ export const canAccessDashboardWorkspace = cache(
     userId: string,
     username: string,
   ): Promise<boolean> {
-    const [teamMember, project] = await Promise.all([
+    const [teamMember, orgMember, project] = await Promise.all([
       prisma.member.findFirst({
         where: { userId, organization: { accountOwner: { username } } },
         select: { id: true },
       }),
+      prisma.member.findFirst({
+        where: { userId, organization: { slug: username } },
+        select: { id: true },
+      }),
       prisma.project.findFirst({
         where: {
-          owner: { username },
+          OR: [
+            { owner: { username } },
+            { organization: { slug: username } },
+          ],
           organization: { members: { some: { userId } } },
         },
         select: { id: true },
       }),
     ]);
-    return Boolean(teamMember ?? project);
+    return Boolean(teamMember ?? orgMember ?? project);
   },
 );
 

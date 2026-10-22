@@ -1,12 +1,44 @@
 "use client";
 
+import { AlertCircle, Loader2, Lock, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ShieldCheck, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { formatMoney } from "@/components/dashboard/format";
+
+interface StripeElement {
+  mount(domElement: HTMLElement): void;
+  on(event: "ready", handler: () => void): void;
+  on(event: "change", handler: (event: StripeAddressChange) => void): void;
+}
+
+interface StripeElements {
+  create(
+    type: "payment" | "address",
+    options?: Record<string, unknown>,
+  ): StripeElement;
+  fetchUpdates(): Promise<unknown>;
+}
+
+interface StripeConfirmResult {
+  error?: {
+    message?: string;
+  };
+}
+
+interface StripeInstance {
+  elements(options: Record<string, unknown>): StripeElements;
+  confirmPayment(options: {
+    elements: StripeElements;
+    confirmParams: { return_url: string };
+  }): Promise<StripeConfirmResult>;
+  confirmSetup(options: {
+    elements: StripeElements;
+    confirmParams: { return_url: string };
+  }): Promise<StripeConfirmResult>;
+}
 
 declare global {
   interface Window {
-    Stripe?: (key: string, options?: Record<string, unknown>) => any;
+    Stripe?: (key: string, options?: Record<string, unknown>) => StripeInstance;
   }
 }
 
@@ -50,10 +82,14 @@ function loadStripeScript(): Promise<void> {
   if (window.Stripe) return Promise.resolve();
   if (!stripeScriptPromise) {
     stripeScriptPromise = new Promise<void>((resolve, reject) => {
-      const existing = document.querySelector('script[src="https://js.stripe.com/v3/"]');
+      const existing = document.querySelector(
+        'script[src="https://js.stripe.com/v3/"]',
+      );
       if (existing) {
         existing.addEventListener("load", () => resolve());
-        existing.addEventListener("error", () => reject(new Error("Failed to load Stripe.js")));
+        existing.addEventListener("error", () =>
+          reject(new Error("Failed to load Stripe.js")),
+        );
         return;
       }
       const script = document.createElement("script");
@@ -76,8 +112,8 @@ export function CheckoutForm({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
-  const stripeRef = useRef<any>(null);
-  const elementsRef = useRef<any>(null);
+  const stripeRef = useRef<StripeInstance | null>(null);
+  const elementsRef = useRef<StripeElements | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -119,7 +155,8 @@ export function CheckoutForm({
         // Address problems are the buyer's to fix; anything else is ours.
         setErrorMessage(
           res.status < 500
-            ? (body?.error?.message ?? "We couldn't work out tax for this address.")
+            ? (body?.error?.message ??
+                "We couldn't work out tax for this address.")
             : "We couldn't work out tax right now. Please try again in a moment.",
         );
         return;
@@ -127,7 +164,8 @@ export function CheckoutForm({
       await elementsRef.current?.fetchUpdates();
       if (run === quoteRun.current) setQuote(body as TaxQuote);
     } catch {
-      if (run === quoteRun.current) setErrorMessage("We couldn't work out tax. Try again.");
+      if (run === quoteRun.current)
+        setErrorMessage("We couldn't work out tax. Try again.");
     } finally {
       if (run === quoteRun.current) setQuoting(false);
     }
@@ -195,7 +233,9 @@ export function CheckoutForm({
         });
 
         if (taxed && addressRef.current) {
-          const addressElement = elements.create("address", { mode: "billing" });
+          const addressElement = elements.create("address", {
+            mode: "billing",
+          });
           addressElement.mount(addressRef.current);
           addressElement.on("change", (event: StripeAddressChange) => {
             if (!event.complete) {
@@ -207,14 +247,21 @@ export function CheckoutForm({
             if (key === lastAddress.current) return;
             lastAddress.current = key;
             if (quoteTimer.current) clearTimeout(quoteTimer.current);
-            quoteTimer.current = setTimeout(() => quoteTax(event.value.address), 350);
+            quoteTimer.current = setTimeout(
+              () => quoteTax(event.value.address),
+              350,
+            );
           });
         }
       })
       .catch((err) => {
         if (!unmounted) {
           setLoading(false);
-          setErrorMessage(err instanceof Error ? err.message : "Failed to load payment processor");
+          setErrorMessage(
+            err instanceof Error
+              ? err.message
+              : "Failed to load payment processor",
+          );
         }
       });
 
@@ -234,25 +281,34 @@ export function CheckoutForm({
     setErrorMessage(null);
 
     try {
-      const confirm = isSetup ? stripe.confirmSetup : stripe.confirmPayment;
-      const { error } = await confirm({
+      const confirmArgs = {
         elements,
         confirmParams: {
           return_url: session.success_url,
         },
-      });
+      };
+      const { error } = isSetup
+        ? await stripe.confirmSetup(confirmArgs)
+        : await stripe.confirmPayment(confirmArgs);
 
       if (error) {
-        setErrorMessage(error.message ?? "An unexpected payment error occurred.");
+        setErrorMessage(
+          error.message ?? "An unexpected payment error occurred.",
+        );
         setSubmitting(false);
       }
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Unable to process payment.");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Unable to process payment.",
+      );
       setSubmitting(false);
     }
   };
 
-  const formattedAmount = formatMoney(quote?.total ?? session.amount, session.currency);
+  const formattedAmount = formatMoney(
+    quote?.total ?? session.amount,
+    session.currency,
+  );
   // With tax on, the buyer can't pay until their address has priced it.
   const awaitingTax = taxed && (quoting || quote === null);
 
@@ -267,9 +323,9 @@ export function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
-        <label className="block text-xs font-medium uppercase tracking-wider text-mute">
+        <p className="block text-xs font-medium uppercase tracking-wider text-mute">
           Payment Method
-        </label>
+        </p>
         <div className="relative rounded-xl border border-line bg-white p-4 shadow-xs">
           {loading && (
             <div className="flex h-32 items-center justify-center">

@@ -4,7 +4,11 @@ import { AccountChrome } from "@/features/dashboard/components/AccountChrome";
 import { UpgradeSheet } from "@/features/dashboard/components/UpgradeSheet";
 import { getServerSession } from "@/lib/auth/session";
 import { getProPlan } from "@/lib/payments/pricing";
+import { accountPlan } from "@/lib/services/billing-entitlement.service";
+import { dashboardWorkspaces } from "@/lib/services/account-team.service";
 import { canAccessDashboardWorkspace } from "@/lib/services/dashboard-scope.service";
+
+export const instant = false;
 
 /**
  * Account-scoped chrome served around every page under /[username]. Renders the
@@ -23,12 +27,14 @@ export default async function AccountLayout({
     redirect("/login");
   }
 
-  const [{ username }, proPlan] = await Promise.all([
-    params,
+  const { username } = await params;
+  const [proPlan, currentPlan, workspaces] = await Promise.all([
     getProPlan().catch((err) => {
       console.error("[AccountLayout] getProPlan error:", err);
       return null;
     }),
+    accountPlan(username).catch(() => "hobby"),
+    dashboardWorkspaces(session.user.id).catch(() => []),
   ]);
 
   if (
@@ -55,6 +61,7 @@ export default async function AccountLayout({
       </div>
       <Suspense fallback={null}>
         <UpgradeSheet
+          currentPlan={currentPlan}
           user={{
             id: session.user.id,
             name: session.user.name,
@@ -63,6 +70,7 @@ export default async function AccountLayout({
             username: session.user.username ?? username,
           }}
           workspaceName={username}
+          workspaces={workspaces}
           features={proPlan?.features}
           featureDescriptions={proPlan?.metadata}
         />

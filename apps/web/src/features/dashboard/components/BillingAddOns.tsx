@@ -54,9 +54,7 @@ export function BillingAddOns({
         <button
           type="button"
           onClick={() =>
-            window.dispatchEvent(
-              new CustomEvent("open-upgrade-sheet", { detail: { step: 2 } }),
-            )
+            window.dispatchEvent(new CustomEvent("open-upgrade-sheet"))
           }
           className="text-foreground underline underline-offset-4 hover:text-white cursor-pointer transition-colors"
         >

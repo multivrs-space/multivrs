@@ -2,13 +2,18 @@ import "server-only";
 import { ConflictError, NotFoundError } from "@multivrs/error-utils";
 import { getProPlan } from "@/lib/payments/pricing";
 import { getStripe } from "@/lib/payments/stripe-client";
+import { resolveCatalogPrice } from "@/lib/payments/stripe-product-catalog";
 import { prisma } from "@/lib/prisma";
 
 const ACTIVE_STATUSES = ["active", "trialing", "past_due", "unpaid"];
 
 export async function createSubscriptionCheckout(
   userId: string,
-  options?: { organizationId?: string | null; returnSlug?: string | null },
+  options?: {
+    organizationId?: string | null;
+    returnSlug?: string | null;
+    addOns?: ("developer_seat" | "mail_volume" | "observability_plus")[] | null;
+  },
 ): Promise<{ checkoutUrl: string }> {
   const organizationId = options?.organizationId || null;
   const returnSlug = options?.returnSlug || null;
@@ -45,11 +50,35 @@ export async function createSubscriptionCheckout(
     ...(organizationId ? { organizationId } : {}),
   };
   const targetSlug = returnSlug ?? user.username ?? "dashboard";
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    { price: proPlan.priceId, quantity: 1 },
+  ];
+
+  if (options?.addOns && options.addOns.length > 0) {
+    const validAddOns = [
+      "developer_seat",
+      "mail_volume",
+      "observability_plus",
+    ] as const;
+    for (const key of options.addOns) {
+      if (validAddOns.includes(key)) {
+        try {
+          const addonPrice = await resolveCatalogPrice(key);
+          if (addonPrice?.id) {
+            lineItems.push({ price: addonPrice.id, quantity: 1 });
+          }
+        } catch (error) {
+          console.warn(`[subscription-checkout] Failed to resolve price for ${key}:`, error);
+        }
+      }
+    }
+  }
+
   const session = await getStripe().checkout.sessions.create({
     mode: "subscription",
     client_reference_id: userId,
     customer_email: user.email,
-    line_items: [{ price: proPlan.priceId, quantity: 1 }],
+    line_items: lineItems,
     metadata,
     subscription_data: { metadata },
     allow_promotion_codes: true,

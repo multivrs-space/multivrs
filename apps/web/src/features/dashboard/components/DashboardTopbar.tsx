@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronRight, MailPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
@@ -16,6 +18,25 @@ interface DashboardTopbarProps {
   projects?: ProjectOption[];
 }
 
+function AccountTopbarTitle() {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+  const titles: Record<string, string> = {
+    overview: "Overview",
+    activity: "Activity",
+    invites: "Invites",
+    authentication: "Authentication",
+    "sign-in-with-multivrs": "Sign in with Multivrs",
+    "billing-information": "Billing Information",
+    "billing-items": "Billing Items",
+    invoices: "Invoices",
+    tokens: "Tokens",
+    sessions: "Sessions",
+  };
+  const title = (tab && titles[tab]) || "Settings";
+  return <span className="text-sm font-medium text-foreground">{title}</span>;
+}
+
 /**
  * Global header bar across the content area. Holds the "All Projects" scope
  * switcher and a breadcrumb to the active section.
@@ -24,7 +45,11 @@ export function DashboardTopbar({
   mobileNavigation,
   projects,
 }: DashboardTopbarProps) {
+  const pathname = usePathname();
   const { activeSlug } = useDashboardScope();
+  const isAccount = pathname.startsWith("/account");
+  const isTeamSettings = activeSlug === "settings";
+
   const sectionSlug = activeSlug === "email" ? "emails" : activeSlug;
   const section =
     DASHBOARD_NAV_ITEMS.find((i) => i.slug === sectionSlug)?.name ?? "Overview";
@@ -34,15 +59,36 @@ export function DashboardTopbar({
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full min-w-0 max-w-full items-center gap-2 sm:gap-2.5 border-b border-(--hairline) bg-(--ink)/80 px-3 sm:px-5 backdrop-blur-xl">
       {mobileNavigation}
-      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
-        {projects ? (
-          <ProjectScopeSwitcher projects={projects} />
-        ) : (
-          <ProjectScopeSwitcher />
-        )}
-        <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/40" />
-        <span className="truncate text-[13px] font-medium text-foreground">{section}</span>
-      </div>
+
+      {isAccount ? (
+        <div className="flex flex-1 items-center justify-center">
+          <Suspense fallback={<span className="text-sm font-medium text-foreground">Settings</span>}>
+            <AccountTopbarTitle />
+          </Suspense>
+        </div>
+      ) : isTeamSettings ? (
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+            {projects ? (
+              <ProjectScopeSwitcher projects={projects} />
+            ) : (
+              <ProjectScopeSwitcher />
+            )}
+          </div>
+          <span className="text-sm font-medium text-foreground">Team Settings</span>
+          <div className="w-20" aria-hidden="true" />
+        </div>
+      ) : (
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+          {projects ? (
+            <ProjectScopeSwitcher projects={projects} />
+          ) : (
+            <ProjectScopeSwitcher />
+          )}
+          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/40" />
+          <span className="truncate text-[13px] font-medium text-foreground">{section}</span>
+        </div>
+      )}
 
       {activeSlug === "emails" && mailStore ? (
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">

@@ -1,18 +1,28 @@
+"use client";
+
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { AccountActivity } from "@/features/dashboard/components/AccountActivity";
-import { AccountDeletion } from "@/features/dashboard/components/AccountDeletion";
-import { AccountPasskeys } from "@/features/dashboard/components/AccountPasskeys";
 import { AccountProfileForm } from "@/features/dashboard/components/AccountProfileForm";
-import { AccountSecurity } from "@/features/dashboard/components/AccountSecurity";
 import { AccountSessions } from "@/features/dashboard/components/AccountSessions";
-import { AccountSignInMethods } from "@/features/dashboard/components/AccountSignInMethods";
-import { ApiTokensPage } from "@/features/dashboard/components/ApiTokensPage";
-import { BillingManager } from "@/features/dashboard/components/BillingManager";
-import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { AccountAuthenticationTab } from "@/features/dashboard/components/account/AccountAuthenticationTab";
+import { AccountBillingInformationTab } from "@/features/dashboard/components/account/AccountBillingInformationTab";
+import { AccountBillingItemsTab } from "@/features/dashboard/components/account/AccountBillingItemsTab";
 import {
-  SettingsNav,
-  type SettingsSection,
-} from "@/features/dashboard/components/SettingsNav";
-import { TeamManager } from "@/features/dashboard/components/TeamManager";
+  AccountInvitesTab,
+  type AccountInviteItem,
+} from "@/features/dashboard/components/account/AccountInvitesTab";
+import {
+  AccountInvoicesTab,
+  type InvoiceItem,
+} from "@/features/dashboard/components/account/AccountInvoicesTab";
+import { AccountOverviewTab } from "@/features/dashboard/components/account/AccountOverviewTab";
+import { AccountSignInWithMultivrsTab } from "@/features/dashboard/components/account/AccountSignInWithMultivrsTab";
+import { ApiTokensPage } from "@/features/dashboard/components/ApiTokensPage";
+import {
+  SettingsCard,
+  SettingsCardBody,
+} from "@/features/dashboard/components/settings/SettingsCard";
 import type {
   AccountDeletionBlocker,
   AccountSignIn,
@@ -22,78 +32,139 @@ import type { AccountProfile } from "@/lib/schemas/account.schemas";
 import type { ApiTokenSummary } from "@/lib/services/api-token.service";
 import type { DashboardAuditEvent } from "@/lib/services/audit-event.service";
 
-const SECTIONS: SettingsSection[] = [
-  { id: "general", label: "General" },
-  { id: "authentication", label: "Authentication" },
-  { id: "sessions", label: "Sessions" },
-  { id: "tokens", label: "Tokens" },
-  { id: "activity", label: "Activity" },
-  { id: "delete-account", label: "Delete account" },
-];
-
 interface SettingsPageProps {
   billing?: BillingOverview;
   deletionBlockers: AccountDeletionBlocker[];
+  emailVerified?: boolean;
   events: DashboardAuditEvent[];
+  invites?: AccountInviteItem[];
+  invoices?: InvoiceItem[];
   profile: AccountProfile;
   signIn: AccountSignIn;
+  teams?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    logo?: string | null;
+    plan?: string;
+    status?: string;
+    role?: string;
+  }>;
   tokens: ApiTokenSummary[];
   twoFactorEnabled: boolean;
+  userId?: string;
 }
 
-export function SettingsPage({
+function SettingsTabContent({
   billing,
   deletionBlockers,
+  emailVerified,
   events,
+  invites,
+  invoices,
   profile,
   signIn,
+  teams,
   tokens,
   twoFactorEnabled,
+  userId,
 }: SettingsPageProps) {
-  return (
-    <div className="w-full px-5 py-6">
-      <DashboardPageHeader
-        title="Account Settings"
-        description="Your personal profile, sign-in methods, sessions, and security."
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "settings";
+
+  if (tab === "overview") {
+    return <AccountOverviewTab teams={teams} />;
+  }
+
+  if (tab === "invites") {
+    return <AccountInvitesTab invites={invites} />;
+  }
+
+  if (tab === "activity") {
+    return (
+      <AccountActivity
+        events={events}
+        userImage={profile.image}
+        userName={profile.name || profile.username}
       />
-      <div className="mt-6 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        <SettingsNav sections={SECTIONS} />
-        <div className="min-w-0 max-w-4xl space-y-10">
-          <Section id="general">
-            <AccountProfileForm initialProfile={profile} />
-          </Section>
-          <Section id="authentication">
-            <AccountSignInMethods signIn={signIn} />
-            <AccountPasskeys passkeys={signIn.passkeys} />
-            <AccountSecurity initiallyEnabled={twoFactorEnabled} />
-          </Section>
-          <Section id="sessions">
-            <AccountSessions sessions={signIn.sessions} />
-          </Section>
-          <Section id="tokens">
-            <ApiTokensPage initialTokens={tokens} embedded />
-          </Section>
-          <Section id="activity">
-            <AccountActivity events={events} />
-          </Section>
-          <Section id="delete-account">
-            <AccountDeletion
-              username={profile.username}
-              email={profile.email}
-              blockers={deletionBlockers}
-            />
-          </Section>
-        </div>
+    );
+  }
+
+  if (tab === "authentication") {
+    return (
+      <AccountAuthenticationTab
+        signIn={signIn}
+        email={profile.email}
+        twoFactorEnabled={twoFactorEnabled}
+        tokens={tokens}
+      />
+    );
+  }
+
+  if (tab === "sign-in-with-multivrs") {
+    return <AccountSignInWithMultivrsTab />;
+  }
+
+  if (tab === "tokens") {
+    return (
+      <div className="space-y-6">
+        <ApiTokensPage initialTokens={tokens} embedded />
       </div>
-    </div>
+    );
+  }
+
+  if (tab === "sessions") {
+    return (
+      <div className="space-y-6">
+        <AccountSessions sessions={signIn.sessions} />
+      </div>
+    );
+  }
+
+  if (tab === "billing-information") {
+    return (
+      <AccountBillingInformationTab
+        email={profile.email}
+        name={profile.name}
+        username={profile.username}
+      />
+    );
+  }
+
+  if (tab === "billing-items") {
+    return <AccountBillingItemsTab teams={teams} />;
+  }
+
+  if (tab === "invoices") {
+    return <AccountInvoicesTab invoices={invoices} />;
+  }
+
+  // Default: Settings (General)
+  return (
+    <AccountProfileForm
+      emailVerified={emailVerified}
+      initialProfile={profile}
+      teams={teams}
+      userId={userId}
+    />
   );
 }
 
-function Section({ id, children }: { id: string; children: React.ReactNode }) {
-  // scroll-mt clears the fixed topbar when jumping to a section.
+export function SettingsPage(props: SettingsPageProps) {
   return (
-    <div id={id} className="scroll-mt-20 space-y-5">
-      {children}
+    <div className="w-full max-w-4xl mx-auto px-6 py-8">
+      <Suspense
+        fallback={
+          <AccountProfileForm
+            emailVerified={props.emailVerified}
+            initialProfile={props.profile}
+            teams={props.teams}
+            userId={props.userId}
+          />
+        }
+      >
+        <SettingsTabContent {...props} />
+      </Suspense>
     </div>
   );
 }

@@ -1,0 +1,156 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { Check, Mail, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { TeamAvatar } from "@/components/TeamAvatar";
+import { authClient } from "@/lib/auth-client";
+
+export interface AccountInviteItem {
+  id: string;
+  organizationId: string;
+  organizationName: string;
+  organizationSlug: string;
+  organizationLogo?: string | null;
+  role?: string | null;
+  inviterName?: string | null;
+  inviterEmail?: string | null;
+  createdAt: string;
+}
+
+interface AccountInvitesTabProps {
+  invites?: AccountInviteItem[];
+}
+
+export function AccountInvitesTab({
+  invites = [],
+}: AccountInvitesTabProps) {
+  const [items, setItems] = useState<AccountInviteItem[]>(invites);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const handleAccept = async (invite: AccountInviteItem) => {
+    if (processingId) return;
+    setProcessingId(invite.id);
+    try {
+      const res = await authClient.organization.acceptInvitation({
+        invitationId: invite.id,
+      });
+      if (res?.error) {
+        throw new Error(res.error.message || "Failed to accept invite");
+      }
+      toast.success(`Joined ${invite.organizationName}`);
+      setItems((prev) => prev.filter((i) => i.id !== invite.id));
+      window.location.href = `/${invite.organizationSlug}`;
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to accept invite");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleReject = async (invite: AccountInviteItem) => {
+    if (processingId) return;
+    setProcessingId(invite.id);
+    try {
+      const res = await authClient.organization.rejectInvitation({
+        invitationId: invite.id,
+      });
+      if (res?.error) {
+        throw new Error(res.error.message || "Failed to decline invite");
+      }
+      toast.success("Invitation declined");
+      setItems((prev) => prev.filter((i) => i.id !== invite.id));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to decline invite");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header matching Vercel */}
+      <div>
+        <h1 className="text-xl font-semibold text-white tracking-tight">Invites</h1>
+        <p className="mt-1 text-xs text-zinc-400">
+          Manage your Multivrs team invites.
+        </p>
+      </div>
+
+      {/* Invites Container */}
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-6 min-h-[380px] flex flex-col justify-center">
+        {items.length > 0 ? (
+          <div className="divide-y divide-zinc-800/60">
+            {items.map((invite) => (
+              <div
+                key={invite.id}
+                className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
+              >
+                <div className="flex items-center gap-3">
+                  <TeamAvatar
+                    name={invite.organizationName}
+                    logo={invite.organizationLogo}
+                    size={32}
+                  />
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-white">
+                        {invite.organizationName}
+                      </span>
+                      {invite.role && (
+                        <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300 capitalize">
+                          {invite.role}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      Invited by {invite.inviterName || invite.inviterEmail || "team owner"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={processingId === invite.id}
+                    onClick={() => handleReject(invite)}
+                    className="h-8 border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white gap-1"
+                  >
+                    <X className="size-3.5" />
+                    Decline
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={processingId === invite.id}
+                    onClick={() => handleAccept(invite)}
+                    className="h-8 bg-white text-xs font-medium text-black hover:bg-zinc-200 gap-1"
+                  >
+                    <Check className="size-3.5" />
+                    Accept
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Exact empty state from the user's screenshot */
+          <div className="flex flex-col items-center justify-center text-center py-16">
+            <div className="flex size-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 mb-3.5">
+              <Mail className="size-5" />
+            </div>
+            <h3 className="text-sm font-medium text-zinc-200">
+              No Invites Yet
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              When a team invites you, it&apos;ll show up here.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

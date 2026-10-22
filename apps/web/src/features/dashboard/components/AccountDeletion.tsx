@@ -45,14 +45,14 @@ export function AccountDeletion({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-red-400/20 bg-background/70"
+      className="overflow-hidden rounded-xl border border-red-500/30 bg-black dark:bg-[#000000]"
       aria-labelledby="delete-account-title"
     >
-      <div className="border-b border-red-400/15 px-5 py-4">
-        <h2 id="delete-account-title" className="text-sm font-semibold">
+      <div className="border-b border-red-500/20 p-6">
+        <h2 id="delete-account-title" className="text-[17px] font-semibold text-red-400 tracking-tight">
           Delete account
         </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-zinc-400">
           Permanently delete your account, your team, and everything in it. This
           can't be undone.
         </p>
@@ -98,10 +98,12 @@ export function AccountDeletion({
                 autoComplete="off"
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
+                className="h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white"
               />
             </label>
             <Button
               variant="destructive"
+              className="h-8 rounded-md text-xs font-medium px-4"
               disabled={confirmation !== username || busy}
               onClick={requestDeletion}
             >

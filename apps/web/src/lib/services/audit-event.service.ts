@@ -29,6 +29,7 @@ export interface DashboardAuditEvent {
   createdAt: string;
   entityType: string;
   id: string;
+  metadata?: Prisma.JsonValue;
   projectName: string | null;
 }
 
@@ -38,7 +39,7 @@ export async function listAuditEvents(
   const rows = await prisma.auditEvent.findMany({
     include: { project: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
-    take: 20,
+    take: 100,
     where: { userId },
   });
   return rows.map((row) => ({
@@ -46,6 +47,7 @@ export async function listAuditEvents(
     createdAt: row.createdAt.toISOString(),
     entityType: row.entityType,
     id: row.id,
+    metadata: row.metadata,
     projectName: row.project?.name ?? null,
   }));
 }

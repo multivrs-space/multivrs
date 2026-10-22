@@ -86,19 +86,19 @@ export function AccountSecurity({
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-(--hairline) bg-background/70"
+      className="overflow-hidden rounded-xl border border-zinc-800 dark:border-[#262626] bg-black dark:bg-[#000000]"
       aria-labelledby="account-security-title"
     >
-      <div className="flex items-center justify-between border-b border-(--hairline) px-5 py-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 dark:border-[#262626] p-6">
         <div>
-          <h2 id="account-security-title" className="text-sm font-semibold">
+          <h2 id="account-security-title" className="text-[17px] font-semibold text-white tracking-tight">
             Multi-factor authentication
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-zinc-400">
             Require a time-based code after password or social sign-in.
           </p>
         </div>
-        <span className="font-geist-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        <span className="font-mono text-xs uppercase px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">
           {enabled ? "Enabled" : "Off"}
         </span>
       </div>

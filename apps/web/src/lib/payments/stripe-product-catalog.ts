@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/payments/stripe-client";
 
 export const BILLING_PRODUCT_KEYS = [
+  "hobby_plan",
   "pro_plan",
   "enterprise_plan",
   "developer_seat",
@@ -24,14 +25,19 @@ type ProductDefinition = {
 };
 
 export const BILLING_PRODUCTS: Record<BillingProductKey, ProductDefinition> = {
+  hobby_plan: product(
+    "plan",
+    "multivrs_hobby_v2",
+    "STRIPE_HOBBY_MONTHLY_PRICE_ID",
+  ),
   developer_seat: product(
     "addon",
-    "multivrs_developer_seat_monthly",
+    "multivrs_team_seats_v2",
     "STRIPE_DEVELOPER_SEAT_PRICE_ID",
   ),
   enterprise_plan: product(
     "plan",
-    "multivrs_enterprise_monthly",
+    "multivrs_enterprise_base_v2",
     "STRIPE_ENTERPRISE_MONTHLY_PRICE_ID",
   ),
   mail_email_units: product(
@@ -41,17 +47,17 @@ export const BILLING_PRODUCTS: Record<BillingProductKey, ProductDefinition> = {
   ),
   mail_volume: product(
     "addon",
-    "multivrs_mail_volume_monthly",
+    "multivrs_mail_volume_v2",
     "STRIPE_MAIL_VOLUME_PRICE_ID",
   ),
   observability_plus: product(
     "addon",
-    "multivrs_observability_plus_monthly",
+    "multivrs_observability_plus_v2",
     "STRIPE_OBSERVABILITY_PLUS_PRICE_ID",
   ),
   pro_plan: product(
     "plan",
-    "multivrs_pro_monthly",
+    "multivrs_pro_base_v2",
     "STRIPE_PRO_MONTHLY_PRICE_ID",
   ),
   speed_insights: product(
@@ -82,7 +88,10 @@ export async function resolveCatalogPrice(
     key === "pro_plan"
       ? process.env.STRIPE_PRO_MONTHLY_LOOKUP_KEY?.trim() ||
         definition.lookupKey
-      : definition.lookupKey;
+      : key === "hobby_plan"
+        ? process.env.STRIPE_HOBBY_MONTHLY_LOOKUP_KEY?.trim() ||
+          definition.lookupKey
+        : definition.lookupKey;
   const prices = await getStripe().prices.list({
     active: true,
     expand: ["data.product"],
@@ -106,7 +115,9 @@ export function identifyBillingProduct(price: Stripe.Price): {
     const configuredLookup =
       candidate === "pro_plan"
         ? process.env.STRIPE_PRO_MONTHLY_LOOKUP_KEY?.trim()
-        : undefined;
+        : candidate === "hobby_plan"
+          ? process.env.STRIPE_HOBBY_MONTHLY_LOOKUP_KEY?.trim()
+          : undefined;
     return (
       metadataKey === candidate ||
       price.id === configuredId ||

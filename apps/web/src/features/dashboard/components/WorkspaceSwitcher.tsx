@@ -1,24 +1,35 @@
 "use client";
 
-import { Check, ChevronsUpDown, Users } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { TeamAvatar } from "@/components/TeamAvatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ALL_PROJECTS_SCOPE,
-  buildNavHref,
-} from "@/features/dashboard/constants/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type {
   CurrentWorkspace,
   DashboardWorkspace,
 } from "@/features/dashboard/types/workspace.types";
+import { authClient } from "@/lib/auth-client";
 import type { PlanKey } from "@/lib/payments/billing.types";
 
 const PLAN_LABELS: Record<PlanKey, string> = {
@@ -33,118 +44,284 @@ interface WorkspaceSwitcherProps {
   workspaces: DashboardWorkspace[];
 }
 
-/** Sidebar header: the account being viewed, and a menu to open another. */
 export function WorkspaceSwitcher({
   workspace,
   workspaces,
 }: WorkspaceSwitcherProps) {
-  const own = workspaces.find((item) => !item.role);
-  const teams = workspaces.filter((item) => item.role);
+  const router = useRouter();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [teamName, setTeamName] = useState("");
+  const [teamSlug, setTeamSlug] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const currentPlanLabel = workspace.plan
+    ? PLAN_LABELS[workspace.plan] || workspace.plan
+    : null;
+
+  // Split own and other teams
+  const otherWorkspaces = useMemo(() => {
+    return workspaces.filter((w) => w.username !== workspace.username);
+  }, [workspaces, workspace.username]);
+
+  // Filtered other teams
+  const filteredOther = useMemo(() => {
+    if (!searchQuery.trim()) return otherWorkspaces;
+    const query = searchQuery.toLowerCase().trim();
+    return otherWorkspaces.filter(
+      (w) =>
+        (w.name && w.name.toLowerCase().includes(query)) ||
+        w.username.toLowerCase().includes(query),
+    );
+  }, [otherWorkspaces, searchQuery]);
+
+  const handleNameChange = (val: string) => {
+    setTeamName(val);
+    const slug = val
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    setTeamSlug(slug);
+  };
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!teamName.trim() || !teamSlug.trim() || creating) return;
+
+    setCreating(true);
+    try {
+      const res = await authClient.organization.create({
+        name: teamName.trim(),
+        slug: teamSlug.trim(),
+      });
+
+      if (res?.error) {
+        throw new Error(res.error.message || "Failed to create team");
+      }
+
+      toast.success("Team created successfully");
+      setCreateDialogOpen(false);
+      setTeamName("");
+      setTeamSlug("");
+      router.push(`/${teamSlug.trim()}`);
+      router.refresh();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to create team");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label="Switch workspace"
-        className="flex h-12 w-full items-center gap-2.5 rounded-lg px-2 text-left outline-none transition-colors hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-(--hairline-strong) data-[state=open]:bg-white/[0.04]"
-      >
-        <WorkspaceAvatar workspace={workspace} size={32} />
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
-            {workspace.username}
-          </span>
-          <span className="truncate font-geist-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">
-            {workspace.plan ? PLAN_LABELS[workspace.plan] : " "}
-          </span>
-        </span>
-        <ChevronsUpDown
-          className="size-3.5 shrink-0 text-muted-foreground"
-          strokeWidth={1.75}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        sideOffset={6}
-        className="w-62 rounded-2xl border border-(--hairline) bg-(--ink) p-1.5 font-hanken shadow-2xl shadow-black/40 dashboard-surface"
-      >
-        {own && (
-          <>
-            <MenuLabel>Your account</MenuLabel>
-            <WorkspaceItem
-              item={own}
-              detail="Personal"
-              active={own.username === workspace.username}
-            />
-          </>
-        )}
-        {teams.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <MenuLabel>Teams you're on</MenuLabel>
-            {teams.map((team) => (
-              <WorkspaceItem
-                key={team.username}
-                item={team}
-                detail={team.role}
-                active={team.username === workspace.username}
-              />
-            ))}
-          </>
-        )}
-        {own && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="rounded-lg" asChild>
-              <Link
-                href={`${buildNavHref(own.username, ALL_PROJECTS_SCOPE, "settings")}#team`}
-              >
-                <Users className="text-muted-foreground" strokeWidth={1.75} />
-                Manage your team
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function MenuLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <DropdownMenuLabel className="px-3 pt-2 pb-1 font-geist-mono text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-      {children}
-    </DropdownMenuLabel>
-  );
-}
-
-function WorkspaceItem({
-  item,
-  detail,
-  active,
-}: {
-  item: DashboardWorkspace;
-  detail?: string;
-  active: boolean;
-}) {
-  return (
-    <DropdownMenuItem className="rounded-lg" asChild>
-      <Link
-        href={`/${item.username}`}
-        aria-current={active ? "page" : undefined}
-      >
-        <WorkspaceAvatar workspace={item} size={24} />
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[13px] text-foreground">
-            {item.username}
-          </span>
-          {detail && (
-            <span className="truncate text-[11px] font-normal capitalize text-muted-foreground">
-              {detail}
+    <>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger
+          aria-label="Switch workspace"
+          className="flex h-10 w-full items-center justify-between gap-2 rounded-lg px-2 text-left outline-none transition-colors hover:bg-white/[0.04] focus-visible:ring-1 focus-visible:ring-zinc-700 data-[state=open]:bg-white/[0.04] cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <WorkspaceAvatar workspace={workspace} size={20} />
+            <span className="truncate text-xs font-medium text-zinc-200">
+              {workspace.name || workspace.username}
             </span>
+            {currentPlanLabel && (
+              <span className="shrink-0 rounded-full bg-zinc-800/80 px-2 py-0.5 text-[10px] font-medium text-zinc-400 capitalize border border-zinc-700/40">
+                {currentPlanLabel}
+              </span>
+            )}
+          </div>
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900/60 text-zinc-400">
+            <ChevronsUpDown className="size-3.5" strokeWidth={1.75} />
+          </div>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="start"
+          sideOffset={6}
+          className="w-72 rounded-xl border border-zinc-800 bg-black p-1.5 shadow-2xl shadow-black/80 font-sans"
+        >
+          {/* Search Header */}
+          <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-zinc-800/80 mb-1">
+            <input
+              type="text"
+              placeholder="Find Team..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-xs text-zinc-200 placeholder:text-zinc-500 outline-none pr-2"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setDropdownOpen(false);
+                }
+              }}
+            />
+            <kbd className="shrink-0 rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">
+              Esc
+            </kbd>
+          </div>
+
+          {/* Current Workspace Row */}
+          <div className="flex items-center justify-between rounded-lg bg-zinc-900/70 px-2.5 py-2 text-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <WorkspaceAvatar workspace={workspace} size={18} />
+              <span className="truncate font-medium text-zinc-100">
+                {workspace.name || workspace.username}
+              </span>
+              {currentPlanLabel && (
+                <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-300 capitalize border border-zinc-700/50">
+                  {currentPlanLabel}
+                </span>
+              )}
+            </div>
+            <Check className="size-4 text-zinc-100 stroke-[2.5] shrink-0" />
+          </div>
+
+          {/* Other Workspaces List if searching or available */}
+          {filteredOther.length > 0 && (
+            <div className="mt-1 space-y-0.5">
+              {filteredOther.map((item) => {
+                const planLabel = item.plan
+                  ? PLAN_LABELS[item.plan] || item.plan
+                  : null;
+                return (
+                  <DropdownMenuItem
+                    key={item.username}
+                    asChild
+                    className="flex items-center justify-between rounded-lg px-2.5 py-2 text-xs cursor-pointer hover:bg-zinc-900 transition-colors"
+                  >
+                    <Link
+                      href={`/${item.username}`}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center justify-between w-full"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <WorkspaceAvatar workspace={item} size={18} />
+                        <span className="truncate text-zinc-300">
+                          {item.name || item.username}
+                        </span>
+                        {planLabel && (
+                          <span className="shrink-0 rounded-full bg-zinc-800/80 px-2 py-0.5 text-[10px] font-medium text-zinc-400 capitalize border border-zinc-700/40">
+                            {planLabel}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })}
+            </div>
           )}
-        </span>
-        {active && <Check className="text-foreground" strokeWidth={2} />}
-      </Link>
-    </DropdownMenuItem>
+
+          {/* Empty State when no other workspaces exist and not searching */}
+          {otherWorkspaces.length === 0 && !searchQuery.trim() && (
+            <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+              <div className="flex size-9 items-center justify-center rounded-lg border border-zinc-800/90 bg-zinc-900/40 text-zinc-400 mb-2.5">
+                <Users className="size-4 text-zinc-400" />
+              </div>
+              <p className="text-xs text-zinc-400 max-w-[210px] leading-relaxed">
+                Teams you create and join appear here for quick context switching.
+              </p>
+            </div>
+          )}
+
+          {/* No search results */}
+          {searchQuery.trim() && filteredOther.length === 0 && (
+            <div className="py-4 text-center text-xs text-zinc-500">
+              No team found
+            </div>
+          )}
+
+          <DropdownMenuSeparator className="my-1 border-t border-zinc-800/80 bg-transparent" />
+
+          {/* Bottom Action: Create Team */}
+          <button
+            type="button"
+            onClick={() => {
+              setDropdownOpen(false);
+              setCreateDialogOpen(true);
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-zinc-900 cursor-pointer group"
+          >
+            <Plus className="size-4 text-zinc-400 group-hover:text-white shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-zinc-200 group-hover:text-white">
+                Create Team
+              </p>
+              <p className="text-[11px] text-zinc-500">
+                Collaborate with others in a shared workspace
+              </p>
+            </div>
+          </button>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Sleek Vercel-style Create Team Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="border-zinc-800 bg-zinc-950 text-white sm:max-w-md font-sans">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold tracking-tight text-white">
+              Create a Team
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-400">
+              Teams allow you to collaborate on projects, manage members, and scale.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateTeam} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="switcher-team-name" className="text-xs font-medium text-zinc-300">
+                Team Name
+              </Label>
+              <Input
+                id="switcher-team-name"
+                value={teamName}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="Acme Corp"
+                required
+                className="h-9 border-zinc-800 bg-zinc-900 text-xs text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-zinc-700"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="switcher-team-slug" className="text-xs font-medium text-zinc-300">
+                Team URL Slug
+              </Label>
+              <div className="flex items-center rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs text-zinc-500">
+                <span>multivrs.space/</span>
+                <input
+                  id="switcher-team-slug"
+                  value={teamSlug}
+                  onChange={(e) => setTeamSlug(e.target.value.toLowerCase())}
+                  placeholder="acme-corp"
+                  required
+                  className="h-9 flex-1 bg-transparent px-1 text-xs text-zinc-200 placeholder:text-zinc-600 outline-none"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCreateDialogOpen(false)}
+                className="h-8 border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={creating || !teamName.trim() || !teamSlug.trim()}
+                className="h-8 bg-white text-xs font-medium text-black hover:bg-zinc-200 cursor-pointer"
+              >
+                {creating ? "Creating..." : "Create Team"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -155,26 +332,11 @@ function WorkspaceAvatar({
   workspace: DashboardWorkspace;
   size: number;
 }) {
-  const style = { width: size, height: size };
-  if (workspace.image) {
-    return (
-      <Image
-        src={workspace.image}
-        alt=""
-        width={size}
-        height={size}
-        unoptimized
-        style={style}
-        className="shrink-0 rounded-md border border-(--hairline-strong) object-cover"
-      />
-    );
-  }
   return (
-    <span
-      style={style}
-      className="flex shrink-0 items-center justify-center rounded-md border border-(--hairline-strong) bg-white/[0.04] font-geist-mono text-[12px] font-medium text-foreground"
-    >
-      {(workspace.username[0] ?? "M").toUpperCase()}
-    </span>
+    <TeamAvatar
+      name={workspace.name || workspace.username}
+      image={workspace.image}
+      size={size}
+    />
   );
 }

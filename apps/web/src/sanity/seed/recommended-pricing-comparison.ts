@@ -114,21 +114,21 @@ const comparison = {
       _type: "pricingPlan" as const,
       key: "hobby" as const,
       name: "Hobby",
-      description: "For personal and early-stage projects",
+      description: "For personal projects and experiments — $0/month",
     },
     {
       _key: "pro",
       _type: "pricingPlan" as const,
       key: "pro" as const,
       name: "Pro",
-      description: `For production teams — $${RECOMMENDED_PLAN_ECONOMICS.pro.monthlyPriceUsd} per month`,
+      description: "Modular plan: $20/mo base, up to $50/mo with all add-ons",
     },
     {
       _key: "enterprise",
       _type: "pricingPlan" as const,
       key: "enterprise" as const,
       name: "Enterprise",
-      description: "Contracted limits and support",
+      description: "For scaling organizations — Custom contracted limits and support",
     },
   ],
   sections: [
@@ -161,15 +161,12 @@ const comparison = {
           ),
           feature(
             "https-certificates",
-            "HTTPS Certificates",
+            "HTTPS Certificates & Custom Domains",
             "available",
             values(
-              text("1 domain included"),
-              text(
-                "5 domains included",
-                `then ${dollars(rate.saasHostname.retailPriceUsd)} per hostname / month`,
-              ),
-              CUSTOM,
+              text("Unlimited", "Automatic SSL included"),
+              text("Unlimited", "Automatic SSL included"),
+              text("Unlimited", "Multi-tenant SaaS & BYO Custom SSL"),
             ),
             "Managed certificate issuance for connected custom hostnames.",
           ),
@@ -846,20 +843,24 @@ const comparison = {
           feature(
             "developer-seat",
             "Developer Seat",
-            "infrastructureRequired",
-            all(ROADMAP),
+            "available",
+            values(
+              text("1 seat included", "Personal"),
+              text("1 seat included", "+$5/mo per 2 team seats"),
+              text("Unlimited", "Custom roles"),
+            ),
           ),
           feature(
             "viewer-seat",
             "Viewer Seat",
-            "infrastructureRequired",
-            all(ROADMAP),
+            "available",
+            values(EXCLUDED, INCLUDED, INCLUDED),
           ),
           feature(
             "billing-seat",
             "Billing Seat",
-            "infrastructureRequired",
-            all(ROADMAP),
+            "available",
+            values(EXCLUDED, INCLUDED, INCLUDED),
           ),
         ]),
         group("toolbar", "Multivrs Toolbar", [
@@ -954,10 +955,10 @@ const comparison = {
             "Emails sent & received",
             "available",
             values(
-              text("100 / month", "hard limit"),
+              text("1,000 / month", "hard limit"),
               text(
-                "500 / month included",
-                `then ${dollars(rate.sesMessages.retailPriceUsd)} per 1K`,
+                "500 / month base",
+                `10,000 / mo with Mail module, then ${dollars(rate.sesMessages.retailPriceUsd)} per 1K`,
               ),
               CUSTOM,
             ),
@@ -969,10 +970,7 @@ const comparison = {
             "available",
             values(
               EXCLUDED,
-              text(
-                `${RECOMMENDED_PLAN_ECONOMICS.mailAddOn.includedMessages / 1_000}K emails for $${RECOMMENDED_PLAN_ECONOMICS.mailAddOn.monthlyPriceUsd} / month`,
-                "then $2 per 1K",
-              ),
+              text("+$15 / month", "10,000 emails / month included, then $2 per 1K"),
               CUSTOM,
             ),
           ),
@@ -1060,9 +1058,13 @@ const comparison = {
         group("observability-plus", "Observability Plus", [
           feature(
             "extended-retention",
-            "Extended Retention",
-            "preview",
-            values(EXCLUDED, PREVIEW, PREVIEW),
+            "Extended Log & Trace Retention",
+            "available",
+            values(
+              EXCLUDED,
+              text("30 days retention", "+$10/mo Observability Plus"),
+              text("90 days / 1 year", "Custom retention"),
+            ),
           ),
           feature(
             "advanced-metrics",

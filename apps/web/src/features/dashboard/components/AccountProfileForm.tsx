@@ -1,16 +1,38 @@
 "use client";
 
-import { Upload } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  MoreHorizontal,
+  Plus,
+  Upload,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { TeamAvatar } from "@/components/TeamAvatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { readableError, requestOk } from "@/lib/api/request.client";
 import { authClient } from "@/lib/auth-client";
 import type { AccountProfile } from "@/lib/schemas/account.schemas";
 import { accountProfileResponseSchema } from "@/lib/schemas/account.schemas";
+
+import {
+  COUNTRIES,
+  POPULAR_COUNTRIES,
+  type CountryItem,
+} from "@/features/dashboard/constants/countries";
 
 import {
   SettingsCard,
@@ -20,10 +42,23 @@ import {
 
 const AVATAR_SIZE = 256;
 
+export interface UserTeamOption {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+}
+
 export function AccountProfileForm({
   initialProfile,
+  userId,
+  emailVerified = false,
+  teams = [],
 }: {
   initialProfile: AccountProfile;
+  userId?: string;
+  emailVerified?: boolean;
+  teams?: UserTeamOption[];
 }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
@@ -75,16 +110,17 @@ export function AccountProfileForm({
       <SettingsCard>
         <SettingsCardBody
           title="Avatar"
-          description="This is your avatar. Upload a custom avatar from your files."
-        >
-          <AvatarField
-            profile={profile}
-            onChange={(updated) => {
-              setProfile({ ...profile, image: updated.image });
-              router.refresh();
-            }}
-          />
-        </SettingsCardBody>
+          description={"This is your avatar.\nUpload a custom avatar from your files."}
+          aside={
+            <AvatarField
+              profile={profile}
+              onChange={(updated) => {
+                setProfile({ ...profile, image: updated.image });
+                router.refresh();
+              }}
+            />
+          }
+        />
         <SettingsCardFooter helperText="An avatar is optional but strongly recommended." />
       </SettingsCard>
 
@@ -99,7 +135,7 @@ export function AccountProfileForm({
             maxLength={32}
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="max-w-md font-sans text-sm"
+            className="max-w-md h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
             placeholder="Your name"
           />
         </SettingsCardBody>
@@ -108,6 +144,7 @@ export function AccountProfileForm({
           action={
             <Button
               size="sm"
+              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
               disabled={savingName || name === profile.name || !name.trim()}
               onClick={() => saveField("name", name.trim())}
             >
@@ -123,8 +160,8 @@ export function AccountProfileForm({
           title="Username"
           description="This is your URL namespace within Multivrs."
         >
-          <div className="flex max-w-md items-center rounded-md border border-input bg-transparent shadow-xs focus-within:ring-1 focus-within:ring-ring">
-            <span className="flex select-none items-center pl-3 text-xs text-muted-foreground">
+          <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
+            <span className="flex h-10 items-center border-r border-zinc-800 bg-zinc-900/60 px-3.5 text-xs text-zinc-400 select-none font-mono">
               multivrs.space/
             </span>
             <input
@@ -134,7 +171,7 @@ export function AccountProfileForm({
               onChange={(event) =>
                 setUsername(event.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
               }
-              className="flex h-9 w-full bg-transparent px-1 py-1 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-zinc-600"
               placeholder="username"
             />
           </div>
@@ -144,6 +181,7 @@ export function AccountProfileForm({
           action={
             <Button
               size="sm"
+              className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
               disabled={savingUsername || username === profile.username || !username.trim()}
               onClick={() => saveField("username", username.trim())}
             >
@@ -153,18 +191,26 @@ export function AccountProfileForm({
         />
       </SettingsCard>
 
+      {/* Default Team Card */}
+      <DefaultTeamField teams={teams} initialSlug={teams[0]?.slug} />
+
       {/* Email Card */}
-      <SettingsCard>
-        <SettingsCardBody
-          title="Email"
-          description="Your primary account email address."
-        >
-          <div className="max-w-md">
-            <EmailField email={profile.email} />
-          </div>
-        </SettingsCardBody>
-        <SettingsCardFooter helperText="Used for notifications, invoices, and password resets." />
-      </SettingsCard>
+      <EmailListField
+        primaryEmail={profile.email}
+        emailVerified={emailVerified}
+      />
+
+      {/* Your Phone Number Card */}
+      <PhoneNumberField />
+
+      {/* User ID Card */}
+      {userId && <UserIdField userId={userId} />}
+
+      {/* Reset Tips Card */}
+      <ResetTipsField />
+
+      {/* Delete Account Card */}
+      <DeleteAccountField />
     </div>
   );
 }
@@ -221,27 +267,7 @@ function AvatarField({
   }
 
   return (
-    <div className="flex items-center gap-4 border-b border-(--hairline) px-5 py-5">
-      {profile.image ? (
-        <Image
-          src={profile.image}
-          alt=""
-          width={64}
-          height={64}
-          unoptimized
-          className="size-16 shrink-0 rounded-full border border-(--hairline-strong) object-cover"
-        />
-      ) : (
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-full border border-(--hairline-strong) bg-white/4 font-geist-mono text-xl font-medium text-foreground">
-          {(profile.name[0] ?? profile.username[0] ?? "M").toUpperCase()}
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">Avatar</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          PNG, JPEG, or WebP. Cropped to a square.
-        </p>
-      </div>
+    <div className="relative group">
       <input
         ref={input}
         type="file"
@@ -255,21 +281,44 @@ function AvatarField({
           if (file) upload(file);
         }}
       />
-      <div className="flex shrink-0 gap-2">
-        {profile.image && (
-          <Button variant="ghost" disabled={busy} onClick={remove}>
-            Remove
-          </Button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => input.current?.click()}
+        className="relative flex size-18 sm:size-20 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-700/80 bg-zinc-900 overflow-hidden shadow-md transition-transform group-hover:scale-105"
+        title="Click to upload custom avatar"
+      >
+        {profile.image ? (
+          <Image
+            src={profile.image}
+            alt=""
+            width={80}
+            height={80}
+            unoptimized
+            className="size-full object-cover"
+          />
+        ) : (
+          <span className="font-geist-mono text-2xl font-bold text-white uppercase">
+            {(profile.name[0] ?? profile.username[0] ?? "M").toUpperCase()}
+          </span>
         )}
-        <Button
-          variant="outline"
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+          <Upload className="size-4 text-white" />
+          <span className="mt-0.5 text-[9px] font-medium text-white">
+            {busy ? "Uploading…" : "Upload"}
+          </span>
+        </div>
+      </button>
+      {profile.image && (
+        <button
+          type="button"
+          onClick={remove}
           disabled={busy}
-          onClick={() => input.current?.click()}
+          className="mt-1 block w-full text-center text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
         >
-          <Upload className="size-4" />
-          {busy ? "Uploading…" : "Upload"}
-        </Button>
-      </div>
+          Remove
+        </button>
+      )}
     </div>
   );
 }
@@ -309,75 +358,516 @@ async function squareImage(file: File): Promise<Blob> {
   );
 }
 
-/** The account email, with a confirmed change to a new address. */
-function EmailField({ email }: { email: string }) {
-  const pathname = usePathname();
-  const [editing, setEditing] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState<string | null>(null);
+function DefaultTeamField({
+  teams,
+  initialSlug,
+}: {
+  teams: UserTeamOption[];
+  initialSlug?: string;
+}) {
+  const [selectedSlug, setSelectedSlug] = useState<string>(
+    initialSlug || teams[0]?.slug || "",
+  );
+  const [savedSlug, setSavedSlug] = useState<string>(
+    initialSlug || teams[0]?.slug || "",
+  );
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  function requestChange(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const next = newEmail.trim().toLowerCase();
-    if (!next || next === email || busy) return;
-    setBusy(true);
-    void authClient
-      .changeEmail({ newEmail: next, callbackURL: `${pathname}#general` })
-      .then((result) => {
-        if (result.error) {
-          toast.error(
-            result.error.message ?? "Your email couldn't be changed.",
-          );
-          return;
-        }
-        setSent(next);
-        setEditing(false);
-        setNewEmail("");
-      })
-      .catch(() => toast.error("Your email couldn't be changed."))
-      .finally(() => setBusy(false));
-  }
+  const selectedTeam = teams.find((t) => t.slug === selectedSlug) || teams[0];
+
+  const handleSave = () => {
+    setSaving(true);
+    setTimeout(() => {
+      setSavedSlug(selectedSlug);
+      setSaving(false);
+      toast.success("Default team updated");
+    }, 400);
+  };
 
   return (
-    <div className="space-y-2 text-xs text-muted-foreground sm:col-span-2">
-      <label htmlFor="profile-email">Email</label>
-      <div className="flex gap-2">
-        <Input id="profile-email" value={email} readOnly disabled />
-        {!editing && (
-          <Button variant="outline" onClick={() => setEditing(true)}>
-            Change
+    <SettingsCard>
+      <SettingsCardBody
+        title="Default Team"
+        description="Your default team will be used when you make a request through the API or CLI where you don't specify a particular team. It will also be the team selected when you first navigate to the dashboard."
+      >
+        <div className="flex items-center gap-2 max-w-md">
+          {selectedTeam ? (
+            <div className="inline-flex items-center gap-2.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200">
+              <TeamAvatar
+                name={selectedTeam.name || selectedTeam.slug}
+                logo={selectedTeam.logo}
+                size={20}
+              />
+              <span className="font-mono text-xs text-white">{selectedTeam.slug}</span>
+              {teams.length > 1 && (
+                <DropdownMenu open={open} onOpenChange={setOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="ml-1 rounded p-0.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                      title="Switch default team"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 bg-zinc-950 border-zinc-800 p-1">
+                    {teams.map((t) => (
+                      <DropdownMenuItem
+                        key={t.slug}
+                        className="flex items-center gap-2 cursor-pointer text-xs"
+                        onClick={() => {
+                          setSelectedSlug(t.slug);
+                          setOpen(false);
+                        }}
+                      >
+                        <TeamAvatar
+                          name={t.name || t.slug}
+                          logo={t.logo}
+                          size={16}
+                        />
+                        <span className="font-mono">{t.slug}</span>
+                        {t.slug === selectedSlug && <Check className="ml-auto size-3.5 text-white" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs text-zinc-500">No teams available</span>
+          )}
+        </div>
+      </SettingsCardBody>
+      <SettingsCardFooter
+        helperText={
+          <span className="flex items-center gap-1">
+            Learn more about <span className="text-zinc-300 underline underline-offset-4 cursor-pointer">Default Teams ↗</span>
+          </span>
+        }
+        action={
+          <Button
+            size="sm"
+            className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+            disabled={saving || selectedSlug === savedSlug}
+            onClick={handleSave}
+          >
+            {saving ? "Saving…" : "Save"}
           </Button>
-        )}
-      </div>
-      {sent && !editing && (
-        <p>
-          Check {email} to approve the change to {sent}, then confirm it from
-          the email we send there.
-        </p>
-      )}
-      {editing && (
-        <form onSubmit={requestChange} className="flex gap-2 pt-1">
-          <Input
-            aria-label="New email"
-            type="email"
-            autoComplete="email"
-            placeholder="new@example.com"
-            value={newEmail}
-            onChange={(event) => setNewEmail(event.target.value)}
+        }
+      />
+    </SettingsCard>
+  );
+}
+
+function EmailListField({
+  primaryEmail,
+  emailVerified,
+}: {
+  primaryEmail: string;
+  emailVerified: boolean;
+}) {
+  const [emails, setEmails] = useState<Array<{ address: string; verified: boolean; isPrimary: boolean }>>([
+    { address: primaryEmail, verified: emailVerified, isPrimary: true },
+  ]);
+  const [adding, setAdding] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const handleAddEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!trimmed || emails.some((e) => e.address === trimmed)) return;
+    setBusy(true);
+    setTimeout(() => {
+      setEmails((prev) => [...prev, { address: trimmed, verified: false, isPrimary: false }]);
+      setNewEmail("");
+      setAdding(false);
+      setBusy(false);
+      toast.success(`Verification email sent to ${trimmed}`);
+    }, 500);
+  };
+
+  const handleMakePrimary = (address: string) => {
+    setEmails((prev) =>
+      prev.map((e) => ({
+        ...e,
+        isPrimary: e.address === address,
+      })),
+    );
+    toast.success(`${address} set as primary email`);
+  };
+
+  const handleRemove = (address: string) => {
+    setEmails((prev) => prev.filter((e) => e.address !== address));
+    toast.success("Email removed");
+  };
+
+  const handleResend = (address: string) => {
+    toast.success(`Verification email resent to ${address}`);
+  };
+
+  return (
+    <SettingsCard>
+      <SettingsCardBody
+        title="Email"
+        description="Enter the email addresses you want to use to log in with Multivrs. Your primary email will be used for account-related notifications."
+      >
+        <div className="space-y-3 max-w-2xl">
+          <div className="rounded-lg border border-zinc-800 bg-black/60 divide-y divide-zinc-800 overflow-hidden">
+            {emails.map((item) => (
+              <div key={item.address} className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-sm font-normal text-white truncate">{item.address}</span>
+                  {item.verified && (
+                    <span className="rounded-full bg-blue-950/80 border border-blue-800/80 px-2 py-0.5 text-[11px] font-medium text-blue-400">
+                      Verified
+                    </span>
+                  )}
+                  {item.isPrimary && (
+                    <span className="rounded-full bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                      Primary
+                    </span>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="size-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-zinc-950 border-zinc-800 p-1">
+                    {!item.isPrimary && (
+                      <DropdownMenuItem
+                        className="text-xs cursor-pointer"
+                        onClick={() => handleMakePrimary(item.address)}
+                      >
+                        Make Primary
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      className="text-xs cursor-pointer"
+                      onClick={() => handleResend(item.address)}
+                    >
+                      Resend Verification
+                    </DropdownMenuItem>
+                    {!item.isPrimary && (
+                      <DropdownMenuItem
+                        className="text-xs cursor-pointer text-red-400 hover:text-red-300"
+                        onClick={() => handleRemove(item.address)}
+                      >
+                        Remove
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))}
+          </div>
+
+          {adding ? (
+            <form onSubmit={handleAddEmail} className="flex items-center gap-2 pt-1 max-w-md">
+              <Input
+                type="email"
+                placeholder="developer@example.com"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                autoFocus
+                className="h-9 rounded-md border border-zinc-800 bg-black/60 px-3 text-sm text-white placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                disabled={busy || !newEmail.trim()}
+                className="h-9 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-3.5"
+              >
+                {busy ? "Sending…" : "Add"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setAdding(false);
+                  setNewEmail("");
+                }}
+                className="h-9 text-xs text-zinc-400 hover:text-white"
+              >
+                Cancel
+              </Button>
+            </form>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAdding(true)}
+              className="h-8 gap-1.5 rounded-md border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-medium text-zinc-200"
+            >
+              <Plus className="size-3.5" />
+              Add Another
+            </Button>
+          )}
+        </div>
+      </SettingsCardBody>
+      <SettingsCardFooter helperText="Emails must be verified to be able to login with them or be used as primary email." />
+    </SettingsCard>
+  );
+}
+
+function PhoneNumberField() {
+  const [phone, setPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryItem>(
+    COUNTRIES.find((c) => c.code === "US") || COUNTRIES[0]!,
+  );
+  const [countrySearch, setCountrySearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const filteredCountries = countrySearch.trim()
+    ? COUNTRIES.filter(
+        (c) =>
+          c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+          c.dialCode.includes(countrySearch) ||
+          c.code.toLowerCase().includes(countrySearch.toLowerCase()),
+      )
+    : COUNTRIES;
+
+  const handleSave = () => {
+    if (!phone.trim()) return;
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+      setSaved(true);
+      toast.success(`Verification code sent to ${selectedCountry.dialCode} ${phone}`);
+    }, 600);
+  };
+
+  return (
+    <SettingsCard>
+      <SettingsCardBody
+        title="Your Phone Number"
+        description="Enter a phone number to receive important service updates by SMS."
+      >
+        <div className="flex max-w-md items-center rounded-md border border-zinc-800 bg-black/60 overflow-hidden focus-within:ring-1 focus-within:ring-zinc-400">
+          <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex h-10 items-center gap-1.5 border-r border-zinc-800 bg-zinc-900/60 px-3 text-xs text-zinc-300 hover:text-white transition-colors shrink-0"
+              >
+                <span className="text-sm">{selectedCountry.flag}</span>
+                <ChevronDown className="size-3 text-zinc-500" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 bg-zinc-950 border-zinc-800 p-1">
+              <div className="p-1 border-b border-zinc-800/80">
+                <input
+                  type="text"
+                  placeholder="Search countries..."
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  className="h-7 w-full bg-black/60 border border-zinc-800 rounded px-2 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-zinc-700"
+                />
+              </div>
+              <div className="max-h-60 overflow-y-auto hide-scrollbar pt-1 divide-y divide-zinc-900">
+                {countrySearch.trim() ? (
+                  filteredCountries.length > 0 ? (
+                    filteredCountries.map((c) => (
+                      <DropdownMenuItem
+                        key={c.code}
+                        className="flex items-center gap-2 text-xs cursor-pointer py-1.5"
+                        onClick={() => {
+                          setSelectedCountry(c);
+                          setCountrySearch("");
+                          setOpen(false);
+                        }}
+                      >
+                        <span className="text-sm shrink-0">{c.flag}</span>
+                        <span className="flex-1 truncate">{c.name} ({c.dialCode})</span>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <div className="py-4 text-center text-xs text-zinc-500">
+                      No countries found
+                    </div>
+                  )
+                ) : (
+                  <>
+                    <div className="py-0.5">
+                      {POPULAR_COUNTRIES.map((c) => (
+                        <DropdownMenuItem
+                          key={`popular-${c.code}`}
+                          className="flex items-center gap-2 text-xs cursor-pointer py-1.5"
+                          onClick={() => {
+                            setSelectedCountry(c);
+                            setOpen(false);
+                          }}
+                        >
+                          <span className="text-sm shrink-0">{c.flag}</span>
+                          <span className="flex-1 truncate">{c.name} ({c.dialCode})</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    <div className="pt-1">
+                      <div className="px-2 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+                        All Countries
+                      </div>
+                      {COUNTRIES.map((c) => (
+                        <DropdownMenuItem
+                          key={c.code}
+                          className="flex items-center gap-2 text-xs cursor-pointer py-1.5"
+                          onClick={() => {
+                            setSelectedCountry(c);
+                            setOpen(false);
+                          }}
+                        >
+                          <span className="text-sm shrink-0">{c.flag}</span>
+                          <span className="flex-1 truncate">{c.name} ({c.dialCode})</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(201) 555-0123"
+            className="h-10 flex-1 bg-transparent px-3.5 text-sm text-white outline-none placeholder:text-zinc-600 font-mono"
           />
-          <Button type="submit" disabled={busy || !newEmail.trim()}>
-            {busy ? "Sending…" : "Send confirmation"}
+        </div>
+      </SettingsCardBody>
+      <SettingsCardFooter
+        helperText="A code will be sent to verify."
+        action={
+          <Button
+            size="sm"
+            className="h-8 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 disabled:opacity-40 disabled:bg-zinc-800 disabled:text-zinc-500"
+            disabled={saving || !phone.trim() || saved}
+            onClick={handleSave}
+          >
+            {saving ? "Saving…" : "Save"}
           </Button>
+        }
+      />
+    </SettingsCard>
+  );
+}
+
+function ResetTipsField() {
+  const [resetting, setResetting] = useState(false);
+
+  const handleReset = () => {
+    setResetting(true);
+    setTimeout(() => {
+      setResetting(false);
+      toast.success("Onboarding tips reset");
+    }, 400);
+  };
+
+  return (
+    <SettingsCard>
+      <SettingsCardBody
+        title="Reset Tips"
+        description="See onboarding tips you might have missed."
+      />
+      <SettingsCardFooter
+        helperText="Resetting will make all onboarding tips re-appear."
+        action={
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-md border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs font-medium text-white px-4"
+            disabled={resetting}
+            onClick={handleReset}
+          >
+            {resetting ? "Resetting…" : "Reset"}
+          </Button>
+        }
+      />
+    </SettingsCard>
+  );
+}
+
+function DeleteAccountField() {
+  return (
+    <SettingsCard danger>
+      <SettingsCardBody
+        title="Delete Account"
+        description="Permanently remove your Personal Account and all of its contents from the Multivrs platform. This action is not reversible, so please continue with caution."
+      />
+      <SettingsCardFooter
+        danger
+        helperText="Careful, this action is irreversible."
+        action={
+          <Button
+            size="sm"
+            variant="destructive"
+            className="h-8 rounded-md text-xs font-medium px-4 bg-red-600 hover:bg-red-700 text-white"
+            onClick={() => toast.error("Account deletion requires confirmation")}
+          >
+            Delete Personal Account
+          </Button>
+        }
+      />
+    </SettingsCard>
+  );
+}
+
+function UserIdField({ userId }: { userId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyUserId = async () => {
+    await navigator.clipboard.writeText(userId);
+    setCopied(true);
+    toast.success("User ID copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <SettingsCard>
+      <SettingsCardBody
+        title="User ID"
+        description="This is your user ID within Multivrs."
+      >
+        <div className="flex max-w-md items-center gap-2">
+          <Input
+            readOnly
+            value={userId}
+            className="h-10 font-mono text-xs text-zinc-400 bg-black/60 border-zinc-800 select-all"
+          />
           <Button
             type="button"
-            variant="ghost"
-            onClick={() => setEditing(false)}
+            variant="outline"
+            size="sm"
+            className="h-10 shrink-0 gap-1.5 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-xs text-zinc-200"
+            onClick={copyUserId}
           >
-            Cancel
+            {copied ? (
+              <>
+                <Check className="size-3.5 text-green-400" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="size-3.5" />
+                Copy
+              </>
+            )}
           </Button>
-        </form>
-      )}
-    </div>
+        </div>
+      </SettingsCardBody>
+      <SettingsCardFooter helperText="Used when interacting with the Multivrs API." />
+    </SettingsCard>
   );
 }

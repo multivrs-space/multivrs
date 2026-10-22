@@ -1,7 +1,7 @@
 "use client";
 
+import { CheckCircle2, Clock, Info, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 import { Logo } from "@/components/site/logo";
 
 export default function PaidPage() {
@@ -18,7 +18,11 @@ export default function PaidPage() {
     const search = new URLSearchParams(window.location.search);
     const redirectStatus = search.get("redirect_status");
     const canceledParam = search.get("canceled");
-    const paymentIntent = search.get("payment_intent");
+    const paymentIntent =
+      search.get("payment_intent") ??
+      search.get("reference") ??
+      search.get("trxref") ??
+      search.get("setup_intent");
     const merchant = search.get("merchant");
     const link = search.get("link");
 
@@ -27,7 +31,11 @@ export default function PaidPage() {
       redirectStatus === "failed" ||
       redirectStatus === "requires_payment_method";
     const isProcessing = redirectStatus === "processing";
-    const isSucceeded = redirectStatus === "succeeded" || (!isCanceled && !isProcessing && !!paymentIntent);
+    const isSucceeded =
+      redirectStatus === "succeeded" ||
+      (!isCanceled &&
+        !isProcessing &&
+        Boolean(paymentIntent || merchant || link));
 
     setParams({
       isCanceled,
@@ -52,10 +60,13 @@ export default function PaidPage() {
           <>
             <XCircle className="mx-auto mt-10 size-12 text-rose-500" />
             <h1 className="mt-6 text-3xl font-light tracking-tight text-ink">
-              <span className="font-display italic text-[1.1em]">Payment</span> canceled
+              <span className="font-display italic text-[1.1em]">Payment</span>{" "}
+              canceled
             </h1>
             <p className="mt-4 text-sm text-mute leading-relaxed">
-              No charge was made{merchantName ? ` by ${merchantName}` : ""}. You can return to your checkout whenever you're ready to complete the payment.
+              No charge was made{merchantName ? ` by ${merchantName}` : ""}. You
+              can return to your checkout whenever you're ready to complete the
+              payment.
             </p>
             <div className="mt-6">
               <a
@@ -78,20 +89,25 @@ export default function PaidPage() {
           <>
             <Clock className="mx-auto mt-10 size-12 text-amber-500" />
             <h1 className="mt-6 text-3xl font-light tracking-tight text-ink">
-              <span className="font-display italic text-[1.1em]">Payment</span> processing
+              <span className="font-display italic text-[1.1em]">Payment</span>{" "}
+              processing
             </h1>
             <p className="mt-4 text-sm text-mute leading-relaxed">
-              Your payment is currently being authorized by your bank. We will notify you once confirmation is received.
+              Your payment is currently being authorized by your bank. We will
+              notify you once confirmation is received.
             </p>
           </>
         ) : params?.isSucceeded ? (
           <>
             <CheckCircle2 className="mx-auto mt-10 size-12 text-emerald-600" />
             <h1 className="mt-6 text-3xl font-light tracking-tight text-ink">
-              <span className="font-display italic text-[1.1em]">Payment</span> received
+              <span className="font-display italic text-[1.1em]">Payment</span>{" "}
+              received
             </h1>
             <p className="mt-4 text-sm text-mute leading-relaxed">
-              Thank you — your transaction{merchantName ? ` with ${merchantName}` : ""} has been completed securely and your receipt has been dispatched.
+              Thank you — your transaction
+              {merchantName ? ` with ${merchantName}` : ""} has been completed
+              securely and your receipt has been dispatched.
             </p>
             {params.paymentIntent && (
               <div className="mt-6 rounded-xl border border-line bg-wash p-3 text-xs text-mute font-mono">
@@ -106,10 +122,12 @@ export default function PaidPage() {
           <>
             <Info className="mx-auto mt-10 size-12 text-mute" />
             <h1 className="mt-6 text-3xl font-light tracking-tight text-ink">
-              <span className="font-display italic text-[1.1em]">Payment</span> status
+              <span className="font-display italic text-[1.1em]">Payment</span>{" "}
+              status
             </h1>
             <p className="mt-4 text-sm text-mute leading-relaxed">
-              No recent payment was initiated or this link has already completed.
+              No recent payment was initiated or this link has already
+              completed.
             </p>
           </>
         )}

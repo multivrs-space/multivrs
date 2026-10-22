@@ -1,12 +1,39 @@
 {
   "name": "@multivrs/mail",
-  "version": "0.1.0",
-  "description": "Multivrs Mail SDK for Node.js, Bun, Next.js, and edge runtimes.",
+  "version": "0.1.1",
+  "description": "Official Multivrs Mail SDK — built natively for swift-rust, Next.js, Bun, and modern edge runtimes. 1:1 drop-in replacement for Resend.",
   "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./src/index.ts"
+    }
   },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "swift-rust",
+    "multivrs",
+    "mail",
+    "email",
+    "transactional-email",
+    "resend",
+    "edge",
+    "bun"
+  ],
   "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "lint": "biome check .",
     "format": "biome check --fix .",
     "check-types": "tsc --noEmit"

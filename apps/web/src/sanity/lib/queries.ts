@@ -146,3 +146,95 @@ export const sellerTemplatesQuery = defineQuery(`
     "imageUrl": coverImage.asset->url
   }
 `);
+
+export const docsNavigationQuery = defineQuery(`
+  *[_type == "docCategory"] | order(order asc) {
+    _id,
+    _type,
+    _updatedAt,
+    title,
+    "slug": slug.current,
+    icon,
+    order,
+    description,
+    "items": *[_type == "docPage" && references(^._id) && !defined(parent)] | order(order asc) {
+      _id,
+      _type,
+      _updatedAt,
+      title,
+      "slug": slug.current,
+      badge,
+      order,
+      icon,
+      summary,
+      "children": *[_type == "docPage" && parent._ref == ^._id] | order(order asc) {
+        _id,
+        _type,
+        _updatedAt,
+        title,
+        "slug": slug.current,
+        badge,
+        order,
+        icon,
+        summary
+      }
+    }
+  }
+`);
+
+export const docPageBySlugQuery = defineQuery(`
+  *[_type == "docPage" && slug.current == $slug][0] {
+    _id,
+    _type,
+    _updatedAt,
+    title,
+    "slug": slug.current,
+    summary,
+    badge,
+    icon,
+    body,
+    category->{ _id, _type, title, "slug": slug.current },
+    parent->{ _id, _type, title, "slug": slug.current }
+  }
+`);
+
+export const allDocPageSlugsQuery = defineQuery(`
+  *[_type == "docPage" && defined(slug.current)]{
+    "slug": slug.current
+  }
+`);
+
+export const mailQuickstartsQuery = defineQuery(`
+  *[_type == "mailQuickstart"] | order(order asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    category,
+    order,
+    summary,
+    installCommand,
+    filename,
+    codeLanguage,
+    codeSnippet,
+    language->{
+      _id,
+      name,
+      "slug": slug.current,
+      "iconUrl": iconImage.asset->url,
+      "iconUrlDark": iconImageDark.asset->url
+    }
+  }
+`);
+
+export const languagesQuery = defineQuery(`
+  *[_type == "language"] | order(name asc) {
+    _id,
+    _type,
+    _updatedAt,
+    name,
+    "slug": slug.current,
+    "iconUrl": iconImage.asset->url,
+    "iconUrlDark": iconImageDark.asset->url
+  }
+`);
+

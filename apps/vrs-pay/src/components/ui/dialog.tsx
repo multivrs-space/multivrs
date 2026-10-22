@@ -37,7 +37,7 @@ function DialogOverlay() {
     <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
       onClick={() => ctx.setOpen(false)}
-      aria-hidden
+      aria-hidden="true"
     />
   );
 }
@@ -92,7 +92,7 @@ export function DialogTrigger({
   asChild,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { asChild?: boolean }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
   const ctx = React.useContext(DialogContext)!;
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children as React.ReactElement<{ onClick?: React.MouseEventHandler }>, {
@@ -103,17 +103,43 @@ export function DialogTrigger({
     });
   }
   return (
-    <div {...props} onClick={() => ctx.setOpen(true)}>
+    <button
+      type="button"
+      {...props}
+      onClick={(e) => {
+        props.onClick?.(e);
+        ctx.setOpen(true);
+      }}
+    >
       {children}
-    </div>
+    </button>
   );
 }
 
-export function DialogClose({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function DialogClose({
+  asChild,
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) {
   const ctx = React.useContext(DialogContext)!;
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<{ onClick?: React.MouseEventHandler }>, {
+      onClick: (e: React.MouseEvent) => {
+        (children as React.ReactElement<{ onClick?: React.MouseEventHandler }>).props.onClick?.(e);
+        ctx.setOpen(false);
+      },
+    });
+  }
   return (
-    <div {...props} onClick={() => ctx.setOpen(false)}>
+    <button
+      type="button"
+      {...props}
+      onClick={(e) => {
+        props.onClick?.(e);
+        ctx.setOpen(false);
+      }}
+    >
       {children}
-    </div>
+    </button>
   );
 }

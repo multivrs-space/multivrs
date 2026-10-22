@@ -1,0 +1,36 @@
+{
+  "name": "@multivrs/cli",
+  "version": "0.1.0",
+  "description": "The official native CLI for the Multivrs platform — purpose-built for swift-rust, Next.js, and modern full-stack web applications.",
+  "license": "MIT",
+  "bin": {
+    "multivrs": "bin/multivrs"
+  },
+  "files": [
+    "bin/multivrs",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "cargo build --release -p cli && cp ../../target/release/multivrs ./bin/multivrs && chmod +x ./bin/multivrs",
+    "prepublishOnly": "chmod +x ./bin/multivrs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/multivrs-space/multivrs.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "swift-rust",
+    "multivrs",
+    "cli",
+    "wasm",
+    "ssr",
+    "deploy",
+    "edge",
+    "rust",
+    "serverless"
+  ]
+}

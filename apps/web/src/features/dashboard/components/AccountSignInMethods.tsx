@@ -81,18 +81,18 @@ export function AccountSignInMethods({ signIn }: { signIn: AccountSignIn }) {
 
   return (
     <section
-      className="overflow-hidden rounded-2xl border border-(--hairline) bg-background/70"
+      className="overflow-hidden rounded-xl border border-zinc-800 dark:border-[#262626] bg-black dark:bg-[#000000]"
       aria-labelledby="sign-in-methods-title"
     >
-      <div className="border-b border-(--hairline) px-5 py-4">
-        <h2 id="sign-in-methods-title" className="text-sm font-semibold">
+      <div className="border-b border-zinc-800 dark:border-[#262626] p-6">
+        <h2 id="sign-in-methods-title" className="text-[17px] font-semibold text-white tracking-tight">
           Sign-in methods
         </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-zinc-400">
           The ways you can sign in to Multivrs. You need at least one.
         </p>
       </div>
-      <ul className="divide-y divide-(--hairline)">
+      <ul className="divide-y divide-zinc-800 dark:divide-[#262626]">
         <li className="px-5 py-4">
           <div className="flex items-center gap-3">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-(--hairline) text-muted-foreground">

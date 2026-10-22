@@ -9,12 +9,19 @@ import {
   pricingPlanValueType,
   pricingSectionType,
 } from "./pricingComparison";
+import { docCategoryType } from "./docCategory";
+import { docPageType } from "./docPage";
 import { templateType } from "./template";
 import { templateCategoryType } from "./templateCategory";
 import { templateStackType } from "./templateStack";
+import { mailQuickstartType } from "./mailQuickstart";
+import { languageType } from "./language";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
+    languageType,
+    docCategoryType,
+    docPageType,
     faqType,
     faqCategoryType,
     pricingPlanType,
@@ -26,5 +33,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     templateType,
     templateCategoryType,
     templateStackType,
+    mailQuickstartType,
   ],
 };

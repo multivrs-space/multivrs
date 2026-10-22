@@ -10,6 +10,7 @@
 
 import type { BetterAuthOptions } from "better-auth";
 import { deleteUserFromConvex, syncUserToConvex } from "@/lib/convex-sync";
+import { recordAuditEvent } from "@/lib/services/audit-event.service";
 import { logError } from "@/lib/services/logger.service";
 import {
   deleteSesTenant,
@@ -48,6 +49,13 @@ export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
             userId: user.id,
           });
         }
+
+        void recordAuditEvent({
+          userId: user.id,
+          action: "user.created",
+          entityType: "user",
+          metadata: { email: user.email },
+        }).catch(() => {});
       },
     },
 
@@ -69,6 +77,23 @@ export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
             userId: user.id,
           });
           // Don't throw - allow update to succeed even if Convex sync fails
+        }
+
+        if (user.twoFactorEnabled !== undefined) {
+          void recordAuditEvent({
+            userId: user.id,
+            action: user.twoFactorEnabled ? "user.2fa_enabled" : "user.2fa_disabled",
+            entityType: "user",
+          }).catch(() => {});
+        }
+
+        if (user.emailVerified) {
+          void recordAuditEvent({
+            userId: user.id,
+            action: "email.verified",
+            entityType: "user",
+            metadata: { email: user.email },
+          }).catch(() => {});
         }
       },
     },
@@ -94,6 +119,57 @@ export const databaseHooks: BetterAuthOptions["databaseHooks"] = {
             userId: user.id,
           });
         }
+      },
+    },
+  },
+
+  session: {
+    create: {
+      after: async (session) => {
+        void recordAuditEvent({
+          userId: session.userId,
+          action: "auth.login",
+          entityType: "session",
+          entityId: session.id,
+        }).catch(() => {});
+      },
+    },
+    delete: {
+      after: async (session) => {
+        void recordAuditEvent({
+          userId: session.userId,
+          action: "auth.logout",
+          entityType: "session",
+          entityId: session.id,
+        }).catch(() => {});
+      },
+    },
+  },
+
+  account: {
+    create: {
+      after: async (account) => {
+        void recordAuditEvent({
+          userId: account.userId,
+          action: "oauth.connected",
+          entityType: "account",
+          metadata: {
+            providerId: account.providerId,
+            accountId: account.accountId,
+          },
+        }).catch(() => {});
+      },
+    },
+    delete: {
+      after: async (account) => {
+        void recordAuditEvent({
+          userId: account.userId,
+          action: "oauth.unlinked",
+          entityType: "account",
+          metadata: {
+            providerId: account.providerId,
+          },
+        }).catch(() => {});
       },
     },
   },

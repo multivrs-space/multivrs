@@ -76,22 +76,27 @@ export function ApiTokensPage({
         />
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-(--hairline) bg-background/70">
-        <div className="border-b border-(--hairline) px-5 py-4">
-          <h2 className="text-sm font-semibold">Developer tokens</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
+      <section className="overflow-hidden rounded-xl border border-zinc-800 dark:border-[#262626] bg-black dark:bg-[#000000]">
+        <div className="border-b border-zinc-800 dark:border-[#262626] p-6">
+          <h2 className="text-[17px] font-semibold text-white tracking-tight">Developer tokens</h2>
+          <p className="mt-1 text-sm text-zinc-400">
             Manage CLI access to your account.
           </p>
         </div>
-        <div className="p-5">
+        <div className="p-6">
           <div className="flex max-w-xl gap-2">
             <Input
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={80}
+              className="h-10 rounded-md border border-zinc-800 bg-black/60 px-3.5 text-sm text-white placeholder:text-zinc-600"
             />
-            <Button onClick={createToken} disabled={busy || !name.trim()}>
-              <Plus className="mr-2 size-4" /> Create
+            <Button
+              onClick={createToken}
+              disabled={busy || !name.trim()}
+              className="h-10 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-medium px-4 shrink-0"
+            >
+              <Plus className="mr-2 size-3.5" /> Create
             </Button>
           </div>
           {created ? (

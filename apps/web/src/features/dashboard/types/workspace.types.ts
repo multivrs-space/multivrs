@@ -7,6 +7,7 @@ export interface DashboardWorkspace {
   image: string | null;
   /** The viewer's role on someone else's team; absent for their own account. */
   role?: string;
+  plan?: PlanKey;
 }
 
 /** The dashboard being viewed, shown in the sidebar header. */

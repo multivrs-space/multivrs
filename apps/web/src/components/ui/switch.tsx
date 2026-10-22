@@ -1,33 +1,88 @@
 "use client";
 
-import { Switch as SwitchPrimitive } from "radix-ui";
-import type * as React from "react";
-
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
-function Switch({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<typeof SwitchPrimitive.Root> & {
+export interface SwitchProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onChange"> {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
   size?: "sm" | "default";
-}) {
-  return (
-    <SwitchPrimitive.Root
-      data-slot="switch"
-      data-size={size}
-      className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border-2 transition-all outline-hidden after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-5 data-[size=default]:w-11 data-[size=sm]:h-4 data-[size=sm]:w-7 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-unchecked:border-transparent data-unchecked:bg-input/90 data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        className,
-      )}
-      {...props}
-    >
-      <SwitchPrimitive.Thumb
-        data-slot="switch-thumb"
-        className="pointer-events-none block rounded-full bg-background shadow-xs ring-0 transition-transform not-dark:bg-clip-padding group-data-[size=default]/switch:h-4 group-data-[size=default]/switch:w-6 group-data-[size=sm]/switch:h-3 group-data-[size=sm]/switch:w-4 data-checked:translate-x-[calc(100%-8px)] dark:data-checked:bg-primary-foreground data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
-      />
-    </SwitchPrimitive.Root>
-  );
 }
 
-export { Switch };
+export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
+  (
+    {
+      className,
+      checked: controlledChecked,
+      defaultChecked = false,
+      onCheckedChange,
+      disabled = false,
+      size = "default",
+      ...props
+    },
+    ref,
+  ) => {
+    const [uncontrolledChecked, setUncontrolledChecked] =
+      React.useState(defaultChecked);
+    const isControlled = controlledChecked !== undefined;
+    const isChecked = isControlled ? controlledChecked : uncontrolledChecked;
+
+    function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+      if (disabled) return;
+      const next = !isChecked;
+      if (!isControlled) {
+        setUncontrolledChecked(next);
+      }
+      onCheckedChange?.(next);
+      props.onClick?.(e);
+    }
+
+    function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
+      if (disabled) return;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        const next = !isChecked;
+        if (!isControlled) {
+          setUncontrolledChecked(next);
+        }
+        onCheckedChange?.(next);
+      }
+      props.onKeyDown?.(e);
+    }
+
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isChecked}
+        disabled={disabled}
+        ref={ref}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
+          size === "sm" ? "h-4 w-7" : "h-5 w-9",
+          isChecked ? "bg-primary" : "bg-zinc-800 hover:bg-zinc-700",
+          className,
+        )}
+        {...props}
+      >
+        <span
+          className={cn(
+            "pointer-events-none block rounded-full shadow-xs ring-0 transition-transform duration-200 ease-in-out",
+            size === "sm" ? "h-3 w-3" : "h-4 w-4",
+            isChecked
+              ? size === "sm"
+                ? "translate-x-3 bg-primary-foreground"
+                : "translate-x-4 bg-primary-foreground"
+              : "translate-x-0 bg-zinc-400",
+          )}
+        />
+      </button>
+    );
+  },
+);
+
+Switch.displayName = "Switch";

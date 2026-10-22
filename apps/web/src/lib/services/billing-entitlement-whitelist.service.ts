@@ -9,15 +9,27 @@ type BillingScope = {
 export async function isBillingScopeWhitelisted(
   scope: BillingScope,
 ): Promise<boolean> {
-  const emails = scope.organizationId
-    ? await organizationOwnerEmails(scope.organizationId)
-    : await personalOwnerEmails(scope.ownerId);
+  const candidateEmails = new Set<string>();
 
-  if (emails.length === 0) return false;
+  if (scope.ownerId) {
+    const personal = await personalOwnerEmails(scope.ownerId);
+    for (const email of personal) {
+      if (email) candidateEmails.add(normalizeEmail(email));
+    }
+  }
+
+  if (scope.organizationId) {
+    const orgEmails = await organizationOwnerEmails(scope.organizationId);
+    for (const email of orgEmails) {
+      if (email) candidateEmails.add(normalizeEmail(email));
+    }
+  }
+
+  if (candidateEmails.size === 0) return false;
 
   const entry = await prisma.billingEntitlementWhitelist.findFirst({
     where: {
-      email: { in: emails.map(normalizeEmail) },
+      email: { in: Array.from(candidateEmails) },
       enabled: true,
     },
     select: { email: true },
@@ -30,17 +42,38 @@ async function personalOwnerEmails(ownerId: string): Promise<string[]> {
     where: { id: ownerId },
     select: { email: true },
   });
-  return owner ? [owner.email] : [];
+  return owner?.email ? [owner.email] : [];
 }
 
 async function organizationOwnerEmails(
   organizationId: string,
 ): Promise<string[]> {
-  const owners = await prisma.member.findMany({
-    where: { organizationId, role: "owner" },
-    select: { user: { select: { email: true } } },
-  });
-  return owners.map((owner) => owner.user.email);
+  const [org, owners] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        accountOwner: { select: { email: true } },
+      },
+    }),
+    prisma.member.findMany({
+      where: {
+        organizationId,
+        role: { in: ["owner", "admin"] },
+      },
+      select: { user: { select: { email: true } } },
+    }),
+  ]);
+
+  const emails: string[] = [];
+  if (org?.accountOwner?.email) {
+    emails.push(org.accountOwner.email);
+  }
+  for (const owner of owners) {
+    if (owner.user?.email) {
+      emails.push(owner.user.email);
+    }
+  }
+  return emails;
 }
 
 function normalizeEmail(email: string): string {

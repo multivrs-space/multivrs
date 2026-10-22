@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getServerSession } from "@/lib/auth/session";
+import { findAccountTeam } from "@/lib/services/account-team.service";
 
 /**
  * Root route ("/").
@@ -8,7 +9,7 @@ import { getServerSession } from "@/lib/auth/session";
  * This page never renders UI — it only decides where to send the visitor,
  * mirroring how vercel.com works:
  *   - Logged out      -> /home   (marketing landing)
- *   - Logged in       -> /<username>  (their dashboard, e.g. /c-tech)
+ *   - Logged in       -> /<team-slug>  (their team dashboard, e.g. /c-tech)
  *   - Logged in, but
  *     no username yet -> /signup?step=username  (finish onboarding)
  *
@@ -31,11 +32,11 @@ async function RootRedirect() {
     return redirect("/home");
   }
 
-  const username = session.user.username;
-  if (!username) {
-    // Authenticated but hasn't picked a username — send them to finish setup.
+  const team = await findAccountTeam(session.user.id);
+  const targetSlug = team?.slug ?? session.user.username;
+  if (!targetSlug) {
     return redirect("/signup?step=username");
   }
 
-  return redirect(`/${username}`);
+  return redirect(`/${targetSlug}`);
 }

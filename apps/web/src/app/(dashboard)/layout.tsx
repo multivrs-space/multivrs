@@ -4,6 +4,8 @@ import { DashboardAuthFallback } from "@/features/dashboard/components/Dashboard
 import { getServerSession } from "@/lib/auth/session";
 import { geistMono, hankenGrotesk } from "@/lib/dashboard-fonts";
 
+export const instant = false;
+
 /**
  * Layout for the authenticated dashboard area (everything under /[username]).
  *

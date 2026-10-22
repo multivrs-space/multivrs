@@ -2,12 +2,13 @@
 
 > A modern, serverless edge deployment platform. Connect a repo, and we'll detect the framework, build it, optimize assets, and serve them globally on the edge.
 
-Multivrs is a Vercel-class deployment platform designed for high-performance edge computing. It provides first-class support for Next.js as well as our own `swift-rust` framework. 
+Multivrs is a modern, high-performance edge deployment platform engineered from the ground up for our flagship **`swift-rust`** framework, with first-class support for Next.js, Vite, and modern full-stack web applications. 
 
 ## ✨ Key Features
 
-- **Global Edge Network**: Deploy your code to a global edge network powered by Cloudflare Workers.
-- **Smart Framework Detection**: Automatically detects your framework, package manager, and monorepo setup.
+- **Flagship `swift-rust` Runtime**: Native, zero-config support for `swift-rust` with multiple render targets (`wasm`, `ssr`, `ssr-htmx`, `ssr-wasm`).
+- **Global Edge Network**: Deploy your code to a global edge network powered by Cloudflare Workers and high-performance edge compute.
+- **Smart Framework Detection**: Automatically detects your framework, prioritizing `swift-rust`, with zero-config setup for Next.js, Vite, Remix, Astro, and Nuxt.
 - **Advanced Asset Optimization**: Lossless and perceptually lossless asset optimization running at build-time (images, fonts, video, minification) using Rust.
 - **Instant Rollbacks**: Every deploy is immutable. Rollbacks are instant alias pointer flips, with no rebuilds required.
 - **Built-in Services**: 
@@ -45,7 +46,7 @@ multivrs/
 │   └── web/              # The main Multivrs Dashboard (Next.js)
 ├── packages/
 │   ├── backend/          # Convex real-time layer
-│   ├── builder-*/        # Builders for Next.js, swift-rust, etc.
+│   ├── builder-*/        # Builders for swift-rust, Next.js, etc.
 │   ├── cli/              # Single-binary deploy CLI (Rust)
 │   ├── config/           # Shared multivrs.json schema and types
 │   ├── fs-detectors/     # Framework/repo detectors
@@ -112,7 +113,7 @@ bunx prisma db push  # or migrate dev
 
 We follow a strict language strategy:
 - **TypeScript**: The default for the dashboard (`web`), API, configuration, client, and routing.
-- **Rust**: Used for CPU-bound tasks like the CLI, `builder-core` (hashing, asset optimization), and swift-rust render core.
+- **Rust**: Used for CPU-bound tasks like the swift-rust compiler & render core, the native CLI, and builder-core (Rayon hashing, asset optimization).
 - **Go**: Handles the network data plane, proxying, TLS, and log ingestion.
 - **Bun**: Our monorepo package manager, test runner, and local development runtime.
 

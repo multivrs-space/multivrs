@@ -97,13 +97,35 @@ export function displayPlan(context: EntitlementContext): PlanKey {
 }
 
 export async function accountPlan(username: string): Promise<PlanKey> {
-  const owner = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { username },
     select: { id: true },
   });
-  if (!owner) return "hobby";
-  const { context } = await resolveBillingEntitlements(owner.id);
-  return displayPlan(context);
+  if (user) {
+    const { context } = await resolveBillingEntitlements(user.id);
+    return displayPlan(context);
+  }
+
+  const org = await prisma.organization.findFirst({
+    where: {
+      OR: [
+        { slug: username },
+        { slug: username.toLowerCase() },
+        { name: username },
+      ],
+    },
+    select: { id: true, accountOwnerId: true },
+  });
+  if (org) {
+    const { context } = await resolveBillingEntitlements(
+      org.accountOwnerId ?? "",
+      null,
+      org.id,
+    );
+    return displayPlan(context);
+  }
+
+  return "hobby";
 }
 
 export async function assertResourceAvailable(input: {
