@@ -289,7 +289,7 @@ async function buildPayFunction(islandUrl) {
       join(FUNC_DIR, ".vc-config.json"),
       `${JSON.stringify(
         {
-          runtime: "nodejs22.x",
+          runtime: "nodejs24.x",
           handler: "index.js",
           launcherType: "Nodejs",
           supportsResponseStreaming: true,
