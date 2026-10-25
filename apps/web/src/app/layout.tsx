@@ -19,7 +19,7 @@ const SOCIAL_IMAGE_PATH = "/og.jpg?v=2";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Build Beyond Limits`,
+    default: `${SITE_NAME} — Build and run your software in one place`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Build Beyond Limits`,
+    title: `${SITE_NAME} — Build and run your software in one place`,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -48,13 +48,13 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         type: "image/jpeg",
-        alt: `${SITE_NAME} — Build Beyond Limits`,
+        alt: `${SITE_NAME} — Build and run your software in one place`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — Build Beyond Limits`,
+    title: `${SITE_NAME} — Build and run your software in one place`,
     description: SITE_DESCRIPTION,
     images: [SOCIAL_IMAGE_PATH],
   },

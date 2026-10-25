@@ -23,7 +23,7 @@ const HIGHLIGHTS = [
  * Hero content:
  * - On Mobile (< lg):
  *   Upper half: Big, bold Particle M Logo (top zone)
- *   Lower half: Headline ("Build Beyond Limits"), WordFlip rotating text, and CTA buttons
+ *   Lower half: Headline ("Build and run your software in one place"), WordFlip rotating text, and CTA buttons
  *   Bottom: Reserved spacing for logo bar
  *
  * - On Desktop (lg):
@@ -79,7 +79,7 @@ export function HeroContent() {
       >
         <h1 className="mb-2 lg:mb-8 font-clash max-w-full">
           <FoldText
-            text={"Build\nBeyond Limits"}
+            text={"Build and run\nyour software\nin one place"}
             splitBy="char"
             hinge="top"
             trigger="mount"
