@@ -5,9 +5,9 @@ import { HeroSection } from "@/components/marketing/HeroSection";
 import { Services } from "@/components/marketing/Services";
 
 export const metadata: Metadata = {
-  title: "Multivrs | Software Ecosystem for Modern Teams",
+  title: "Multivrs | Build and Run Software in One Place",
   description:
-    "Multivrs builds a connected software ecosystem: cloud deployment, developer tooling, AI workflows, and premium product experiences.",
+    "Deploy apps, register domains, manage email, and access cloud infrastructure and security tools—all from one platform for building and running software.",
   // "/" redirects signed-out visitors here, so this is the page's real address.
   alternates: { canonical: "/home" },
 };

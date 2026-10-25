@@ -375,7 +375,7 @@ export function Services() {
           <h2 className="font-sans text-4xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-medium tracking-tight text-foreground leading-[1.04] text-left">
             One platform for
             <br />
-            every layer of the stack.
+            every layer of your stack.
           </h2>
         </div>
 

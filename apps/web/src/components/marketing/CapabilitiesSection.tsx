@@ -159,7 +159,7 @@ export function CapabilitiesSection() {
           ref={headingRef}
           className="font-clash text-[clamp(2.5rem,6vw,5rem)] font-bold leading-[1.02] tracking-tight text-foreground"
         >
-          One platform for every layer of the stack.
+          One platform for every layer of your stack.
         </h2>
         <p
           data-reveal

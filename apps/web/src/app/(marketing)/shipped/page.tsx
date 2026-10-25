@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ComingSoonPage } from "@/components/marketing/ComingSoonPage";
 
 export const metadata: Metadata = {
-  title: "Shipped & Releases · Multivrs",
+  title: "Multivrs | Shipped & Releases",
   description: "Live changelog and product releases shipped across Multivrs.",
 };
 

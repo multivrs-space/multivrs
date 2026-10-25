@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Talk to Sales | Multivrs",
+  title: "Multivrs | Talk to Sales",
 };
 
 export default function ContactSalesPage() {

@@ -23,7 +23,7 @@ const HIGHLIGHTS = [
  * Hero content:
  * - On Mobile (< lg):
  *   Upper half: Big, bold Particle M Logo (top zone)
- *   Lower half: Headline ("Build and run your software in one place"), WordFlip rotating text, and CTA buttons
+ *   Lower half: Headline ("Your Stack. Unified."), WordFlip rotating text, and CTA buttons
  *   Bottom: Reserved spacing for logo bar
  *
  * - On Desktop (lg):
@@ -77,9 +77,9 @@ export function HeroContent() {
         ref={leftColRef}
         className="order-2 my-auto flex w-full max-w-full flex-col items-center text-center opacity-0 px-2 sm:px-0 lg:order-1 lg:my-0 lg:max-w-[360px] xl:max-w-[420px] lg:items-start lg:text-left"
       >
-        <h1 className="mb-2 lg:mb-8 font-clash max-w-full">
+        <h1 className="mb-2 lg:mb-8 font-sans max-w-full">
           <FoldText
-            text={"Build and run\nyour software\nin one place"}
+            text={"Your Stack.\nUnified."}
             splitBy="char"
             hinge="top"
             trigger="mount"
@@ -89,7 +89,7 @@ export function HeroContent() {
             fontSize="clamp(2.1rem, 3.6vw, 3.8rem)"
             fontWeight={700}
             color="#ffffff"
-            className="font-clash leading-[1.02] lg:leading-[1.04] tracking-tight select-none max-w-full inline-block"
+            className="font-sans leading-[1.02] lg:leading-[1.04] tracking-tight select-none max-w-full inline-block"
           />
         </h1>
 

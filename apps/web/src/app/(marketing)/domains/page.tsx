@@ -5,7 +5,7 @@ import { DomainMarketplaceShell } from "@/features/domains/DomainMarketplaceShel
 import { DomainSearchPlaceholder } from "@/features/domains/DomainSearchPlaceholder";
 
 export const metadata: Metadata = {
-  title: "Domains | Multivrs",
+  title: "Multivrs | Domains",
   description: "Find and manage a domain for your next project.",
 };
 

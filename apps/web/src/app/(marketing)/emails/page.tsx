@@ -7,7 +7,7 @@ import { EmailsIntegrate } from "@/components/marketing/emails/EmailsIntegrate";
 import { EmailsShowcase } from "@/components/marketing/emails/EmailsShowcase";
 
 export const metadata: Metadata = {
-  title: "Emails | Multivrs",
+  title: "Multivrs | Emails",
   description:
     "Send transactional and campaign email from your own domain, receive replies as real threads, and track every delivery event with signed webhooks.",
   alternates: { canonical: "/emails" },

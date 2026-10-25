@@ -9,7 +9,7 @@ import { getPricingPlans } from "@/lib/payments/pricing";
 import { getCachedPricingComparison } from "@/sanity/lib/pricing-comparison.service";
 
 export const metadata: Metadata = {
-  title: "Pricing | Multivrs",
+  title: "Multivrs | Pricing",
   description:
     "Predictable, usage-based pricing for modern software teams. Start for free on our Hobby plan, or scale with Pro and Enterprise.",
   alternates: { canonical: "/pricing" },

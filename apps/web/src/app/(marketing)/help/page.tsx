@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ComingSoonPage } from "@/components/marketing/ComingSoonPage";
 
 export const metadata: Metadata = {
-  title: "Help Center · Multivrs",
+  title: "Multivrs | Help Center",
   description: "Knowledge base, troubleshooting guides, and support resources.",
 };
 

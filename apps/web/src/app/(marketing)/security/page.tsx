@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ComingSoonPage } from "@/components/marketing/ComingSoonPage";
 
 export const metadata: Metadata = {
-  title: "Edge Security · Multivrs",
+  title: "Multivrs | Edge Security",
   description: "Multivrs Edge Security and Autonomous WAF.",
 };
 
