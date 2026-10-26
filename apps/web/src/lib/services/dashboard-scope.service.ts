@@ -47,10 +47,7 @@ export const canAccessDashboardWorkspace = cache(
       }),
       prisma.project.findFirst({
         where: {
-          OR: [
-            { owner: { username } },
-            { organization: { slug: username } },
-          ],
+          OR: [{ owner: { username } }, { organization: { slug: username } }],
           organization: { members: { some: { userId } } },
         },
         select: { id: true },
@@ -65,9 +62,11 @@ export async function getScopedProject(
   username: string,
   slug: string,
 ): Promise<ScopedProject> {
+  const ownerId = await accountOwnerIdForSlug(username);
+  if (!ownerId) throw new NotFoundError("Project not found");
   const project = await prisma.project.findFirst({
     where: {
-      owner: { username },
+      ownerId,
       slug,
       OR: projectAccessWhere(userId),
     },

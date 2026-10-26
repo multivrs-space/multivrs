@@ -3,6 +3,7 @@ import { cacheLife } from "next/cache";
 import { z } from "zod";
 import type { AccountUsage } from "@/features/dashboard/types/usage.types";
 import { prisma } from "@/lib/prisma";
+import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import { projectAccessWhere } from "@/lib/services/project-access";
 
 const responseSchema = z.object({
@@ -47,9 +48,10 @@ export async function getAccountUsage(
   userId: string,
   workspaceUsername: string,
 ): Promise<AccountUsage> {
+  const ownerId = await accountOwnerIdForSlug(workspaceUsername);
   const projects = await prisma.project.findMany({
     where: {
-      owner: { username: workspaceUsername },
+      ownerId: ownerId ?? "",
       OR: projectAccessWhere(userId),
     },
     select: { id: true },
