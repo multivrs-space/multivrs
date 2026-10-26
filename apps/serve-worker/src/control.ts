@@ -1,6 +1,9 @@
+import { cachedResolution } from "./resolution-cache";
 import type { Env } from "./types";
 
 export interface ControlResolution {
+  /** Production deployment on a paid plan: its container never sleeps. */
+  alwaysOn?: boolean;
   analyticsEnabled: boolean;
   attackMode: boolean;
   browserTtl: number;
@@ -37,31 +40,37 @@ export function encodeRuntimeEnvironment(values: Record<string, string>): string
   return btoa(binary);
 }
 
-export async function resolveDeployment(request: Request, env: Env): Promise<ControlResolution> {
+function resolveRequest(env: Env, query: Record<string, string>): Promise<Response> {
   const endpoint = new URL("/api/serve/resolve", env.CONTROL_PLANE_URL);
-  endpoint.searchParams.set("hostname", new URL(request.url).hostname);
+  for (const [name, value] of Object.entries(query)) endpoint.searchParams.set(name, value);
   const headers = new Headers();
   if (env.CONTROL_PLANE_TOKEN) {
     headers.set("authorization", `Bearer ${env.CONTROL_PLANE_TOKEN}`);
   }
-  const response = await fetch(endpoint, { headers });
-  if (!response.ok) {
-    throw new Error(`control plane returned ${response.status}`);
-  }
-  return response.json<ControlResolution>();
+  return fetch(endpoint, { headers });
 }
 
-export async function resolveProjectDeployment(
+export function resolveDeployment(
+  request: Request,
+  env: Env,
+  context?: ExecutionContext,
+): Promise<ControlResolution> {
+  const hostname = new URL(request.url).hostname.toLowerCase();
+  return cachedResolution(
+    `host:${hostname}`,
+    () => resolveRequest(env, { hostname }),
+    context ? (promise) => context.waitUntil(promise) : undefined,
+  );
+}
+
+export function resolveProjectDeployment(
   projectId: string,
   env: Env,
+  context?: ExecutionContext,
 ): Promise<ControlResolution> {
-  const endpoint = new URL("/api/serve/resolve", env.CONTROL_PLANE_URL);
-  endpoint.searchParams.set("projectId", projectId);
-  const headers = new Headers();
-  if (env.CONTROL_PLANE_TOKEN) {
-    headers.set("authorization", `Bearer ${env.CONTROL_PLANE_TOKEN}`);
-  }
-  const response = await fetch(endpoint, { headers });
-  if (!response.ok) throw new Error(`control plane returned ${response.status}`);
-  return response.json<ControlResolution>();
+  return cachedResolution(
+    `project:${projectId}`,
+    () => resolveRequest(env, { projectId }),
+    context ? (promise) => context.waitUntil(promise) : undefined,
+  );
 }

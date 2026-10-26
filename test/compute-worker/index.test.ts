@@ -16,8 +16,22 @@ describe("native compute request boundary", () => {
       deploymentId: "deployment_123",
       entrypoint: "server",
       environment: {},
+      keepWarm: false,
       runtime: "bun",
     });
+  });
+
+  test("reads the keep-warm flag set for paid production deployments", () => {
+    const request = new Request("https://compute.internal/", {
+      headers: {
+        "x-multivrs-artifact": "c".repeat(64),
+        "x-multivrs-deployment": "deployment_789",
+        "x-multivrs-entrypoint": "server",
+        "x-multivrs-keep-warm": "1",
+        "x-multivrs-runtime": "bun",
+      },
+    });
+    expect(parseRuntimeRequest(request)?.keepWarm).toBe(true);
   });
 
   test("decodes validated runtime environment variables", () => {

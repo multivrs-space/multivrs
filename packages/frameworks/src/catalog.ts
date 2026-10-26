@@ -23,6 +23,7 @@ export const FRAMEWORKS: readonly Framework[] = [
     name: "swift-rust",
     signals: [
       { dependency: "swift-rust" },
+      { file: "swift-rust.config.json" },
       { file: "swift-rust.config.ts" },
       { file: "swift-rust.config" },
     ],

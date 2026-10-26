@@ -1,3 +1,8 @@
+import {
+  RUNTIME_ORIGIN_HEADER,
+  runtimeOriginKey,
+  runtimeScriptName,
+} from "@multivrs/client/runtime-worker";
 import { collectAnalyticsEvent } from "./analytics-events";
 import { isBlobRequest, serveBlob } from "./blob";
 import { releaseCacheLock, serveFunctionWithCache, storeGeneratedResponse } from "./cache";
@@ -26,7 +31,12 @@ export async function serveDeployment(
   env: Env,
   context: ExecutionContext,
 ): Promise<ServedDeployment> {
-  return serveResolvedDeployment(request, env, context, await resolveDeployment(request, env));
+  return serveResolvedDeployment(
+    request,
+    env,
+    context,
+    await resolveDeployment(request, env, context),
+  );
 }
 
 async function serveResolvedDeployment(
@@ -80,7 +90,7 @@ async function serveResolvedDeployment(
   if (hop < 4) {
     const mounted = resolveMicrofrontend(request, runtimeConfig);
     if (mounted) {
-      const target = await resolveProjectDeployment(mounted.targetProjectId, env);
+      const target = await resolveProjectDeployment(mounted.targetProjectId, env, context);
       const served = await serveResolvedDeployment(mounted.request, env, context, target);
       const headers = new Headers(served.response.headers);
       headers.set("x-multivrs-microfrontend", mounted.targetProjectId);
@@ -197,6 +207,7 @@ async function invokeFunctionResponse(
     request.headers.get("x-multivrs-request-id") ?? crypto.randomUUID(),
   );
   forwarded.headers.set("x-multivrs-runtime", fn.runtime);
+  if (deployment.alwaysOn) forwarded.headers.set("x-multivrs-keep-warm", "1");
   forwarded.headers.set(
     "x-multivrs-environment",
     encodeRuntimeEnvironment(deployment.runtimeEnvironment),
@@ -207,6 +218,13 @@ async function invokeFunctionResponse(
   const startedAt = Date.now();
   if (fn.runtime === "edge" && env.DISPATCHER) {
     response = await env.DISPATCHER.get(deployment.deploymentId).fetch(forwarded);
+  } else if (fn.runtime === "edge" && env.RUNTIME_ORIGIN_SECRET && env.RUNTIME_WORKERS_SUBDOMAIN) {
+    response = await fetchStandaloneRuntime(
+      forwarded,
+      deployment.deploymentId,
+      env.RUNTIME_ORIGIN_SECRET,
+      env.RUNTIME_WORKERS_SUBDOMAIN,
+    );
   } else if (env.COMPUTE) {
     response = await env.COMPUTE.fetch(forwarded);
   } else if (fn.runtime === "node" || fn.runtime === "bun") {
@@ -270,7 +288,7 @@ export async function processRevalidation(
   context: ExecutionContext,
 ): Promise<void> {
   try {
-    const deployment = await resolveProjectDeployment(message.projectId, env);
+    const deployment = await resolveProjectDeployment(message.projectId, env, context);
     const manifest = await loadManifest(env, deployment);
     if (!manifest) throw new Error("Deployment artifact not found during revalidation");
     const request = new Request(message.requestUrl, {
@@ -302,4 +320,21 @@ function cacheControl(deployment: ControlResolution, path?: string): string {
   const immutable = path && !path.endsWith(".html") && deployment.cacheMode === "smart";
   if (immutable) return "public, max-age=31536000, immutable";
   return `public, max-age=${deployment.browserTtl}, s-maxage=${deployment.edgeTtl}, stale-while-revalidate=${deployment.staleWindow}`;
+}
+
+/** Forward to a deployment's own Worker over workers.dev, proving the serve Worker sent it. */
+async function fetchStandaloneRuntime(
+  forwarded: Request,
+  deploymentId: string,
+  secret: string,
+  subdomain: string,
+): Promise<Response> {
+  const incoming = new URL(forwarded.url);
+  const target = new URL(
+    `${incoming.pathname}${incoming.search}`,
+    `https://${runtimeScriptName(deploymentId)}.${subdomain}.workers.dev`,
+  );
+  const request = new Request(target, forwarded);
+  request.headers.set(RUNTIME_ORIGIN_HEADER, await runtimeOriginKey(secret, deploymentId));
+  return fetch(request, { redirect: "manual" });
 }

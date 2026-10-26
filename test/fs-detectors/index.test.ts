@@ -25,6 +25,10 @@ describe("@multivrs/fs-detectors", () => {
     expect(await detectFrameworkId(fsFor("swift-rust"))).toBe("swift-rust");
   });
 
+  test("detects swift-rust from swift-rust.config.json alone", async () => {
+    expect(await detectFrameworkId(fsFor("swift-rust-json"))).toBe("swift-rust");
+  });
+
   test("detects vite", async () => {
     expect(await detectFrameworkId(fsFor("vite"))).toBe("vite");
   });

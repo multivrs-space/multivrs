@@ -8,6 +8,8 @@ export interface BuildWorkerEnv {
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_API_TOKEN?: string;
   DISPATCH_NAMESPACE?: string;
+  /** Derives per-deployment origin keys when runtimes run outside a dispatch namespace. */
+  RUNTIME_ORIGIN_SECRET?: string;
   Sandbox: DurableObjectNamespace<Sandbox>;
   SANDBOX_TRANSPORT: string;
 }

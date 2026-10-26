@@ -6,13 +6,17 @@
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "SANDBOX_TRANSPORT": "rpc",
-    "DISPATCH_NAMESPACE": "multivrs-deployments"
+    // Empty: the account has no Workers for Platforms, so each server-rendered
+    // deployment is published as its own Worker. Set to a namespace to switch.
+    "DISPATCH_NAMESPACE": ""
   },
   "containers": [
     {
       "class_name": "Sandbox",
       "image": "./Dockerfile",
       "image_build_context": "../..",
+      // The image unpacks to ~2.5 GB; smaller types fail with ImagePullRequestedDiskSizeToSmall.
+      "instance_type": "standard-2",
       "max_instances": 5
     }
   ],

@@ -46,7 +46,7 @@ export async function executeBuild(job: BuildJob, env: BuildWorkerEnv) {
     sleepAfter: "10m",
   });
   try {
-    await appendBuildLog(job, "info", "Cloudflare build sandbox starting");
+    await appendBuildLog(job, "info", "Starting build environment");
     await sandbox.gitCheckout(checkoutUrl(job), {
       branch: job.input.branch,
       depth: 1,
