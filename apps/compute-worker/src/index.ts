@@ -11,8 +11,12 @@ async function invoke(request: Request, env: Env, context: ExecutionContext): Pr
   if (!runtimeRequest) {
     return new Response("Invalid runtime request", { status: 400 });
   }
+  // keepWarm is policy, not runtime identity: keep it out of the state the
+  // container compares, or toggling it would reinstall the runtime.
+  const { keepWarm, ...runtimeState } = runtimeRequest;
   const container = getContainer(env.RUNTIME, runtimeRequest.deploymentId);
-  const ready = await container.ensureRuntime(runtimeRequest);
+  context.waitUntil(container.setKeepWarm(keepWarm));
+  const ready = await container.ensureRuntime(runtimeState);
   if (!ready) {
     const manifest = await loadArtifact(env, runtimeRequest.artifactHash);
     if (!manifest.files.some((file) => file.path === runtimeRequest.entrypoint)) {
@@ -25,7 +29,7 @@ async function invoke(request: Request, env: Env, context: ExecutionContext): Pr
         return new Response(`Runtime file not found: ${file.path}`, { status: 404 });
       await container.installFile(file.path, object.body);
     }
-    await container.activateRuntime(runtimeRequest);
+    await container.activateRuntime(runtimeState);
   }
   const response = await container.fetch(request);
   context.waitUntil(container.flushRuntimeLogs());

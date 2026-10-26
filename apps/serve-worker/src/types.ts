@@ -36,6 +36,10 @@ export interface Env {
   DISPATCHER?: {
     get(name: string): Fetcher;
   };
+  /** Platform secret for per-deployment runtime Workers (no dispatch namespace). */
+  RUNTIME_ORIGIN_SECRET?: string;
+  /** Account workers.dev subdomain that hosts per-deployment runtime Workers. */
+  RUNTIME_WORKERS_SUBDOMAIN?: string;
   IMAGES?: ImagesBinding;
   RATE_LIMITER?: RateLimit;
   REVALIDATION_QUEUE?: Queue<RevalidationMessage>;

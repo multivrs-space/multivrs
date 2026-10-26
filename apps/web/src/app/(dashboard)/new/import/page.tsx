@@ -1,28 +1,26 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { NewProjectHeader } from "@/features/dashboard/components/NewProjectHeader";
-import { NewProjectImportFlow } from "@/features/dashboard/components/NewProjectImportFlow";
+import { redirect } from "next/navigation";
+import { getServerSession } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "Import Project — Multivrs",
-  description: "Configure framework preset and deploy repository on Multivrs",
-};
+/** Reads the URL and session at request time, like the rest of the dashboard. */
+export const instant = false;
 
-export default function NewProjectImportPage() {
-  return (
-    <div className="min-h-screen w-full bg-background text-foreground">
-      <NewProjectHeader />
-      <main className="w-full">
-        <Suspense
-          fallback={
-            <div className="mx-auto max-w-5xl p-8 text-sm text-muted-foreground">
-              Loading repository…
-            </div>
-          }
-        >
-          <NewProjectImportFlow />
-        </Suspense>
-      </main>
-    </div>
-  );
+/** Legacy entry point: keeps old import links working inside the dashboard. */
+export default async function NewProjectImportRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [session, params] = await Promise.all([
+    getServerSession(),
+    searchParams,
+  ]);
+  if (!session) redirect("/login?redirect=/new");
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") query.set(key, value);
+  }
+  const workspace =
+    query.get("teamSlug") ?? session.user.username ?? session.user.id;
+  query.delete("teamSlug");
+  redirect(`/${workspace}/new/import?${query.toString()}`);
 }

@@ -14,6 +14,8 @@ export interface RuntimeRequest {
   artifactHash: string;
   environment: Record<string, string>;
   entrypoint: string;
+  /** Set by the serve Worker for production deployments on a paid plan. */
+  keepWarm: boolean;
   runtime: z.infer<typeof runtimeSchema>;
 }
 
@@ -35,7 +37,14 @@ export function parseRuntimeRequest(request: Request): RuntimeRequest | null {
     const binary = atob(encoded);
     const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
     const environment = environmentSchema.parse(JSON.parse(new TextDecoder().decode(bytes)));
-    return { deploymentId, artifactHash, entrypoint, environment, runtime: runtime.data };
+    return {
+      deploymentId,
+      artifactHash,
+      entrypoint,
+      environment,
+      keepWarm: request.headers.get("x-multivrs-keep-warm") === "1",
+      runtime: runtime.data,
+    };
   } catch {
     return null;
   }

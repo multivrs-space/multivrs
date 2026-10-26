@@ -27,11 +27,11 @@ export function EnvironmentDraftEditor({
     });
   }
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-muted/70">
+    <section className="overflow-hidden rounded-lg border border-(--hairline)">
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-2 p-3.5 text-xs font-medium text-foreground/80"
+        className="flex w-full items-center gap-2 px-3.5 py-3 text-[13px] font-medium text-foreground/80 hover:text-foreground"
       >
         <ChevronRight className={open ? "size-3.5 rotate-90" : "size-3.5"} />{" "}
         Environment variables
@@ -48,7 +48,7 @@ export function EnvironmentDraftEditor({
                     update(item.id, { key: event.target.value })
                   }
                   placeholder="EXAMPLE_KEY"
-                  className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs outline-hidden"
+                  className="h-9 w-full rounded-md border border-(--hairline) bg-foreground/[0.03] px-3 font-mono text-xs outline-hidden"
                 />
               </label>
               <label className="min-w-0 flex-1">
@@ -59,7 +59,7 @@ export function EnvironmentDraftEditor({
                     update(item.id, { value: event.target.value })
                   }
                   placeholder="value"
-                  className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs outline-hidden"
+                  className="h-9 w-full rounded-md border border-(--hairline) bg-foreground/[0.03] px-3 font-mono text-xs outline-hidden"
                 />
               </label>
               <button
@@ -90,7 +90,7 @@ export function EnvironmentDraftEditor({
                 ],
               })
             }
-            className="flex items-center gap-1.5 text-xs font-medium text-purple-400"
+            className="flex items-center gap-1.5 text-xs font-medium text-primary"
           >
             <Plus className="size-3.5" /> Add variable
           </button>

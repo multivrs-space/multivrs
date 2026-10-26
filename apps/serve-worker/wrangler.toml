@@ -1,7 +1,9 @@
 name = "multivrs-serve"
 main = "src/index.ts"
 compatibility_date = "2026-07-10"
-compatibility_flags = ["nodejs_compat"]
+# global_fetch_strictly_public: same-account fetches (per-deployment runtime
+# Workers, *.multivrs.app) go through the public edge instead of the origin.
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
 # workers.dev stays on: the dashboard calls it for workflow control (CLOUDFLARE_WORKFLOW_WORKER_URL).
 workers_dev = true
@@ -83,6 +85,8 @@ crons = ["* * * * *"]
 # In production this is the deployed dashboard URL.
 [vars]
 CONTROL_PLANE_URL = "https://multivrs.space"
+# Hosts per-deployment runtime Workers (<name>.<subdomain>.workers.dev).
+RUNTIME_WORKERS_SUBDOMAIN = "colecrownwealthadrian"
 
 [observability]
 enabled = true

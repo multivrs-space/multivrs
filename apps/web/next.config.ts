@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
     "@multivrs/config",
     "@multivrs/client",
     "@multivrs/error-utils",
+    "@multivrs/frameworks",
+    "@multivrs/fs-detectors",
   ],
 };
 

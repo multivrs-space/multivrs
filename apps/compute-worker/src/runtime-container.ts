@@ -1,4 +1,5 @@
 import { Container } from "@cloudflare/containers";
+import { keepWarmActive, recordKeepWarm } from "./keep-warm";
 import type { RuntimeRequest } from "./request";
 import type { Env } from "./types";
 
@@ -15,6 +16,19 @@ export class SwiftRustContainer extends Container<Env> {
   sleepAfter = "10m";
   enableInternet = false;
   private flushPromise?: Promise<void>;
+
+  async setKeepWarm(keepWarm: boolean): Promise<void> {
+    await recordKeepWarm(this.ctx.storage, keepWarm);
+  }
+
+  /** Paid production deployments renew instead of sleeping; see keep-warm.ts. */
+  async onActivityExpired(): Promise<void> {
+    if (await keepWarmActive(this.ctx.storage)) {
+      this.renewActivityTimeout();
+      return;
+    }
+    await super.onActivityExpired();
+  }
 
   async ensureRuntime(state: RuntimeState): Promise<boolean> {
     await this.ensureContainer();

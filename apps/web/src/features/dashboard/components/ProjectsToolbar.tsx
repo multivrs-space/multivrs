@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
+import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 import { cn } from "@/lib/utils";
 
 export type ProjectLayout = "grid" | "list";
@@ -35,6 +36,7 @@ interface ProjectsToolbarProps {
 }
 
 export function ProjectsToolbar(props: ProjectsToolbarProps) {
+  const { username } = useDashboardScope();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -157,7 +159,10 @@ export function ProjectsToolbar(props: ProjectsToolbarProps) {
               <List className="size-4" />
             </button>
           </div>
-          <Link href="/new" className={buttonVariants({ size: "lg" })}>
+          <Link
+            href={`/${username}/new`}
+            className={buttonVariants({ size: "lg" })}
+          >
             Add New
           </Link>
         </div>

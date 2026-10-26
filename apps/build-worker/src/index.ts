@@ -34,8 +34,13 @@ async function consume(message: Message<BuildJob>, env: BuildWorkerEnv) {
     await revokeBuildToken(job);
     message.ack();
   } catch (error) {
-    const messageText = error instanceof Error ? error.message : "Build failed";
-    if (!(error instanceof BuildCommandError) && message.attempts < 3) {
+    const isBuildError = error instanceof BuildCommandError;
+    if (!isBuildError) console.error("build infrastructure error", error);
+    // Infrastructure errors are provider-specific; users see a neutral message.
+    const messageText = isBuildError
+      ? error.message
+      : "The build environment failed to start. Retry the deployment.";
+    if (!isBuildError && message.attempts < 3) {
       await appendBuildLog(job, "warn", "Build infrastructure interrupted; retrying").catch(
         () => undefined,
       );

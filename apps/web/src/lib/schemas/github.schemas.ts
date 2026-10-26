@@ -1,3 +1,4 @@
+import { FRAMEWORK_IDS } from "@multivrs/config";
 import { z } from "zod";
 
 export const githubRepositorySchema = z.object({
@@ -7,7 +8,6 @@ export const githubRepositorySchema = z.object({
   full_name: z.string().min(1),
   html_url: z.url(),
   id: z.number().int(),
-  is_turbo: z.boolean().optional(),
   language: z.string().nullable(),
   name: z.string().min(1),
   owner: z.object({ avatar_url: z.url(), login: z.string().min(1) }),
@@ -18,7 +18,7 @@ export const githubRepositorySchema = z.object({
 
 export const githubRepositoriesResponseSchema = z.object({
   connected: z.boolean(),
-  owner: z.string(),
+  owner: z.string().nullable(),
   repos: z.array(githubRepositorySchema),
 });
 
@@ -32,3 +32,36 @@ export const githubRepositoryUrlSchema = z.url().refine((value) => {
 }, "Enter an HTTPS GitHub repository URL");
 
 export type GitHubRepository = z.infer<typeof githubRepositorySchema>;
+
+export const frameworkDetectionQuerySchema = z.object({
+  owner: z.string().min(1).max(100),
+  repo: z.string().min(1).max(100),
+  /** Branch to read; omitted means the repository's default branch. */
+  ref: z.string().max(255).optional(),
+  root: z
+    .string()
+    .max(500)
+    .default(".")
+    .transform((value) =>
+      value
+        .split("/")
+        .filter((segment) => segment && segment !== ".")
+        .join("/"),
+    )
+    .refine(
+      (value) => !value.split("/").includes(".."),
+      "Root directory must stay inside the repository",
+    ),
+});
+
+export const frameworkDetectionSchema = z.object({
+  /** The branch that was read (resolves the default branch when none was given). */
+  ref: z.string(),
+  framework: z.enum(FRAMEWORK_IDS).nullable(),
+  frameworkName: z.string().nullable(),
+  packageManager: z.enum(["bun", "pnpm", "yarn", "npm"]),
+  buildCommand: z.string().nullable(),
+  outputDirectory: z.string().nullable(),
+});
+
+export type FrameworkDetection = z.infer<typeof frameworkDetectionSchema>;

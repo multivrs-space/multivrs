@@ -1,3 +1,4 @@
+import { ResolutionNotFoundError } from "./resolution-cache";
 import { processRevalidation, serveDeployment } from "./serve";
 import { recordRequest } from "./telemetry";
 import type { Env, RevalidationMessage } from "./types";
@@ -24,8 +25,12 @@ export default {
         );
       }
       return served.response;
-    } catch {
-      const response = new Response("Deployment resolution failed", { status: 502 });
+    } catch (error: unknown) {
+      const notFound = error instanceof ResolutionNotFoundError;
+      if (!notFound) console.error("deployment resolution failed", error);
+      const response = notFound
+        ? new Response("Deployment not found", { status: 404 })
+        : new Response("Deployment resolution failed", { status: 502 });
       recordRequest(env, request, "unresolved", "unresolved", response, Date.now() - startedAt);
       return response;
     }

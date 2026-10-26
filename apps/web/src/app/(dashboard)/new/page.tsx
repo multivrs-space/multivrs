@@ -1,24 +1,12 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { NewProjectFlow } from "@/features/dashboard/components/NewProjectFlow";
-import { NewProjectHeader } from "@/features/dashboard/components/NewProjectHeader";
 import { getServerSession } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: "New Project — Multivrs",
-  description: "Deploy a new project or import a Git repository on Multivrs",
-};
+/** Reads the URL and session at request time, like the rest of the dashboard. */
+export const instant = false;
 
-export default async function NewProjectPage() {
+/** Legacy entry point: New Project now lives inside the workspace dashboard. */
+export default async function NewProjectRedirect() {
   const session = await getServerSession();
   if (!session) redirect("/login?redirect=/new");
-  const username = session.user.username ?? session.user.id;
-  return (
-    <div className="min-h-screen w-full bg-background text-foreground">
-      <NewProjectHeader />
-      <main className="w-full">
-        <NewProjectFlow username={username} />
-      </main>
-    </div>
-  );
+  redirect(`/${session.user.username ?? session.user.id}/new`);
 }

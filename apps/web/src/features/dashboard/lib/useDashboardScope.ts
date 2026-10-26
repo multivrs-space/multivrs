@@ -1,7 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ALL_PROJECTS_SCOPE } from "@/features/dashboard/constants/navigation";
+import {
+  ALL_PROJECTS_SCOPE,
+  NEW_PROJECT_SLUG,
+} from "@/features/dashboard/constants/navigation";
 
 export interface DashboardScope {
   /** Account slug (first path segment). */
@@ -21,6 +24,7 @@ export interface DashboardScope {
  *   /c-tech/~/cdn               → { c-tech, ~,            cdn }
  *   /c-tech/kontinue-ai         → { c-tech, kontinue-ai,  ""  }
  *   /c-tech/kontinue-ai/cdn     → { c-tech, kontinue-ai,  cdn }
+ *   /c-tech/new                 → { c-tech, ~,            new } (account-level page)
  */
 export function useDashboardScope(): DashboardScope {
   const pathname = usePathname();
@@ -28,6 +32,14 @@ export function useDashboardScope(): DashboardScope {
   const [username = "", rawScope, rawSlug] = pathname
     .split("/")
     .filter(Boolean);
+  if (rawScope === NEW_PROJECT_SLUG) {
+    return {
+      username,
+      scope: ALL_PROJECTS_SCOPE,
+      activeSlug: NEW_PROJECT_SLUG,
+      isAllProjects: true,
+    };
+  }
   const scope = rawScope ?? ALL_PROJECTS_SCOPE;
   return {
     username,

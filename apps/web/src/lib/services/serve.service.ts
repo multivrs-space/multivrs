@@ -2,9 +2,15 @@ import "server-only";
 import { NotFoundError } from "@multivrs/error-utils";
 import { type FirewallRule, firewallRuleSchema } from "@multivrs/firewall";
 import { prisma } from "@/lib/prisma";
+import {
+  displayPlan,
+  resolveBillingEntitlements,
+} from "@/lib/services/billing-entitlement.service";
 import { deploymentEnvironment } from "@/lib/services/environment-variable.service";
 
 export interface ServeResolution {
+  /** Production deployment on a paid plan: its container never sleeps. */
+  alwaysOn: boolean;
   analyticsEnabled: boolean;
   deploymentId: string;
   artifactHash: string;
@@ -22,6 +28,16 @@ export interface ServeResolution {
   staleWindow: number;
   billingBlocked: boolean;
   billingBlockReason: string | null;
+}
+
+/** Paid plans keep production containers awake; failures fall back to sleeping. */
+async function paidPlan(ownerId: string, projectId: string): Promise<boolean> {
+  try {
+    const { context } = await resolveBillingEntitlements(ownerId, projectId);
+    return displayPlan(context) !== "hobby";
+  } catch {
+    return false;
+  }
 }
 
 async function readyResolution(
@@ -70,7 +86,12 @@ async function readyResolution(
       ),
       prisma.project.findUnique({
         where: { id: deployment.projectId },
-        select: { usageBlockedUntil: true, usageBlockReason: true },
+        select: {
+          ownerId: true,
+          productionDeploymentId: true,
+          usageBlockedUntil: true,
+          usageBlockReason: true,
+        },
       }),
     ]);
   const firewallRules = rows.map((row) =>
@@ -81,7 +102,11 @@ async function readyResolution(
       id: row.id,
     }),
   );
+  const alwaysOn =
+    billing?.productionDeploymentId === deployment.id &&
+    (await paidPlan(billing.ownerId, deployment.projectId));
   return {
+    alwaysOn,
     analyticsEnabled: settings?.analyticsEnabled ?? true,
     artifactHash: deployment.artifactHash,
     attackMode: settings?.attackMode ?? false,
