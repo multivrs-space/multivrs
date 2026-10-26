@@ -21,7 +21,7 @@ COPY --from=cli-builder /source/target/release/multivrs /usr/local/bin/multivrs
 ENV CARGO_HOME=/usr/local/cargo
 ENV RUSTUP_HOME=/usr/local/rustup
 ENV PATH=/root/.bun/bin:/usr/local/cargo/bin:/usr/local/bin:/usr/bin:/bin
-RUN rustup default stable && multivrs --version
+RUN rustup default stable && multivrs --version && /usr/local/bin/bun --version
 # Pinned publisher: runtime deploys never resolve wrangler from a customer's node_modules.
 RUN bun install -g wrangler@4.152.0 && /root/.bun/bin/wrangler --version
 
