@@ -169,6 +169,13 @@ export async function resolveHostname(
   return readyResolution(project?.productionDeployment ?? null);
 }
 
+/** The project's stable address, which always serves its production deployment. */
+export function projectUrl(slug: string): string | null {
+  const baseDomain = process.env.MULTIVRS_DEPLOYMENT_DOMAIN;
+  if (!baseDomain) return null;
+  return `${process.env.MULTIVRS_DEPLOYMENT_PROTOCOL ?? "https"}://${slug}.${baseDomain}`;
+}
+
 export function deploymentUrl(deploymentId: string): string {
   const baseDomain = process.env.MULTIVRS_DEPLOYMENT_DOMAIN;
   if (!baseDomain && process.env.NODE_ENV === "development") {

@@ -94,7 +94,7 @@
 }
 
 .dark {
-  --background: #030303;
+  --background: #000000;
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -130,8 +130,8 @@
 
   /* Dashboard chrome tokens — defined globally (not just on .dashboard-surface)
      so portalled UI (dropdowns/menus rendered at <body>) resolves them too. */
-  --ink: #0a0a0b;
-  --ink-raised: #0f0f10;
+  --ink: #000000;
+  --ink-raised: #0a0a0a;
   --hairline: rgba(255, 255, 255, 0.07);
   --hairline-strong: rgba(255, 255, 255, 0.12);
 }

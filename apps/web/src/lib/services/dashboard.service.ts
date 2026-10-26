@@ -8,7 +8,7 @@ import type {
 import { prisma } from "@/lib/prisma";
 import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import { projectAccessWhere } from "@/lib/services/project-access";
-import { deploymentUrl } from "@/lib/services/serve.service";
+import { deploymentUrl, projectUrl } from "@/lib/services/serve.service";
 import { SITE_URL } from "@/lib/site";
 
 function relative(date: Date): string {
@@ -84,7 +84,11 @@ export const dashboardProjects = cache(async function dashboardProjects(
     const generatedDeploymentUrl = latest
       ? (latest.url ?? deploymentUrl(latest.id))
       : null;
-    const siteUrl = hostname ? `https://${hostname}` : generatedDeploymentUrl;
+    // Custom domain first, then the project's own address; a per-deployment
+    // URL only when no deployment domain is configured (local development).
+    const siteUrl = hostname
+      ? `https://${hostname}`
+      : (projectUrl(project.slug) ?? generatedDeploymentUrl);
     const repositoryLabel = project.repositoryUrl
       ? new URL(project.repositoryUrl).pathname
           .replace(/^\//, "")
@@ -95,7 +99,7 @@ export const dashboardProjects = cache(async function dashboardProjects(
       slug: project.slug,
       name: project.name,
       siteUrl,
-      siteLabel: hostname ?? hostLabel(generatedDeploymentUrl),
+      siteLabel: hostname ?? hostLabel(siteUrl),
       faviconUrl: siteUrl ? faviconUrl(siteUrl) : null,
       repositoryUrl: project.repositoryUrl,
       repositoryLabel,
