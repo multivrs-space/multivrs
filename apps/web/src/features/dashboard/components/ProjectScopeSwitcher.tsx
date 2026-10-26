@@ -70,7 +70,7 @@ export function ProjectScopeSwitcher({
         query={query}
         onCreate={() => {
           close();
-          router.push("/new");
+          router.push(`/${username}/new`);
         }}
         onQueryChange={setQuery}
         onSelect={select}

@@ -1,9 +1,20 @@
 "use client";
 
-import { CircleCheck, CircleX, Globe2, Loader2 } from "lucide-react";
+import { CircleCheck, CircleX, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import type { ImportDeploymentStatus } from "@/features/dashboard/hooks/useDeploymentImport";
 
+const STATUS_TEXT: Record<Exclude<ImportDeploymentStatus, "idle">, string> = {
+  building: "Building",
+  canceled: "Canceled after",
+  failed: "Failed after",
+  ready: "Ready in",
+};
+
+/** Live build status and log tail shown once a deploy has started. */
 export function DeploymentProgress({
   cancel,
   deploying,
@@ -17,71 +28,57 @@ export function DeploymentProgress({
   detailsUrl?: string;
   logs: Array<{ id: string; message: string }>;
   seconds: number;
-  status: ImportDeploymentStatus;
+  status: Exclude<ImportDeploymentStatus, "idle">;
 }) {
-  const hasAttempt = status !== "idle";
+  const tail = useRef<HTMLDivElement>(null);
+  // Keep the newest line in view as logs stream in.
+  useEffect(() => {
+    if (logs.length) tail.current?.scrollTo({ top: tail.current.scrollHeight });
+  }, [logs]);
+
   return (
-    <section className="mt-8 rounded-2xl border border-border bg-card p-6">
-      <h2 className="text-lg font-semibold">Deployment</h2>
-      {!hasAttempt ? (
-        <div className="mt-4 grid min-h-48 place-items-center rounded-xl border border-border bg-muted text-center">
-          <div>
-            <Globe2 className="mx-auto size-8 text-muted-foreground" />
-            <p className="mt-3 text-xs text-muted-foreground">
-              Build progress and logs will appear here.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-4 space-y-4">
-          <div
-            className="flex items-center gap-2 text-xs text-foreground/60"
-            aria-live="polite"
+    <div className="space-y-3">
+      <p
+        className="flex items-center gap-2 text-[13px] font-medium"
+        aria-live="polite"
+      >
+        {status === "building" ? (
+          <Loader2 className="size-4 animate-spin text-primary" />
+        ) : status === "ready" ? (
+          <CircleCheck className="size-4 text-emerald-400" />
+        ) : (
+          <CircleX className="size-4 text-rose-400" />
+        )}
+        {STATUS_TEXT[status]}
+        <span className="font-mono text-xs text-muted-foreground">
+          {seconds}s
+        </span>
+      </p>
+      <div
+        ref={tail}
+        className="h-56 space-y-1 overflow-y-auto rounded-lg border border-(--hairline) bg-black/40 p-3 font-mono text-[11px] leading-relaxed"
+      >
+        {logs.map((log) => (
+          <p key={log.id} className="break-words text-foreground/85">
+            {log.message}
+          </p>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        {deploying ? (
+          <Button type="button" size="sm" variant="outline" onClick={cancel}>
+            Cancel
+          </Button>
+        ) : null}
+        {detailsUrl ? (
+          <Link
+            href={detailsUrl}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            {status === "building" ? (
-              <Loader2 className="size-4 animate-spin text-purple-400" />
-            ) : status === "ready" ? (
-              <CircleCheck className="size-4 text-emerald-400" />
-            ) : (
-              <CircleX className="size-4 text-rose-400" />
-            )}
-            {status === "building"
-              ? `Building for ${seconds}s`
-              : status === "ready"
-                ? `Built in ${seconds}s`
-                : status === "canceled"
-                  ? `Canceled after ${seconds}s`
-                  : `Deployment failed after ${seconds}s`}
-          </div>
-          <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-border bg-background p-4 font-mono text-xs">
-            {logs.map((log) => (
-              <div key={log.id} className="flex gap-2">
-                <span className="text-muted-foreground">›</span>
-                <span>{log.message}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {deploying ? (
-              <button
-                type="button"
-                onClick={cancel}
-                className="h-9 rounded-lg border border-border px-4 text-xs font-medium hover:bg-foreground/5"
-              >
-                Cancel deployment
-              </button>
-            ) : null}
-            {detailsUrl ? (
-              <Link
-                href={detailsUrl}
-                className="inline-flex h-9 items-center rounded-lg border border-border px-4 text-xs font-medium hover:bg-foreground/5"
-              >
-                View deployment details
-              </Link>
-            ) : null}
-          </div>
-        </div>
-      )}
-    </section>
+            Deployment details
+          </Link>
+        ) : null}
+      </div>
+    </div>
   );
 }

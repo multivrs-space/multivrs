@@ -1,9 +1,12 @@
 import "server-only";
 import type { Deployment } from "@multivrs/client";
 import { ConflictError } from "@multivrs/error-utils";
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getDeployment, toDeployment } from "@/lib/services/deployment.service";
 import { notifyDeploymentStatus } from "@/lib/services/deployment-notification.service";
+import { logError } from "@/lib/services/logger.service";
+import { pruneRuntimeWorkers } from "@/lib/services/runtime-worker-cleanup.service";
 
 export async function markDeploymentBuilding(
   ownerId: string,
@@ -45,6 +48,11 @@ export async function markDeploymentReady(
     return deployment;
   });
   await notifyDeploymentStatus(ownerId, projectId, deploymentId, "ready");
+  after(() =>
+    pruneRuntimeWorkers(projectId).catch((error: unknown) =>
+      logError("runtime_worker.prune_failed", error),
+    ),
+  );
   return toDeployment(row);
 }
 

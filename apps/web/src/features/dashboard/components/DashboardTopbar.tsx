@@ -1,11 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronRight, MailPlus } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
-import { DASHBOARD_NAV_ITEMS } from "@/features/dashboard/constants/navigation";
+import {
+  DASHBOARD_NAV_ITEMS,
+  NEW_PROJECT_SLUG,
+} from "@/features/dashboard/constants/navigation";
 import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 import { useGlobalMailStore } from "@/features/mail/mail-context";
 import {
@@ -52,7 +55,10 @@ export function DashboardTopbar({
 
   const sectionSlug = activeSlug === "email" ? "emails" : activeSlug;
   const section =
-    DASHBOARD_NAV_ITEMS.find((i) => i.slug === sectionSlug)?.name ?? "Overview";
+    activeSlug === NEW_PROJECT_SLUG
+      ? "New Project"
+      : (DASHBOARD_NAV_ITEMS.find((i) => i.slug === sectionSlug)?.name ??
+        "Overview");
 
   const mailStore = useGlobalMailStore();
 
@@ -62,7 +68,13 @@ export function DashboardTopbar({
 
       {isAccount ? (
         <div className="flex flex-1 items-center justify-center">
-          <Suspense fallback={<span className="text-sm font-medium text-foreground">Settings</span>}>
+          <Suspense
+            fallback={
+              <span className="text-sm font-medium text-foreground">
+                Settings
+              </span>
+            }
+          >
             <AccountTopbarTitle />
           </Suspense>
         </div>
@@ -75,7 +87,9 @@ export function DashboardTopbar({
               <ProjectScopeSwitcher />
             )}
           </div>
-          <span className="text-sm font-medium text-foreground">Team Settings</span>
+          <span className="text-sm font-medium text-foreground">
+            Team Settings
+          </span>
           <div className="w-20" aria-hidden="true" />
         </div>
       ) : (
@@ -86,7 +100,9 @@ export function DashboardTopbar({
             <ProjectScopeSwitcher />
           )}
           <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/40" />
-          <span className="truncate text-[13px] font-medium text-foreground">{section}</span>
+          <span className="truncate text-[13px] font-medium text-foreground">
+            {section}
+          </span>
         </div>
       )}
 

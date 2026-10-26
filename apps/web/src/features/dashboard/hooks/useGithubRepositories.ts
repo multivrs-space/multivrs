@@ -11,7 +11,7 @@ export function useGithubRepositories() {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
-  const [owner, setOwner] = useState("github");
+  const [owner, setOwner] = useState<string | null>(null);
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
   useEffect(() => {
     let active = true;
@@ -27,7 +27,7 @@ export function useGithubRepositories() {
         setConnected(result.connected);
         setOwner(result.owner);
         setRepositories(result.repos);
-        if (!result.repos.length)
+        if (result.connected && !result.repos.length)
           setError("No repositories were returned by GitHub.");
       })
       .catch((cause: unknown) => {

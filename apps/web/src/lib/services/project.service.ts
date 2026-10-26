@@ -24,7 +24,7 @@ import {
   projectRole,
   projectRoleInclude,
 } from "@/lib/services/project-access";
-import { slugify } from "@/lib/services/slug";
+import { RESERVED_PROJECT_SLUGS, slugify } from "@/lib/services/slug";
 
 function toProject(row: ProjectRow): Project {
   return projectSchema.parse({
@@ -81,6 +81,9 @@ export async function createProject(
     ? creatorId
     : await accountOwnerFor(creatorId, input.account);
   const slug = input.slug ?? slugify(input.name);
+  if (RESERVED_PROJECT_SLUGS.has(slug)) {
+    throw new ConflictError(`"${slug}" is reserved. Choose another project name.`);
+  }
   if (input.organizationId) {
     const member = await prisma.member.findUnique({
       where: {

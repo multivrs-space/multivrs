@@ -25,6 +25,9 @@ import {
  */
 export const ALL_PROJECTS_SCOPE = "~";
 
+/** `/[username]/new` — the account-level New Project page, not a project scope. */
+export const NEW_PROJECT_SLUG = "new";
+
 export interface DashboardNavItem {
   /** Display label. */
   name: string;
