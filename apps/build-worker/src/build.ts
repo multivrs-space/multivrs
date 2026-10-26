@@ -32,7 +32,8 @@ function commandEnvironment(job: BuildJob) {
     MULTIVRS_API_URL: job.apiUrl,
     MULTIVRS_TOKEN: job.apiToken,
     MULTIVRS_DEPLOYMENT_ID: job.deploymentId,
-    MULTIVRS_BUN_BINARY: "/root/.bun/bin/bun",
+    // The sandbox base image ships bun here (see the Dockerfile check).
+    MULTIVRS_BUN_BINARY: "/usr/local/bin/bun",
     ...(job.framework ? { MULTIVRS_FRAMEWORK: job.framework } : {}),
     ...(job.input.buildCommand ? { MULTIVRS_BUILD_COMMAND: job.input.buildCommand } : {}),
     ...(job.input.installCommand ? { MULTIVRS_INSTALL_COMMAND: job.input.installCommand } : {}),
