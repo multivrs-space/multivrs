@@ -23,4 +23,4 @@ binding = "ARTIFACTS"
 bucket_name = "multivrs-artifacts"
 
 [vars]
-CONTROL_PLANE_URL = "http://localhost:3000"
+CONTROL_PLANE_URL = "https://multivrs.space"

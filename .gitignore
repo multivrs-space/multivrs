@@ -45,3 +45,6 @@ yarn-error.log*
 # Rust (Cargo workspace for cli / builder-core)
 /target
 **/*.rs.bk
+
+# Wrangler local dev overrides
+.dev.vars

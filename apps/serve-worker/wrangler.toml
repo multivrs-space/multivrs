@@ -3,6 +3,15 @@ main = "src/index.ts"
 compatibility_date = "2026-07-10"
 compatibility_flags = ["nodejs_compat"]
 
+# workers.dev stays on: the dashboard calls it for workflow control (CLOUDFLARE_WORKFLOW_WORKER_URL).
+workers_dev = true
+preview_urls = false
+
+# Customer deployments: <project-or-deployment>.multivrs.app
+routes = [
+  { pattern = "*.multivrs.app/*", zone_name = "multivrs.app" },
+]
+
 # R2 bucket that stores every deployment's blobs + manifests.
 # Created automatically on first `wrangler deploy` (if it doesn't exist).
 [[r2_buckets]]
@@ -73,7 +82,7 @@ crons = ["* * * * *"]
 # The control-plane API base URL used to resolve deployment IDs.
 # In production this is the deployed dashboard URL.
 [vars]
-CONTROL_PLANE_URL = "http://localhost:3000"
+CONTROL_PLANE_URL = "https://multivrs.space"
 
 [observability]
 enabled = true
