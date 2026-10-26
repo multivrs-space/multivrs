@@ -141,15 +141,12 @@ export async function dashboardDeployments(
   username: string,
   projectSlug?: string,
 ): Promise<DashboardDeployment[] | null> {
-  const owner = await prisma.user.findUnique({
-    where: { username },
-    select: { id: true },
-  });
-  if (!owner) return null;
+  const ownerId = await accountOwnerIdForSlug(username);
+  if (!ownerId) return null;
   const rows = await prisma.deployment.findMany({
     where: {
       project: {
-        ownerId: owner.id,
+        ownerId,
         ...(projectSlug ? { slug: projectSlug } : {}),
         OR: projectAccessWhere(viewerId),
       },

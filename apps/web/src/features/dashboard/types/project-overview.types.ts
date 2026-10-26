@@ -11,6 +11,8 @@ export interface ProjectOverviewDeployment {
 }
 
 export interface ProjectOverviewData {
+  /** The project's own address (`https://<slug>.<deployment domain>`), if configured. */
+  address: string | null;
   analytics: PlatformAnalytics;
   createdAt: string;
   domains: Array<{ hostname: string; status: string }>;
