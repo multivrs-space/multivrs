@@ -1,17 +1,17 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { LiveMails, LiveSend } from "@/components/icons/animated";
-import { Button } from "@/components/ui/button";
+import { LiveMails } from "@/components/icons/animated";
+import { BroadcastComposeActions } from "@/features/mail/compose/BroadcastComposeActions";
 import { BroadcastRecipients } from "@/features/mail/compose/BroadcastRecipients";
 import {
   ENVELOPE_FIELD,
   EnvelopeLine,
 } from "@/features/mail/compose/EnvelopeLine";
 import { MailSheet } from "@/features/mail/compose/MailSheet";
-import { SendLater } from "@/features/mail/compose/SendLater";
+import { MergeTags } from "@/features/mail/compose/MergeTags";
 import type { MailResources } from "@/features/mail/mail.types";
 import { useMailData } from "@/features/mail/mail-context";
 import { submitMailResource } from "@/features/mail/mail-resource.client";
@@ -31,13 +31,15 @@ export function MailBroadcastCompose({
   resources,
 }: MailBroadcastComposeProps) {
   const router = useRouter();
-  const params = useParams<{ username?: string }>();
+  const params = useParams<{ username?: string; scope?: string }>();
   const { mailboxes } = useMailData();
   const audiences = resources.audiences;
   const [sending, setSending] = useState(false);
   const [scheduled, setScheduled] = useState(false);
+  const body = useRef<HTMLTextAreaElement>(null);
 
   function submit(formData: FormData) {
+    const draft = formData.get("intent") === "draft";
     setSending(true);
     void submitMailResource(
       "broadcasts",
@@ -48,18 +50,25 @@ export function MailBroadcastCompose({
       setSending(false);
       if (!result.ok) return void toast.error(result.message);
       toast.success(
-        formData.get("scheduledAt")
-          ? "Broadcast scheduled"
-          : "Broadcast queued",
+        draft
+          ? "Draft saved"
+          : formData.get("scheduledAt")
+            ? "Broadcast scheduled"
+            : "Sending started",
       );
       onOpenChange(false);
-      router.refresh();
+      // Its own page shows it going out, copy by copy.
+      if (result.id && params.username && params.scope)
+        router.push(
+          `/${params.username}/${params.scope}/email/broadcasts/${result.id}`,
+        );
+      else router.refresh();
     });
   }
 
   return (
     <MailSheet
-      description="Draft, schedule and send to an audience that opted in."
+      description="Send to everyone subscribed, or one segment."
       icon={LiveMails}
       onOpenChange={onOpenChange}
       open={open}
@@ -77,7 +86,11 @@ export function MailBroadcastCompose({
                 required
               />
             </EnvelopeLine>
-            <BroadcastRecipients audiences={audiences} mailboxes={mailboxes} />
+            <BroadcastRecipients
+              audiences={audiences}
+              mailboxes={mailboxes}
+              subscribed={resources.audience.subscribed}
+            />
             <EnvelopeLine htmlFor="broadcast-subject" label="Subject">
               <input
                 className={`${ENVELOPE_FIELD} font-medium`}
@@ -88,33 +101,28 @@ export function MailBroadcastCompose({
               />
             </EnvelopeLine>
           </div>
-          <div className="p-4 sm:p-5">
+          <div className="space-y-3 p-4 sm:p-5">
+            <MergeTags
+              properties={resources.audience.properties.map(
+                (property) => property.key,
+              )}
+              target={body}
+            />
             <textarea
               aria-label="Campaign body"
               className="surface-inset min-h-[260px] w-full resize-y rounded-tile p-4 text-[14px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-ring/40"
               name="body"
-              placeholder="Write the campaign…"
+              placeholder={"Hi {{first_name|there}},\n\nWrite the campaign…"}
+              ref={body}
               required
             />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-3">
-          <Button
-            data-icon-trigger
-            disabled={sending || !audiences.length}
-            size="sm"
-            type="submit"
-            variant="hero"
-          >
-            <LiveSend strokeWidth={1.75} />
-            {sending
-              ? "Queuing…"
-              : scheduled
-                ? "Schedule campaign"
-                : "Send campaign"}
-          </Button>
-          <SendLater onChange={setScheduled} />
-        </div>
+        <BroadcastComposeActions
+          onScheduledChange={setScheduled}
+          scheduled={scheduled}
+          sending={sending}
+        />
       </form>
     </MailSheet>
   );

@@ -89,7 +89,11 @@ export function SidebarMailNav({
           const countKey = "count" in item && ctx ? item.count : undefined;
           return (
             <ContextNavItem
-              active={view === item.view}
+              active={
+                view === item.view ||
+                ("also" in item &&
+                  (item.also as readonly string[]).includes(view))
+              }
               href={`/${username}/${scope}/emails?view=${item.view}`}
               icon={item.icon}
               key={item.view}

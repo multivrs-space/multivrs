@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { DashCard } from "@/components/dashboard/DashCard";
 import { fullTimestamp } from "@/features/dashboard/lib/relative-time";
 import type { MailResourceItem } from "@/features/mail/mail.types";
@@ -21,8 +23,25 @@ export function MailResourceCard({
 }) {
   const config = mailResourceView(view);
   const Icon = config.icon;
+  const params = useParams<{ username?: string; scope?: string }>();
+  // Broadcasts open their own page: content, status and results.
+  const href =
+    view === "broadcasts" && params.username && params.scope
+      ? `/${params.username}/${params.scope}/email/broadcasts/${item.id}`
+      : undefined;
   return (
-    <DashCard aria-label={item.name} className="min-h-[164px] p-4">
+    <DashCard
+      aria-label={item.name}
+      className="relative min-h-[164px] p-4 transition-colors has-[a[data-card-link]:hover]:bg-foreground/[0.02]"
+    >
+      {href ? (
+        <Link
+          aria-label={`Open ${item.name}`}
+          className="absolute inset-0 z-0 rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          data-card-link
+          href={href}
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-3">
         {view === "mailboxes" ? (
           <SenderAvatar
@@ -38,7 +57,9 @@ export function MailResourceCard({
             <Icon className="size-[18px]" strokeWidth={1.75} />
           </span>
         )}
-        <MailResourceActions item={item} view={view} />
+        <div className="relative z-10">
+          <MailResourceActions item={item} view={view} />
+        </div>
       </div>
       <p className="mt-4 truncate text-[14.5px] font-semibold tracking-[-0.01em] text-foreground">
         {item.name}

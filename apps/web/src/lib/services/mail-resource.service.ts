@@ -11,9 +11,9 @@ import {
   mailAccount,
 } from "@/lib/services/mail-access.service";
 
+export { createBroadcast } from "@/lib/services/mail-broadcast.service";
 export {
   createAutomation,
-  createBroadcast,
   createTemplate,
 } from "@/lib/services/mail-campaign.service";
 export {

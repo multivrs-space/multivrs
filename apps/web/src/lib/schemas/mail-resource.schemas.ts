@@ -39,6 +39,13 @@ export const createMailContactSchema = z.object({
   audienceIds: z.array(z.uuid()).max(50).default([]),
 });
 
+/** Custom facts about a contact (company, plan), used as merge tags. */
+const contactPropertiesSchema = z
+  .record(z.string().regex(/^[a-z][a-z0-9_]{0,39}$/), z.string().max(500))
+  .refine((value) => Object.keys(value).length <= 50, {
+    message: "A contact can have up to 50 properties",
+  });
+
 /** Most contacts one import request carries; the dashboard sends batches. */
 export const CONTACT_IMPORT_BATCH = 1_000;
 
@@ -49,7 +56,11 @@ export const CONTACT_IMPORT_BATCH = 1_000;
 export const importMailContactsSchema = z.object({
   account,
   contacts: z
-    .array(createMailContactSchema.omit({ account: true, audienceIds: true }))
+    .array(
+      createMailContactSchema
+        .omit({ account: true, audienceIds: true })
+        .extend({ properties: contactPropertiesSchema.optional() }),
+    )
     .min(1)
     .max(CONTACT_IMPORT_BATCH),
   audienceId: z.uuid().optional(),
@@ -84,11 +95,14 @@ export const createMailBroadcastSchema = z.object({
   name: z.string().trim().min(1).max(160),
   subject: z.string().trim().min(1).max(998),
   fromAddress: mailAddressSchema,
-  audienceId: z.uuid(),
+  /** A segment; left out, it goes to every subscribed contact. */
+  audienceId: z.uuid().optional(),
   templateVersionId: z.uuid().optional(),
   body: z.string().min(1).max(2_000_000),
   projectId: z.uuid().optional(),
   scheduledAt: z.iso.datetime().optional(),
+  /** Save it without sending. */
+  draft: z.boolean().optional(),
 });
 
 export const createMailAutomationSchema = z.object({

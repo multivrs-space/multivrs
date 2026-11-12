@@ -34,7 +34,12 @@ async function queueDue(env: Env) {
   });
   if (!response.ok) throw new Error("Unable to load scheduled mail");
   const due = dueJobsSchema.parse(await response.json());
-  if (due.jobs.length) await env.MAIL_QUEUE.sendBatch(due.jobs.map((job) => ({ body: job })));
+  // A queue batch holds at most 100 messages.
+  for (let start = 0; start < due.jobs.length; start += 100) {
+    await env.MAIL_QUEUE.sendBatch(
+      due.jobs.slice(start, start + 100).map((job) => ({ body: job })),
+    );
+  }
 }
 
 export default {

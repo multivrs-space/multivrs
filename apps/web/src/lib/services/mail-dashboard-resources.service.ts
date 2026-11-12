@@ -2,6 +2,7 @@ import "server-only";
 import { isAuthenticatedSendingDomain } from "@/lib/mail/mail-domain-dns";
 import { RECEIVING_PURPOSE } from "@/lib/mail/ses-domain-snapshot";
 import { prisma } from "@/lib/prisma";
+import { audienceSummary } from "@/lib/services/mail-audience-summary.service";
 import { resource } from "@/lib/services/mail-dashboard-mappers";
 
 export async function mailDashboardResources(
@@ -18,6 +19,7 @@ export async function mailDashboardResources(
     automations,
     credentials,
     webhooks,
+    audience,
   ] = await Promise.all([
     prisma.mailDomain.findMany({
       where: { userId, ...scope },
@@ -32,7 +34,7 @@ export async function mailDashboardResources(
     prisma.mailContact.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: 2_000,
     }),
     prisma.mailAudience.findMany({
       where: { userId },
@@ -59,10 +61,12 @@ export async function mailDashboardResources(
       where: { userId, ...scope },
       orderBy: { createdAt: "desc" },
     }),
+    audienceSummary(userId),
   ]);
   return {
     verifiedDomains: domains.filter(isAuthenticatedSendingDomain).length,
     resources: {
+      audience,
       domains: domains.map((item) => {
         const status = isAuthenticatedSendingDomain(item)
           ? "verified"

@@ -111,8 +111,24 @@ export interface MailActivityDay {
   complained: number;
 }
 
+export interface ContactProperty {
+  key: string;
+  /** Contacts that have a value for it. */
+  contacts: number;
+  example: string;
+}
+
+export interface AudienceSummary {
+  total: number;
+  subscribed: number;
+  unsubscribed: number;
+  properties: ContactProperty[];
+}
+
 /** The account's mail resources, for the resource pages and their forms. */
 export interface MailResources {
+  /** Contact totals and custom properties, for the Audience page and broadcasts. */
+  audience: AudienceSummary;
   domains: MailResourceItem[];
   contacts: MailResourceItem[];
   audiences: MailResourceItem[];

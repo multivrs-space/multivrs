@@ -17,10 +17,11 @@ export const MAIL_RESOURCE_COPY: Record<
   },
   broadcasts: {
     description:
-      "Campaigns to an audience, drafted, scheduled and sent from here.",
+      "Campaigns to all your contacts or a segment, drafted, scheduled and sent from here.",
     layout: "cards",
     status: "orb",
-    empty: "Write a campaign once and send it to a whole audience.",
+    empty:
+      "Write a campaign once and send it to everyone, or just one segment.",
   },
   automations: {
     description:
@@ -41,13 +42,14 @@ export const MAIL_RESOURCE_COPY: Record<
     layout: "rows",
     mono: true,
     status: "orb",
-    empty: "Add people by hand or import them, then group them into audiences.",
+    empty: "Add people by hand or import a CSV, then group them into segments.",
   },
   audiences: {
-    description: "Groups of contacts to send campaigns to.",
+    description: "Named groups of contacts, like Customers or Beta testers.",
     layout: "cards",
     status: "chip",
-    empty: "Group contacts so a broadcast knows who to reach.",
+    empty:
+      "Make a segment, then add contacts to it when you create or import them.",
   },
   domains: {
     description: "Domains you send from and receive at, verified through DNS.",

@@ -1,123 +1,62 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { composeMail } from "@/lib/services/mail-compose.service";
+import { finishSentBroadcasts } from "@/lib/services/mail-broadcast-progress.service";
+import { sendBroadcast } from "@/lib/services/mail-broadcast-send.service";
+
+/** A send saves its progress every few seconds; this long silent means it died. */
+const STALLED_MS = 10 * 60_000;
 
 export interface ScheduledMailJob {
   userId: string;
   messageId: string;
 }
 
-async function materializeBroadcast(
-  broadcast: Awaited<ReturnType<typeof dueBroadcasts>>[number],
-) {
-  const mailbox = await prisma.mailbox.findFirst({
+/**
+ * Broadcasts that are due, sent one after another. Each hands its own copies
+ * to delivery, so none of them come back as jobs here.
+ */
+async function sendDueBroadcasts() {
+  // A send that stopped answering (its server went away) picks up where it saved.
+  await prisma.mailBroadcast.updateMany({
     where: {
-      userId: broadcast.userId,
-      address: broadcast.fromAddress,
-      status: "active",
+      status: "processing",
+      updatedAt: { lt: new Date(Date.now() - STALLED_MS) },
     },
+    data: { status: "scheduled" },
   });
-  if (!mailbox || !broadcast.audience)
-    throw new Error("Broadcast sender or audience is unavailable");
-  const suppressed = new Set(
-    (
-      await prisma.mailSuppression.findMany({
-        where: { userId: broadcast.userId },
-        select: { email: true },
-      })
-    ).map((row) => row.email),
-  );
-  const content = broadcast.templateVersion;
-  const recipients = broadcast.audience.members.filter(
-    (member) =>
-      member.subscriptionState === "subscribed" &&
-      !suppressed.has(member.contact.email),
-  );
-  const messages = await Promise.all(
-    recipients.map((member) =>
-      composeMail(
-        broadcast.userId,
-        {
-          mailboxId: mailbox.id,
-          to: [member.contact.email],
-          cc: [],
-          bcc: [],
-          attachments: [],
-          subject: broadcast.subject,
-          text: content?.text ?? "",
-          html: content?.html,
-        },
-        broadcast.id,
-        true,
-      ),
-    ),
-  );
-  await prisma.mailBroadcast.update({
-    where: { id: broadcast.id },
-    data: { status: "sending", sentAt: new Date() },
+  const due = await prisma.mailBroadcast.findMany({
+    where: { status: "scheduled", scheduledAt: { lte: new Date() } },
+    orderBy: { scheduledAt: "asc" },
+    select: { id: true },
+    take: 5,
   });
-  return messages.map((message) => ({
-    userId: broadcast.userId,
-    messageId: message.id,
-  }));
+  for (const { id } of due) await sendBroadcast(id);
 }
 
-function dueBroadcasts() {
-  return prisma.mailBroadcast.findMany({
+/** Scheduled single emails that are due, as delivery jobs for the queue. */
+async function dueMessages(): Promise<ScheduledMailJob[]> {
+  const scheduled = await prisma.mailMessage.findMany({
     where: { status: "scheduled", scheduledAt: { lte: new Date() } },
-    include: {
-      audience: { include: { members: { include: { contact: true } } } },
-      templateVersion: true,
-    },
-    take: 25,
+    select: { id: true, userId: true },
+    take: 500,
   });
+  const claimed = await Promise.all(
+    scheduled.map(async (message) => {
+      const { count } = await prisma.mailMessage.updateMany({
+        where: { id: message.id, status: "scheduled" },
+        data: { status: "queued" },
+      });
+      return count ? { userId: message.userId, messageId: message.id } : null;
+    }),
+  );
+  return claimed.filter((job) => job !== null);
 }
 
 export async function prepareDueMailJobs(): Promise<ScheduledMailJob[]> {
-  const [due, scheduled] = await Promise.all([
-    dueBroadcasts(),
-    prisma.mailMessage.findMany({
-      where: { status: "scheduled", scheduledAt: { lte: new Date() } },
-      select: { id: true, userId: true },
-      take: 500,
-    }),
+  const [jobs] = await Promise.all([
+    dueMessages(),
+    sendDueBroadcasts(),
+    finishSentBroadcasts(),
   ]);
-  const [broadcasts, scheduledJobs] = await Promise.all([
-    Promise.all(
-      due.map(async (broadcast) => {
-        const claimed = await prisma.mailBroadcast.updateMany({
-          where: { id: broadcast.id, status: "scheduled" },
-          data: { status: "processing" },
-        });
-        if (!claimed.count) return [];
-        try {
-          return await materializeBroadcast(broadcast);
-        } catch (error) {
-          await prisma.mailBroadcast.update({
-            where: { id: broadcast.id },
-            data: {
-              status: "failed",
-              stats: {
-                error:
-                  error instanceof Error ? error.message : "Broadcast failed",
-              },
-            },
-          });
-          return [];
-        }
-      }),
-    ),
-    Promise.all(
-      scheduled.map(async (message) => {
-        const claimed = await prisma.mailMessage.updateMany({
-          where: { id: message.id, status: "scheduled" },
-          data: { status: "queued" },
-        });
-        return claimed.count
-          ? { userId: message.userId, messageId: message.id }
-          : null;
-      }),
-    ),
-  ]);
-  return [...broadcasts.flat(), ...scheduledJobs.filter((job) => job !== null)];
+  return jobs;
 }

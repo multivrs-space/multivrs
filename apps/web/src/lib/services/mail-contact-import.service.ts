@@ -27,6 +27,10 @@ function uniqueContacts(input: ImportInput): ImportedContact[] {
       tags: [
         ...new Set([...(earlier?.tags ?? input.tags), ...contact.tags]),
       ].slice(0, 30),
+      properties:
+        earlier?.properties || contact.properties
+          ? { ...contact.properties, ...earlier?.properties }
+          : undefined,
     });
   }
   return [...byEmail.values()];
@@ -82,13 +86,16 @@ export async function importContacts(
               "firstName" = COALESCE(c."firstName", v."firstName"),
               "lastName" = COALESCE(c."lastName", v."lastName"),
               "tags" = COALESCE((SELECT array_agg(DISTINCT t) FROM unnest(c."tags" || ARRAY(SELECT jsonb_array_elements_text(v."tags"))) AS t), '{}'),
+              "properties" = CASE WHEN v."properties" IS NULL THEN c."properties"
+                ELSE (CASE WHEN jsonb_typeof(c."properties") = 'object' THEN c."properties" ELSE '{}'::jsonb END) || v."properties" END,
               "updatedAt" = now()
             FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb)
-              AS v("email" text, "firstName" text, "lastName" text, "tags" jsonb)
+              AS v("email" text, "firstName" text, "lastName" text, "tags" jsonb, "properties" jsonb)
             WHERE c."userId" = ${userId} AND c."email" = v."email" AND (
               (c."firstName" IS NULL AND v."firstName" IS NOT NULL) OR
               (c."lastName" IS NULL AND v."lastName" IS NOT NULL) OR
-              NOT (c."tags" @> ARRAY(SELECT jsonb_array_elements_text(v."tags")))
+              NOT (c."tags" @> ARRAY(SELECT jsonb_array_elements_text(v."tags"))) OR
+              (v."properties" IS NOT NULL AND NOT (COALESCE(c."properties", '{}'::jsonb) @> v."properties"))
             )`
         : 0;
       const ids = [...created, ...existing].map((contact) => contact.id);

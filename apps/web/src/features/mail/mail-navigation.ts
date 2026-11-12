@@ -3,7 +3,6 @@ import {
   LiveBookOpen,
   LiveBot,
   LiveChartColumn,
-  LiveContactRound,
   LiveFileText,
   LiveInbox,
   LiveKeyRound,
@@ -38,8 +37,13 @@ export const MAIL_NAVIGATION = [
   { label: "Broadcasts", view: "broadcasts", icon: LiveMails },
   { label: "Automations", view: "automations", icon: LiveBot },
   { label: "Templates", view: "templates", icon: LiveTags },
-  { label: "Contacts", view: "contacts", icon: LiveContactRound },
-  { label: "Audiences", view: "audiences", icon: LiveUsersRound },
+  // Contacts, segments and properties are tabs of one Audience page.
+  {
+    label: "Audience",
+    view: "contacts",
+    icon: LiveUsersRound,
+    also: ["audiences", "properties"],
+  },
   { divider: "INFRASTRUCTURE" },
   { label: "Domains", view: "domains", icon: LiveMailQuestion },
   { label: "Mailboxes", view: "mailboxes", icon: LiveMailPlus },

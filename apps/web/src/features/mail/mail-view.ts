@@ -13,6 +13,7 @@ export type MailView =
   | "templates"
   | "contacts"
   | "audiences"
+  | "properties"
   | "domains"
   | "mailboxes"
   | "credentials"
@@ -35,6 +36,7 @@ const MAIL_VIEWS = new Set<string>([
   "templates",
   "contacts",
   "audiences",
+  "properties",
   "domains",
   "mailboxes",
   "credentials",

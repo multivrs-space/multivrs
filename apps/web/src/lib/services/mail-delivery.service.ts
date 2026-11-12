@@ -3,6 +3,7 @@ import { isAuthenticatedSendingDomain } from "@/lib/mail/mail-domain-dns";
 import { configuredMailProvider } from "@/lib/mail/ses-mail.provider";
 import { prisma } from "@/lib/prisma";
 import { logError } from "@/lib/services/logger.service";
+import { deliveryHeaders } from "@/lib/services/mail-list-headers.service";
 import { enqueueMailWebhooks } from "@/lib/services/mail-webhook-delivery.service";
 import { publishBillingMeterEvents } from "@/lib/services/stripe-meter.service";
 import {
@@ -67,15 +68,7 @@ export async function deliverMailMessage(userId: string, messageId: string) {
       subject: message.subject,
       text: message.textBody ?? undefined,
       html: message.htmlBody ?? undefined,
-      // Lets the recipient's mail app thread a reply with what it answers.
-      headers: message.inReplyTo
-        ? {
-            "In-Reply-To": message.inReplyTo,
-            References: [...message.references, message.inReplyTo]
-              .filter((id, index, all) => all.indexOf(id) === index)
-              .join(" "),
-          }
-        : undefined,
+      headers: await deliveryHeaders(userId, message),
       attachments: message.attachments.flatMap((attachment) =>
         attachment.contentBase64
           ? [

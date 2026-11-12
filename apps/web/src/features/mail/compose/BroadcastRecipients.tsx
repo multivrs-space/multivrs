@@ -1,4 +1,3 @@
-import { LiveUsersRound } from "@/components/icons/animated";
 import {
   ENVELOPE_FIELD,
   EnvelopeLine,
@@ -8,13 +7,18 @@ import type {
   MailResourceItem,
 } from "@/features/mail/mail.types";
 
-/** Who a campaign comes from and which audience gets it. */
+const count = new Intl.NumberFormat("en-US");
+
+/** Who a campaign comes from, and whether everyone or one segment gets it. */
 export function BroadcastRecipients({
   mailboxes,
   audiences,
+  subscribed,
 }: {
   mailboxes: MailboxSummary[];
   audiences: MailResourceItem[];
+  /** Contacts a send to everyone reaches. */
+  subscribed: number;
 }) {
   return (
     <>
@@ -44,30 +48,25 @@ export function BroadcastRecipients({
         )}
       </EnvelopeLine>
       <EnvelopeLine htmlFor="broadcast-audience" label="To">
-        {audiences.length ? (
-          <select
-            className={`${ENVELOPE_FIELD} cursor-pointer`}
-            id="broadcast-audience"
-            name="audienceId"
-            required
-          >
-            {audiences.map((audience) => (
-              <option key={audience.id} value={audience.id}>
-                {audience.name}
-                {audience.detail ? ` · ${audience.detail}` : ""}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <p
-            className="flex h-10 items-center gap-2 text-[12.5px] text-amber-700 dark:text-amber-300"
-            data-icon-trigger
-            id="broadcast-audience"
-          >
-            <LiveUsersRound className="size-4 shrink-0" strokeWidth={1.75} />
-            Create an audience first, under Audiences.
-          </p>
-        )}
+        <select
+          className={`${ENVELOPE_FIELD} cursor-pointer`}
+          id="broadcast-audience"
+          name="audienceId"
+        >
+          <option value="">
+            All contacts · {count.format(subscribed)} subscribed
+          </option>
+          {audiences.length ? (
+            <optgroup label="Segments">
+              {audiences.map((audience) => (
+                <option key={audience.id} value={audience.id}>
+                  {audience.name}
+                  {audience.detail ? ` · ${audience.detail}` : ""}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
+        </select>
       </EnvelopeLine>
     </>
   );

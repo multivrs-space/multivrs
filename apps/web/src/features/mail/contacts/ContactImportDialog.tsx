@@ -8,6 +8,7 @@ import { DASH_DIALOG } from "@/components/dashboard/menu";
 import { LiveContactRound, LiveFileUp } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { ContactImportColumns } from "@/features/mail/contacts/ContactImportColumns";
 import { ContactImportFiles } from "@/features/mail/contacts/ContactImportFiles";
 import {
   ContactImportOptions,
@@ -16,20 +17,18 @@ import {
 import { ContactImportSummary } from "@/features/mail/contacts/ContactImportSummary";
 import { importContactBatches } from "@/features/mail/contacts/contact-import.client";
 import { mergeContactFiles } from "@/features/mail/contacts/contact-merge";
+import {
+  type CsvSource,
+  readCsvFiles,
+} from "@/features/mail/contacts/read-csv-files";
 
-const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_CONTACTS = 100_000;
 const count = new Intl.NumberFormat("en-US");
 
-interface Source {
-  key: string;
-  name: string;
-  text: string;
-}
-
 /**
  * Import contacts from one or more CSV exports. Files are read in the
- * browser and only addresses, names and tags are sent, never other columns.
+ * browser; only addresses, names, tags and the columns chosen as properties
+ * are sent.
  */
 export function ContactImportDialog({
   onOpenChange,
@@ -38,34 +37,22 @@ export function ContactImportDialog({
 }) {
   const router = useRouter();
   const { username } = useParams<{ username?: string }>();
-  const [sources, setSources] = useState<Source[]>([]);
+  const [sources, setSources] = useState<CsvSource[]>([]);
   const [choices, setChoices] = useState<ImportChoices>({
     audienceId: "",
     tags: "",
     consent: false,
   });
   const [sent, setSent] = useState<number | null>(null);
-  const merged = useMemo(() => mergeContactFiles(sources), [sources]);
+  const [keep, setKeep] = useState<string[]>([]);
+  const merged = useMemo(
+    () => mergeContactFiles(sources, keep),
+    [sources, keep],
+  );
   const total = merged.contacts.length;
 
   async function add(files: File[]) {
-    const csv = files.filter(
-      (file) => /\.csv$/i.test(file.name) || file.type === "text/csv",
-    );
-    if (csv.length < files.length)
-      toast.error("Only .csv files can be imported");
-    const large = csv.find((file) => file.size > MAX_FILE_BYTES);
-    if (large)
-      toast.error(`${large.name} is over 25 MB; split it into smaller files`);
-    const read = await Promise.all(
-      csv
-        .filter((file) => file.size <= MAX_FILE_BYTES)
-        .map(async (file) => ({
-          key: `${file.name}:${file.size}:${file.lastModified}`,
-          name: file.name,
-          text: await file.text(),
-        })),
-    );
+    const read = await readCsvFiles(files);
     setSources((current) => [
       ...current,
       ...read.filter(
@@ -119,6 +106,13 @@ export function ContactImportDialog({
             }
           />
           {sources.length ? <ContactImportSummary merged={merged} /> : null}
+          {total ? (
+            <ContactImportColumns
+              columns={merged.columns}
+              keep={keep}
+              onChange={setKeep}
+            />
+          ) : null}
           {total ? (
             <ContactImportOptions choices={choices} onChange={setChoices} />
           ) : null}

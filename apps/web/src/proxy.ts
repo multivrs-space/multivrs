@@ -37,6 +37,8 @@ const publicPrefixes = [
   "/email",
   "/emails",
   "/ci-cd",
+  // Where people who get a customer's broadcast stop getting them.
+  "/unsubscribe",
   "/changelog",
   "/customers",
   "/templates",
