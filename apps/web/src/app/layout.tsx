@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({
+// Self-hosted, so builds never wait on Google Fonts.
+const inter = localFont({
+  src: "../fonts/inter.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
 const SITE_DESCRIPTION =
