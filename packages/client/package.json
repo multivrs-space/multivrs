@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./runtime-worker": "./src/runtime-worker.ts"
+    "./runtime-worker": "./src/runtime-worker.ts",
+    "./preview": "./src/preview.ts"
   },
   "scripts": {
     "lint": "biome check .",

@@ -5,6 +5,8 @@ mod artifact_upload;
 mod deploy;
 mod framework;
 mod framework_output;
+mod next_setup;
+mod presenter;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};

@@ -5,6 +5,10 @@ import type { Env } from "./types";
 
 const APP_ROOT = "/runtime/app";
 const PORT = 8080;
+/** How long a confirmed-running app is trusted before checking it again. */
+const TRUST_MS = 30_000;
+/** Runtime logs are drained at most this often, not after every request. */
+const FLUSH_EVERY_MS = 5_000;
 type RuntimeState = Pick<
   RuntimeRequest,
   "artifactHash" | "deploymentId" | "entrypoint" | "environment" | "runtime"
@@ -16,6 +20,9 @@ export class SwiftRustContainer extends Container<Env> {
   sleepAfter = "10m";
   enableInternet = false;
   private flushPromise?: Promise<void>;
+  private lastFlush = 0;
+  /** The runtime this instance last confirmed serving, and when. */
+  private confirmed?: { key: string; at: number };
 
   async setKeepWarm(keepWarm: boolean): Promise<void> {
     await recordKeepWarm(this.ctx.storage, keepWarm);
@@ -30,25 +37,62 @@ export class SwiftRustContainer extends Container<Env> {
     await super.onActivityExpired();
   }
 
+  /**
+   * Whether this exact runtime is up. Recently confirmed means yes with no
+   * round trips into the container; otherwise the process and port are
+   * checked. A request that then fails calls `forgetRuntime` and retries.
+   */
   async ensureRuntime(state: RuntimeState): Promise<boolean> {
+    const key = JSON.stringify(state);
+    const recent = this.confirmed;
+    if (recent?.key === key && Date.now() - recent.at < TRUST_MS && this.runtime.running) {
+      return true;
+    }
     await this.ensureContainer();
     const current = await this.ctx.storage.get<RuntimeState>("runtimeState");
     const pid = await this.ctx.storage.get<number>("runtimePid");
-    if (JSON.stringify(current) !== JSON.stringify(state) || !pid || !(await this.isAlive(pid))) {
+    if (JSON.stringify(current) !== key || !pid || !(await this.isAlive(pid))) {
+      this.confirmed = undefined;
       return false;
     }
     await this.waitForPort({ portToCheck: PORT, retries: 4, waitInterval: 100 });
+    this.confirmed = { key, at: Date.now() };
     return true;
   }
 
+  /** A request to the app failed: check it properly before trusting it again. */
+  async forgetRuntime(): Promise<void> {
+    this.confirmed = undefined;
+  }
+
   async prepareRuntime(): Promise<void> {
+    this.confirmed = undefined;
     await this.ensureContainer();
     await this.stopRuntime();
+    // A fresh or woken container has no app folder yet: create it, then empty it.
     const cleaned = await this.runtime.exec(
-      ["sh", "-c", 'find "$1" -mindepth 1 -delete', "sh", APP_ROOT],
-      { stdout: "ignore", stderr: "ignore" },
+      ["sh", "-c", 'mkdir -p "$1" && find "$1" -mindepth 1 -delete', "sh", APP_ROOT],
+      { stdout: "ignore", stderr: "pipe" },
     );
-    if ((await cleaned.exitCode) !== 0) throw new Error("Could not clear the runtime directory");
+    const result = await cleaned.output();
+    if (result.exitCode !== 0) {
+      const detail = new TextDecoder().decode(result.stderr).trim();
+      throw new Error(`Could not clear the runtime directory: ${detail || "unknown error"}`);
+    }
+  }
+
+  /** Unpack the whole app from one streamed archive (see tar-stream.ts). */
+  async installArchive(archive: ReadableStream<Uint8Array>): Promise<void> {
+    const unpack = await this.runtime.exec(["sh", "-c", 'tar -x -C "$1"', "sh", APP_ROOT], {
+      stdin: archive,
+      stdout: "ignore",
+      stderr: "pipe",
+    });
+    const result = await unpack.output();
+    if (result.exitCode !== 0) {
+      const detail = new TextDecoder().decode(result.stderr).trim();
+      throw new Error(`Could not unpack the app: ${detail || "unknown error"}`);
+    }
   }
 
   async installFile(path: string, body: ReadableStream<Uint8Array>): Promise<void> {
@@ -69,6 +113,8 @@ export class SwiftRustContainer extends Container<Env> {
 
   async flushRuntimeLogs(): Promise<void> {
     if (this.flushPromise) return this.flushPromise;
+    if (Date.now() - this.lastFlush < FLUSH_EVERY_MS) return;
+    this.lastFlush = Date.now();
     this.flushPromise = this.flushRuntimeLogsOnce().finally(() => {
       this.flushPromise = undefined;
     });
@@ -106,12 +152,17 @@ export class SwiftRustContainer extends Container<Env> {
     await this.ctx.storage.put("runtimePid", process.pid);
     await this.ctx.storage.put("runtimeState", state);
     await this.waitForPort({ portToCheck: PORT, retries: 60, waitInterval: 250 });
+    this.confirmed = { key: JSON.stringify(state), at: Date.now() };
   }
 
   private async stopRuntime(): Promise<void> {
     const pid = await this.ctx.storage.get<number>("runtimePid");
     if (pid && (await this.isAlive(pid))) {
-      await this.runtime.exec(["kill", String(pid)], { stdout: "ignore" });
+      // The image has no kill binary; the shell's built-in one is always there.
+      await this.runtime.exec(["sh", "-c", 'kill "$1"', "sh", String(pid)], {
+        stdout: "ignore",
+        stderr: "ignore",
+      });
     }
     await this.ctx.storage.delete("runtimePid");
     await this.ctx.storage.delete("runtimeState");
@@ -160,7 +211,7 @@ export class SwiftRustContainer extends Container<Env> {
   }
 
   private async isAlive(pid: number): Promise<boolean> {
-    const check = await this.runtime.exec(["kill", "-0", String(pid)], {
+    const check = await this.runtime.exec(["sh", "-c", 'kill -0 "$1"', "sh", String(pid)], {
       stdout: "ignore",
       stderr: "ignore",
     });
@@ -169,7 +220,7 @@ export class SwiftRustContainer extends Container<Env> {
 
   private get runtime(): NonNullable<(typeof this.ctx)["container"]> {
     const runtime = this.ctx.container;
-    if (!runtime) throw new Error("Cloudflare Container binding is unavailable");
+    if (!runtime) throw new Error("Runtime container binding is unavailable");
     return runtime;
   }
 }

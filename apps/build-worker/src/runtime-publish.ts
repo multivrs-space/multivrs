@@ -1,4 +1,4 @@
-import { getSandbox, type Sandbox } from "@cloudflare/sandbox";
+import type { Sandbox } from "@cloudflare/sandbox";
 import type { BuildJob } from "@multivrs/client";
 import {
   RUNTIME_ORIGIN_HEADER,
@@ -8,7 +8,8 @@ import {
 } from "@multivrs/client/runtime-worker";
 import { BuildCommandError, type BuildWorkerEnv } from "./build-worker.types";
 import { appendBuildLog } from "./control-plane";
-import { PUBLISH_ROOT, transferRuntimeBundle } from "./runtime-bundle";
+import { transferRuntimeBundle } from "./runtime-bundle";
+import { leaseSandbox } from "./warm-sandbox";
 
 const SAFE_NAME = /^[a-z0-9][a-z0-9-_]{0,62}$/;
 const PUBLISH_TIMEOUT_MS = 10 * 60 * 1_000;
@@ -99,10 +100,17 @@ export async function publishRuntime(
   if (!SAFE_NAME.test(job.deploymentId)) {
     throw new BuildCommandError("Deployment ID cannot be used as a Worker name.");
   }
-  await appendBuildLog(job, "info", "Publishing server runtime");
-  const publisher = getSandbox(env.Sandbox, `publish-${job.deploymentId}`);
+  await appendBuildLog(job, "info", "Publishing the server");
+  // Only Multivrs tooling runs here, so one warm publisher serves everyone.
+  const lease = await leaseSandbox(env, {
+    warm: "publisher-warm",
+    fresh: `publish-${job.deploymentId}`,
+    build: job.deploymentId,
+  });
+  const publisher = lease.sandbox;
+  const publishRoot = `${lease.root}/publish`;
   try {
-    await transferRuntimeBundle(build, publisher, job, env, cwd);
+    await transferRuntimeBundle(build, publisher, job, env, cwd, publishRoot);
     const variables = { ...(job.input.env ?? {}) };
     let main = "../.open-next/worker.js";
     let name = job.deploymentId;
@@ -113,9 +121,9 @@ export async function publishRuntime(
         target.originSecret,
         job.deploymentId,
       );
-      await publisher.writeFile(`${PUBLISH_ROOT}/.multivrs/runtime-entry.mjs`, RUNTIME_ENTRY);
+      await publisher.writeFile(`${publishRoot}/.multivrs/runtime-entry.mjs`, RUNTIME_ENTRY);
     }
-    const configPath = `${PUBLISH_ROOT}/.multivrs/runtime-wrangler.jsonc`;
+    const configPath = `${publishRoot}/.multivrs/runtime-wrangler.jsonc`;
     await publisher.writeFile(
       configPath,
       JSON.stringify(wranglerConfig(name, main, variables, !target.namespace)),
@@ -124,7 +132,7 @@ export async function publishRuntime(
     const result = await publisher.exec(
       `${WRANGLER} deploy --config ${configPath} --name ${name}${namespaceFlag}`,
       {
-        cwd: PUBLISH_ROOT,
+        cwd: publishRoot,
         timeout: PUBLISH_TIMEOUT_MS,
         env: {
           CLOUDFLARE_API_TOKEN: env.CLOUDFLARE_API_TOKEN,
@@ -134,10 +142,10 @@ export async function publishRuntime(
     );
     if (!result.success) {
       console.error("runtime publish failed", result.stderr);
-      throw new BuildCommandError("Server runtime publish failed.");
+      throw new BuildCommandError("Publishing the server failed. Retry the deployment.");
     }
   } finally {
-    await publisher.destroy();
+    await lease.release();
   }
-  await appendBuildLog(job, "info", "Server runtime published");
+  await appendBuildLog(job, "info", "Server published");
 }

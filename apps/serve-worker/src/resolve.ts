@@ -52,3 +52,11 @@ export function selectAssetVariant(
     ? (manifest.files.find((candidate) => candidate.path === preferred) ?? file)
     : file;
 }
+
+/** The app's own 404 page (`404.html` in its static folder), if it built one. */
+export function notFoundPage(manifest: ArtifactManifest): ArtifactManifest["files"][number] | null {
+  const staticDir = manifest.output?.staticDir;
+  const path =
+    staticDir && staticDir !== "." ? `${staticDir.replace(/\/$/, "")}/404.html` : "404.html";
+  return manifest.files.find((file) => file.path === path) ?? null;
+}

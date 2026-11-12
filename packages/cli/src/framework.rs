@@ -54,7 +54,11 @@ impl Framework {
     pub(crate) fn build_command(self) -> Option<String> {
         let bun = bun_binary();
         match self {
-            Self::Next => Some(format!("NODE_ENV=production {bun} x @opennextjs/cloudflare build")),
+            // The publish step writes its own Wrangler config, so a project
+            // without one shouldn't stop the build.
+            Self::Next => Some(format!(
+                "SKIP_WRANGLER_CONFIG_CHECK=yes NODE_ENV=production {bun} x @opennextjs/cloudflare build"
+            )),
             Self::SwiftRust => Some(format!("NODE_ENV=production {bun} x swift-rust build")),
             Self::Remix => Some(format!("NODE_ENV=production {bun} run build && mkdir -p .multivrs-output/client && {bun} build build/server/index.js --target=bun --outfile .multivrs-output/server.js && cp -R build/client/. .multivrs-output/client")),
             Self::Hono | Self::H3 | Self::Node => Some(format!("mkdir -p .multivrs-output && ENTRY=server.ts; test -f server.ts || ENTRY=server.js; {bun} build $ENTRY --target=bun --outfile .multivrs-output/server.js")),
@@ -162,7 +166,7 @@ pub(crate) fn detect_install_command(root: &Path) -> Option<String> {
     None
 }
 
-fn bun_binary() -> String {
+pub(crate) fn bun_binary() -> String {
     std::env::var("MULTIVRS_BUN_BINARY")
         .ok()
         .filter(|value| !value.trim().is_empty())
