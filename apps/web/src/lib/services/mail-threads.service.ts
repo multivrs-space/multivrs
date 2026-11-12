@@ -102,6 +102,7 @@ export async function listMailThreads(
     select: {
       id: true,
       mailboxId: true,
+      mailbox: { select: { address: true } },
       subject: true,
       status: true,
       lastMessageAt: true,
@@ -111,7 +112,14 @@ export async function listMailThreads(
     take: limit + 1,
   });
   const page = rows.slice(0, limit);
-  const latest = await latestMessages(page.map((row) => row.id));
+  const folder =
+    options.view === "starred" || options.view === "recent"
+      ? null
+      : options.view;
+  const latest = await latestMessages(
+    page.map((row) => row.id),
+    folder,
+  );
   const last = page.at(-1);
   return {
     threads: page.map((row) => {
@@ -119,6 +127,7 @@ export async function listMailThreads(
       return {
         id: row.id,
         mailboxId: row.mailboxId,
+        mailboxAddress: row.mailbox.address,
         subject: row.subject,
         status: row.status,
         assignedTo: row.assignedTo?.name,
@@ -127,8 +136,15 @@ export async function listMailThreads(
         unread: message ? !message.isRead : false,
         starred: message?.isStarred ?? false,
         preview: message?.preview || "No message preview",
-        correspondent: message?.fromAddress ?? "Unknown sender",
-        correspondentName: message?.fromName ?? undefined,
+        // Your own message names who it went to, not you.
+        correspondent:
+          message?.direction === "outbound"
+            ? (message.toAddresses[0] ?? "No recipient")
+            : (message?.fromAddress ?? "Unknown sender"),
+        correspondentName:
+          message?.direction === "outbound"
+            ? undefined
+            : (message?.fromName ?? undefined),
       } satisfies MailThreadSummary;
     }),
     nextCursor:
@@ -141,27 +157,38 @@ export async function listMailThreads(
 type LatestMessage = {
   threadId: string;
   id: string;
+  direction: string;
   fromName: string | null;
   fromAddress: string;
+  toAddresses: string[];
   isRead: boolean;
   isStarred: boolean;
   preview: string;
 };
 
-/** Each thread's newest message, with a whitespace-collapsed 180-char preview. */
+/**
+ * Each thread's newest message (within `folder` when given, so an inbox row
+ * shows what arrived, not your reply), with a whitespace-collapsed 180-char
+ * preview. Starred means any message in the thread is, as the Starred view
+ * counts it.
+ */
 async function latestMessages(
   threadIds: string[],
+  folder: string | null,
 ): Promise<Map<string, LatestMessage>> {
   if (!threadIds.length) return new Map();
   const rows = await prisma.$queryRaw<LatestMessage[]>`
-    SELECT t.id AS "threadId", m.id, m."fromName", m."fromAddress",
-      m."isRead", m."isStarred",
+    SELECT t.id AS "threadId", m.id, m.direction, m."fromName", m."fromAddress",
+      m."toAddresses", m."isRead",
+      EXISTS (
+        SELECT 1 FROM mail_messages s WHERE s."threadId" = t.id AND s."isStarred"
+      ) AS "isStarred",
       left(regexp_replace(coalesce(m."textBody", ''), '\\s+', ' ', 'g'), 180) AS preview
     FROM unnest(${threadIds}::text[]) AS t(id)
     CROSS JOIN LATERAL (
-      SELECT id, "fromName", "fromAddress", "isRead", "isStarred", "textBody"
+      SELECT id, direction, "fromName", "fromAddress", "toAddresses", "isRead", "textBody"
       FROM mail_messages
-      WHERE "threadId" = t.id
+      WHERE "threadId" = t.id AND (${folder}::text IS NULL OR folder = ${folder})
       ORDER BY "createdAt" DESC
       LIMIT 1
     ) m`;

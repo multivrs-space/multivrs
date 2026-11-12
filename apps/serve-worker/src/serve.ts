@@ -13,10 +13,13 @@ import {
   resolveDeployment,
   resolveProjectDeployment,
 } from "./control";
+import { platformError } from "./error-page";
 import { enforceFirewall } from "./firewall";
 import { serveImage } from "./image";
 import { collectVital, insightsScript, instrumentHtml } from "./insights";
-import { resolveRequest, selectAssetVariant } from "./resolve";
+import { loadManifest } from "./manifest-cache";
+import { previewCapture } from "./preview-capture";
+import { notFoundPage, resolveRequest, selectAssetVariant } from "./resolve";
 import { applyBulkRedirects, resolveMicrofrontend } from "./routing";
 import { loadRuntimeConfig } from "./runtime-config";
 import type { ArtifactManifest, BuildFunction, Env, RevalidationMessage } from "./types";
@@ -31,12 +34,14 @@ export async function serveDeployment(
   env: Env,
   context: ExecutionContext,
 ): Promise<ServedDeployment> {
-  return serveResolvedDeployment(
-    request,
-    env,
-    context,
-    await resolveDeployment(request, env, context),
-  );
+  const deployment = await resolveDeployment(request, env, context);
+  // The dashboard's screenshot: served like any visit, never counted or billed.
+  const preview = await previewCapture(request, env, deployment.deploymentId);
+  if (preview) {
+    const served = await serveResolvedDeployment(preview.request, preview.env, context, deployment);
+    return { ...served, analyticsEnabled: false };
+  }
+  return serveResolvedDeployment(request, env, context, deployment);
 }
 
 async function serveResolvedDeployment(
@@ -46,11 +51,14 @@ async function serveResolvedDeployment(
   deployment: ControlResolution,
 ): Promise<ServedDeployment> {
   if (deployment.billingBlocked) {
-    return result(
-      deployment,
-      deployment.billingBlockReason ?? "This deployment has reached its usage limit",
-      402,
-    );
+    return {
+      ...deployment,
+      response: platformError(
+        request,
+        "USAGE_LIMIT_REACHED",
+        deployment.billingBlockReason ?? undefined,
+      ),
+    };
   }
   const firewallResponse = await enforceFirewall(request, env, deployment);
   if (firewallResponse) return { ...deployment, response: firewallResponse };
@@ -106,8 +114,10 @@ async function serveResolvedDeployment(
     }
   }
 
-  const manifest = await loadManifest(env, deployment);
-  if (!manifest) return result(deployment, "Deployment artifact not found", 404);
+  const manifest = await loadManifest(env, context, deployment.artifactHash);
+  if (!manifest) {
+    return { ...deployment, response: platformError(request, "DEPLOYMENT_FILES_MISSING") };
+  }
   if (pathname === "/_image") {
     return {
       ...deployment,
@@ -122,7 +132,18 @@ async function serveResolvedDeployment(
     };
   }
   const resolved = resolveRequest(manifest, pathname);
-  if (!resolved) return result(deployment, "Not found", 404);
+  if (!resolved) {
+    const page = notFoundPage(manifest);
+    if (!page) return { ...deployment, response: platformError(request, "NOT_FOUND") };
+    // The app's own 404 page, with a real 404 status and no shared caching.
+    const served = await serveStatic(request, env, context, deployment, page);
+    const headers = new Headers(served.headers);
+    headers.set("cache-control", "no-store");
+    return {
+      ...deployment,
+      response: instrumentHtml(new Response(served.body, { headers, status: 404 }), deployment),
+    };
+  }
   if (resolved.type === "function") {
     const response = await serveFunctionWithCache(
       request,
@@ -145,14 +166,6 @@ async function serveResolvedDeployment(
       deployment,
     ),
   };
-}
-
-async function loadManifest(
-  env: Env,
-  deployment: ControlResolution,
-): Promise<ArtifactManifest | null> {
-  const object = await env.ARTIFACTS.get(`artifacts/${deployment.artifactHash}/manifest.json`);
-  return object ? object.json<ArtifactManifest>() : null;
 }
 
 async function serveStatic(
@@ -227,6 +240,10 @@ async function invokeFunctionResponse(
     );
   } else if (env.COMPUTE) {
     response = await env.COMPUTE.fetch(forwarded);
+    // The compute layer's own failure (not the app's): show the platform page.
+    if (response.headers.get("x-multivrs-error") === "APP_UNAVAILABLE") {
+      return platformError(request, "APP_UNAVAILABLE");
+    }
   } else if (fn.runtime === "node" || fn.runtime === "bun") {
     const incoming = new URL(request.url);
     const endpoint = new URL(
@@ -236,7 +253,7 @@ async function invokeFunctionResponse(
     endpoint.search = incoming.search;
     response = await fetch(new Request(endpoint, forwarded));
   } else {
-    return new Response("Deployment compute is unavailable", { status: 503 });
+    return platformError(request, "APP_UNAVAILABLE");
   }
   recordUsage(env, deployment.projectId, "function_invocations");
   recordUsage(env, deployment.projectId, "function_duration_ms", Date.now() - startedAt, [
@@ -289,7 +306,7 @@ export async function processRevalidation(
 ): Promise<void> {
   try {
     const deployment = await resolveProjectDeployment(message.projectId, env, context);
-    const manifest = await loadManifest(env, deployment);
+    const manifest = await loadManifest(env, context, deployment.artifactHash);
     if (!manifest) throw new Error("Deployment artifact not found during revalidation");
     const request = new Request(message.requestUrl, {
       headers: new Headers(message.requestHeaders),

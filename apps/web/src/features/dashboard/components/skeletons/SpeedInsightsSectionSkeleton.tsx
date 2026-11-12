@@ -1,31 +1,38 @@
-import { SectionLoadingHeader } from "./SectionSkeletonParts";
+import {
+  SkeletonCard,
+  SkeletonHeader,
+  SkeletonRows,
+} from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
+const VITALS = ["lcp", "inp", "cls", "ttfb"];
+
+/** Mirrors Speed Insights: score gauge, four vitals, routes and devices. */
 export function SpeedInsightsSectionSkeleton() {
   return (
-    <main className="w-full space-y-6 px-5 py-6" aria-busy>
-      <SectionLoadingHeader
-        description="Core Web Vitals collected from real visits."
-        title="Speed Insights"
-      />
-      <div className="grid border-border border-y md:grid-cols-2 xl:grid-cols-4">
-        {["CLS", "INP", "LCP", "TTFB"].map((vital) => (
-          <article
-            className="h-44 border-border border-b p-5 md:border-r xl:border-b-0"
-            key={vital}
-          >
-            <p className="font-geist-mono text-xs text-muted-foreground">
-              {vital}
-            </p>
-            <div className="mt-7 h-9 w-24 animate-pulse rounded-sm bg-white/9" />
-            <p className="mt-4 text-xs text-muted-foreground">
-              Loading field data…
-            </p>
-          </article>
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Multivrs measures Core Web Vitals from real visitors.
-      </p>
-    </main>
+    <PageBody>
+      <main aria-busy aria-label="Loading Speed Insights" className="space-y-5">
+        <SkeletonHeader action="w-40" />
+        <div className="grid gap-3 lg:grid-cols-12">
+          <SkeletonCard className="lg:col-span-5">
+            <span className="skeleton mx-auto block aspect-[240/150] w-full max-w-[320px] rounded-t-full" />
+          </SkeletonCard>
+          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-7">
+            {VITALS.map((key) => (
+              <SkeletonCard icon key={key}>
+                <span className="skeleton block h-7 w-24" />
+                <span className="skeleton mt-6 block h-2 w-full rounded-full" />
+              </SkeletonCard>
+            ))}
+          </div>
+          <SkeletonCard className="lg:col-span-8">
+            <SkeletonRows rows={6} />
+          </SkeletonCard>
+          <SkeletonCard className="lg:col-span-4">
+            <SkeletonRows rows={3} />
+          </SkeletonCard>
+        </div>
+      </main>
+    </PageBody>
   );
 }

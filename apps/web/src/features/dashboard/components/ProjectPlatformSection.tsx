@@ -1,11 +1,12 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { AnalyticsPage } from "@/features/dashboard/components/AnalyticsPage";
+import { AnalyticsSection } from "@/features/dashboard/components/analytics/AnalyticsSection";
 import { CdnPage } from "@/features/dashboard/components/CdnPage";
 import { EnvironmentVariablesPage } from "@/features/dashboard/components/EnvironmentVariablesPage";
 import { FirewallPage } from "@/features/dashboard/components/FirewallPage";
 import { IntegrationsPage } from "@/features/dashboard/components/IntegrationsPage";
-import { ObservabilityPage } from "@/features/dashboard/components/ObservabilityPage";
+import { ObservabilitySection } from "@/features/dashboard/components/observability/ObservabilitySection";
 import { ProjectEmailSection } from "@/features/dashboard/components/ProjectEmailSection";
 import { ProjectSectionPicker } from "@/features/dashboard/components/ProjectSectionPicker";
 import { SandboxesPage } from "@/features/dashboard/components/SandboxesPage";
@@ -18,10 +19,6 @@ import type { AnalyticsRange } from "@/features/dashboard/types/analytics.types"
 import type { MailView } from "@/features/mail/mail-navigation";
 import { auth } from "@/lib/auth";
 import {
-  getProjectAnalytics,
-  getProjectWebVitals,
-} from "@/lib/services/analytics.service";
-import {
   entitledAnalyticsRange,
   getProjectBillingFeatures,
 } from "@/lib/services/billing-feature-access.service";
@@ -31,15 +28,16 @@ import { getScopedProject } from "@/lib/services/dashboard-scope.service";
 import { getEdgeSettings } from "@/lib/services/edge-settings.service";
 import { listEnvironmentVariables } from "@/lib/services/environment-variable.service";
 import { listFirewallRules } from "@/lib/services/firewall-rule.service";
-import { getProjectObservability } from "@/lib/services/observability.service";
 import { oidcIssuerOrStatus } from "@/lib/services/oidc.service";
 import { listPlatformWorkflows } from "@/lib/services/platform-workflow.service";
+import { getProjectWebVitals } from "@/lib/services/web-vitals.service";
 
 export async function ProjectPlatformSection({
   analyticsRange,
   meta,
   initialMailView = "overview",
   initialMailCompose = false,
+  requestedView,
   scope,
   section,
   username,
@@ -48,6 +46,8 @@ export async function ProjectPlatformSection({
   meta: SectionMeta;
   initialMailView?: MailView;
   initialMailCompose?: boolean;
+  /** Raw `?view=` for sections with sub-views, such as Observability. */
+  requestedView?: string;
   scope: string;
   section: PlatformSection;
   username: string;
@@ -84,25 +84,13 @@ export async function ProjectPlatformSection({
   if (!selected) notFound();
   const project = await getScopedProject(session.user.id, username, scope);
   if (section === "analytics") {
-    const features = await getProjectBillingFeatures(
-      session.user.id,
-      project.id,
-    );
-    const range = entitledAnalyticsRange(
-      analyticsRange,
-      features.webAnalyticsPlus,
-    );
     return (
-      <AnalyticsPage
-        project={selected}
-        analytics={
-          await getProjectAnalytics(
-            project.id,
-            range,
-            features.webAnalyticsPlus,
-          )
-        }
-        plusEnabled={features.webAnalyticsPlus}
+      <AnalyticsSection
+        projectId={project.id}
+        requestedRange={analyticsRange}
+        selected={selected}
+        userId={session.user.id}
+        username={username}
       />
     );
   }
@@ -191,10 +179,15 @@ export async function ProjectPlatformSection({
     features.observabilityPlus,
   );
   return (
-    <ObservabilityPage
+    <ObservabilitySection
       plusEnabled={features.observabilityPlus}
+      projectId={project.id}
       projectName={project.name}
-      data={await getProjectObservability(session.user.id, project.id, range)}
+      projectSlug={selected.slug}
+      range={range}
+      requestedView={requestedView}
+      userId={session.user.id}
+      username={username}
     />
   );
 }

@@ -1,11 +1,14 @@
-import { Check, LayoutGrid, type LucideIcon, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 import type { RefObject } from "react";
+import { DASH_MENU, DASH_MENU_ITEM } from "@/components/dashboard/menu";
+import { LiveLayoutGrid, LivePlus } from "@/components/icons/animated";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
+import { ProjectFavicon } from "@/features/dashboard/components/ProjectFavicon";
 import type { ProjectOption } from "@/features/dashboard/components/ProjectScopeSwitcher";
 import { ALL_PROJECTS_SCOPE } from "@/features/dashboard/constants/navigation";
 import { cn } from "@/lib/utils";
@@ -32,46 +35,45 @@ export function ProjectScopeMenu({
   onSelect,
 }: ProjectScopeMenuProps) {
   return (
-    <DropdownMenuContent
-      align="start"
-      className="w-[300px] rounded-xl border border-[var(--hairline-strong)] bg-[var(--ink-raised)] p-0 shadow-2xl"
-    >
+    <DropdownMenuContent align="start" className={cn(DASH_MENU, "w-[300px]")}>
       <DashboardSearchInput
-        ref={inputRef}
-        containerClassName="h-10 rounded-none border-x-0 border-t-0 bg-transparent"
-        value={query}
-        onValueChange={onQueryChange}
-        placeholder="Find Project…"
         onKeyDown={(event) => event.stopPropagation()}
+        onValueChange={onQueryChange}
+        placeholder="Find project…"
+        ref={inputRef}
+        size="sm"
+        value={query}
       />
-      <div className="max-h-[280px] overflow-y-auto p-1">
+      <div className="mt-1.5 max-h-[280px] space-y-0.5 overflow-y-auto">
         <ScopeRow
-          label="All Projects"
-          icon={LayoutGrid}
-          selected={isAllProjects}
+          all
+          label="All projects"
           onSelect={() => onSelect(ALL_PROJECTS_SCOPE)}
+          selected={isAllProjects}
         />
         {projects.map((project) => (
           <ScopeRow
+            faviconUrl={project.faviconUrl ?? null}
             key={project.slug}
             label={project.name}
-            selected={currentScope === project.slug}
             onSelect={() => onSelect(project.slug)}
+            selected={currentScope === project.slug}
           />
         ))}
         {projects.length === 0 ? (
           <p className="px-3 py-2 text-[12px] text-muted-foreground/70">
-            No projects found.
+            No projects match “{query}”.
           </p>
         ) : null}
       </div>
-      <DropdownMenuSeparator className="m-0" />
+      <DropdownMenuSeparator className="mx-0 my-1.5 bg-hairline" />
       <DropdownMenuItem
+        className={DASH_MENU_ITEM}
+        data-icon-trigger
         onSelect={onCreate}
-        className="rounded-none px-3 py-2.5 text-[13px] text-muted-foreground"
       >
-        <Plus className="size-4" strokeWidth={1.75} />
-        Create Project
+        <LivePlus className="size-4" strokeWidth={1.75} />
+        New project
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
@@ -79,28 +81,32 @@ export function ProjectScopeMenu({
 
 function ScopeRow({
   label,
-  icon: Icon,
+  all = false,
+  faviconUrl = null,
   selected,
   onSelect,
 }: {
   label: string;
-  icon?: LucideIcon;
+  all?: boolean;
+  faviconUrl?: string | null;
   selected: boolean;
   onSelect(): void;
 }) {
   return (
     <DropdownMenuItem
+      className={cn(DASH_MENU_ITEM, selected && "text-foreground")}
+      data-icon-trigger
       onSelect={onSelect}
-      className={cn(
-        "rounded-lg px-2.5 py-2 text-[13px]",
-        selected ? "text-foreground" : "text-muted-foreground",
-      )}
     >
-      <span className="flex size-5 shrink-0 items-center justify-center rounded-sm border border-[var(--hairline)] font-geist-mono text-[11px]">
-        {Icon ? (
-          <Icon className="size-3" strokeWidth={1.75} />
+      <span className="surface-inset grid size-6 shrink-0 place-items-center overflow-hidden rounded-[7px]">
+        {all ? (
+          <LiveLayoutGrid className="size-3.5" strokeWidth={1.75} />
         ) : (
-          label[0]?.toUpperCase()
+          <ProjectFavicon
+            className="size-4 rounded-[4px]"
+            name={label}
+            url={faviconUrl}
+          />
         )}
       </span>
       <span className="flex-1 truncate">{label}</span>

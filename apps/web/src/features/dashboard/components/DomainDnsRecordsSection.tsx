@@ -1,4 +1,6 @@
-import SpecularButton from "@/components/SpecularButton";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { LiveNetwork, LivePlus } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
 import { DnsRecordsTable } from "@/features/dashboard/components/DnsRecordsTable";
 import type { DnsRecord, DomainDnsOverview } from "@/lib/domains/dns.types";
 
@@ -10,36 +12,44 @@ interface DomainDnsRecordsSectionProps {
   onRemove(record: DnsRecord): void;
 }
 
+/** The zone's records, straight from the authoritative DNS. */
 export function DomainDnsRecordsSection(props: DomainDnsRecordsSectionProps) {
+  const count = props.overview.records.length;
   return (
-    <section className="mb-10">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">DNS</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            These records come directly from the configured authoritative zone.
-          </p>
-        </div>
-        {props.overview.managed ? null : (
-          <SpecularButton
-            size="sm"
-            tint="#ffffff"
-            tintOpacity={0.9}
-            lineColor="#ffffff"
-            baseColor="#ffffff"
-            textColor="#000000"
-            onClick={props.onEnable}
-          >
-            Enable Multivrs DNS
-          </SpecularButton>
-        )}
-      </div>
+    <DashCard aria-label="DNS records">
+      <DashCardHeader
+        action={
+          <>
+            {props.overview.managed ? null : (
+              <Button
+                data-icon-trigger
+                onClick={props.onEnable}
+                size="sm"
+                variant="raised"
+              >
+                Enable Multivrs DNS
+              </Button>
+            )}
+            <Button
+              data-icon-trigger
+              onClick={props.onAdd}
+              size="sm"
+              variant="hero"
+            >
+              <LivePlus strokeWidth={2} />
+              Add record
+            </Button>
+          </>
+        }
+        description={`${count} authoritative ${count === 1 ? "record" : "records"}`}
+        icon={LiveNetwork}
+        title="DNS records"
+      />
       <DnsRecordsTable
-        records={props.overview.records}
-        onAdd={props.onAdd}
         onEdit={props.onEdit}
         onRemove={props.onRemove}
+        records={props.overview.records}
       />
-    </section>
+    </DashCard>
   );
 }

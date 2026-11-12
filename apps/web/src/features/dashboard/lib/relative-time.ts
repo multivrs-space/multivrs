@@ -21,3 +21,11 @@ export function relativeTime(raw: string): string {
   }
   return "just now";
 }
+
+/** Full date and time, for the tooltip beside a relative time. */
+export function fullTimestamp(value: Date | string | number): string {
+  return new Date(value).toLocaleString("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}

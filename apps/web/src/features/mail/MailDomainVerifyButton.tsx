@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { LiveRefresh, LiveShieldCheck } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 
 const verificationResponseSchema = z.object({
@@ -56,11 +56,11 @@ export function MailDomainVerifyButton({
           );
         } else if (result.stalled) {
           toast.error(
-            "Your records are correct, but AWS stopped checking this domain. Remove it and add it again, then replace the 3 DKIM records with the new ones.",
+            "Your records are correct, but verification for this domain expired. Remove it and add it again, then replace the 3 DKIM records with the new ones.",
           );
         } else {
           toast.info(
-            "All records found. AWS is confirming them, which usually takes a few minutes.",
+            "All records found. Multivrs is confirming them, which usually takes a few minutes.",
           );
         }
         router.refresh();
@@ -76,11 +76,20 @@ export function MailDomainVerifyButton({
   }
 
   return (
-    <Button disabled={checking} onClick={verify} variant="outline">
+    <Button
+      data-icon-trigger
+      disabled={checking}
+      onClick={verify}
+      size="sm"
+      variant="raised"
+    >
       {verified ? (
-        <CheckCircle2 className="size-4" />
+        <LiveShieldCheck strokeWidth={1.75} />
       ) : (
-        <RefreshCw className={checking ? "size-4 animate-spin" : "size-4"} />
+        <LiveRefresh
+          className={checking ? "animate-spin" : undefined}
+          strokeWidth={1.75}
+        />
       )}
       {checking ? "Refreshing…" : "Refresh now"}
     </Button>

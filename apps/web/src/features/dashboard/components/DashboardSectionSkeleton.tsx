@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isPlatformProjectSection } from "@/features/dashboard/lib/project-platform-sections";
 import { MailPageSkeleton } from "@/features/mail/MailPageSkeleton";
 import { ProjectSectionPickerSkeleton } from "./ProjectSectionPicker";
 import { AnalyticsSectionSkeleton } from "./skeletons/AnalyticsSectionSkeleton";
@@ -16,6 +17,7 @@ import { FirewallSectionSkeleton } from "./skeletons/FirewallSectionSkeleton";
 import { IntegrationsSectionSkeleton } from "./skeletons/IntegrationsSectionSkeleton";
 import { LogsSectionSkeleton } from "./skeletons/LogsSectionSkeleton";
 import { ObservabilitySectionSkeleton } from "./skeletons/ObservabilitySectionSkeleton";
+import { ProjectsSectionSkeleton } from "./skeletons/ProjectsSectionSkeleton";
 import { ProjectPickerSkeleton } from "./skeletons/SectionSkeletonParts";
 import { SettingsSectionSkeleton } from "./skeletons/SettingsSectionSkeleton";
 import { SpeedInsightsSectionSkeleton } from "./skeletons/SpeedInsightsSectionSkeleton";
@@ -32,17 +34,19 @@ export function DashboardSectionSkeleton({
   const section = requestedSection ?? segments[segments.length - 1];
   const scope = requestedScope ?? segments[segments.length - 2];
 
+  if (section === "projects") return <ProjectsSectionSkeleton />;
   if (section === "emails" || section === "email") return <MailPageSkeleton />;
   if (section === "settings")
     return <SettingsSectionSkeleton account={scope === "~"} />;
   if (section === "deployments") return <DeploymentsSectionSkeleton />;
   if (section === "domains") return <DomainsSectionSkeleton />;
   if (section === "templates") return <TemplatesSectionSkeleton />;
-  if (scope === "~" && section) {
+  if (section === "logs") return <LogsSectionSkeleton />;
+  // Platform sections ask you to pick a project at the workspace scope.
+  if (scope === "~" && section && isPlatformProjectSection(section)) {
     const title = sectionTitle(section);
     return <ProjectSectionPickerSkeleton section={section} title={title} />;
   }
-  if (section === "logs") return <LogsSectionSkeleton />;
   if (section === "analytics") return <AnalyticsSectionSkeleton />;
   if (section === "speed-insights") return <SpeedInsightsSectionSkeleton />;
   if (section === "observability") return <ObservabilitySectionSkeleton />;

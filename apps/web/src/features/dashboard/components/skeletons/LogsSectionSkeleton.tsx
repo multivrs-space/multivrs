@@ -1,53 +1,52 @@
-import { Circle, RefreshCcw, Search } from "lucide-react";
-import { DashboardPageHeader } from "../DashboardPageHeader";
+import { SkeletonHeader } from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { SKELETON_ROWS } from "./skeleton.constants";
 
+/** Mirrors the logs console: histogram, filters, rows. */
 export function LogsSectionSkeleton() {
   return (
-    <main className="space-y-6 px-5 py-6" aria-busy>
-      <DashboardPageHeader
-        title="Logs"
-        description="Latest 200 build and deployment events"
-        actions={
-          <button
-            className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] px-3 text-xs text-muted-foreground"
-            disabled
-            type="button"
-          >
-            <RefreshCcw className="size-3.5" /> Refresh
-          </button>
-        }
-      />
-      <div className="flex gap-2">
-        <div className="flex h-9 flex-1 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-[var(--ink-raised)]/60 px-3 text-xs text-muted-foreground/70">
-          <Search className="size-3.5" /> Search logs…
+    <PageBody wide>
+      <main aria-busy aria-label="Loading logs" className="space-y-5">
+        <SkeletonHeader action="w-48" />
+        <span
+          aria-hidden="true"
+          className="skeleton block h-9 w-56 rounded-full"
+        />
+        <div aria-hidden="true" className="surface-card rounded-card p-5">
+          <div className="mb-5 flex flex-wrap gap-8">
+            {["requests", "5xx", "4xx", "p50", "p95"].map((figure) => (
+              <span className="space-y-1.5" key={figure}>
+                <span className="skeleton block h-2.5 w-12" />
+                <span className="skeleton block h-5 w-14" />
+              </span>
+            ))}
+          </div>
+          <span className="skeleton block h-20 w-full rounded-tile" />
+          <span className="skeleton mt-3 block h-3 w-72 max-w-full" />
         </div>
-        {["info", "warn", "error"].map((level) => (
-          <button
-            className="flex h-9 w-20 items-center justify-center gap-2 rounded-lg border border-[var(--hairline)] text-xs capitalize text-muted-foreground"
-            disabled
-            key={level}
-            type="button"
-          >
-            <Circle className="size-2 fill-current" /> {level}
-          </button>
-        ))}
-      </div>
-      <div className="overflow-hidden rounded-xl border border-border">
-        <div className="grid h-10 grid-cols-[9rem_5rem_7rem_10rem_1fr] items-center gap-3 border-border border-b px-4 font-geist-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-          <span>Time</span>
-          <span>Level</span>
-          <span>Source</span>
-          <span>Deployment</span>
-          <span>Message</span>
+        <div aria-hidden="true" className="flex flex-wrap gap-2">
+          <span className="skeleton h-9 min-w-56 flex-1 rounded-control" />
+          {["ok", "client", "server"].map((level) => (
+            <span className="skeleton h-9 w-20 rounded-full" key={level} />
+          ))}
         </div>
-        {SKELETON_ROWS.map((row) => (
-          <div
-            className="h-11 animate-pulse border-border border-b bg-foreground/[0.04]"
-            key={row}
-          />
-        ))}
-      </div>
-    </main>
+        <div
+          aria-hidden="true"
+          className="surface-card divide-y divide-hairline rounded-card"
+        >
+          {[...SKELETON_ROWS, ...SKELETON_ROWS].map((row, index) => (
+            <div
+              className="flex items-center gap-3 px-4 py-2.5"
+              key={`${row}-${index > 4 ? "b" : "a"}`}
+            >
+              <span className="skeleton h-3 w-16" />
+              <span className="skeleton h-4 w-10 rounded-full" />
+              <span className="skeleton h-3 w-20" />
+              <span className="skeleton h-3 flex-1" />
+            </div>
+          ))}
+        </div>
+      </main>
+    </PageBody>
   );
 }

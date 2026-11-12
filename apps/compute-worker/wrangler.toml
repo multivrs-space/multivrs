@@ -8,7 +8,9 @@ workers_dev = false
 class_name = "SwiftRustContainer"
 image = "./Dockerfile"
 max_instances = 25
-instance_type = "lite"
+# A full vCPU, like a serverless function gets elsewhere. On lite (1/16 vCPU)
+# a server-rendered page took about a second. Memory and disk bill while running.
+instance_type = "standard-2"
 
 [[durable_objects.bindings]]
 name = "RUNTIME"

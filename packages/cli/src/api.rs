@@ -1,6 +1,28 @@
 use anyhow::{Result, bail};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
+
+/// Uploads can be large and a dev server may compile a route on first use.
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(300);
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(15);
+pub(crate) const RETRY_DELAYS: [Duration; 2] = [Duration::from_secs(2), Duration::from_secs(5)];
+
+/// A network failure in words a customer can act on, without URLs.
+pub(crate) fn describe(error: &reqwest::Error) -> anyhow::Error {
+    if error.is_timeout() {
+        anyhow::anyhow!("the Multivrs API didn't answer in time")
+    } else if error.is_connect() {
+        anyhow::anyhow!("couldn't reach the Multivrs API")
+    } else {
+        anyhow::anyhow!("the request to the Multivrs API failed")
+    }
+}
+
+/// Worth trying again: the request never got a clear answer.
+pub(crate) fn is_transient(error: &reqwest::Error) -> bool {
+    error.is_timeout() || error.is_connect() || error.is_request()
+}
 
 #[derive(Debug, Deserialize)]
 struct ApiErrorBody {
@@ -32,7 +54,11 @@ impl ApiClient {
                 .trim_end_matches('/')
                 .to_string(),
             token,
-            http: Client::new(),
+            http: Client::builder()
+                .timeout(REQUEST_TIMEOUT)
+                .connect_timeout(CONNECT_TIMEOUT)
+                .build()
+                .unwrap_or_else(|_| Client::new()),
         }
     }
 
@@ -73,17 +99,46 @@ impl ApiClient {
         )
     }
 
+    /// POST that may be retried: only for requests that are safe to repeat.
+    pub(crate) fn post_idempotent<T: for<'de> Deserialize<'de>, B: Serialize>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<T> {
+        self.post_with(path, body, true)
+    }
+
     pub(crate) fn post<T: for<'de> Deserialize<'de>, B: Serialize>(
         &self,
         path: &str,
         body: &B,
     ) -> Result<T> {
-        let response = self
-            .http
-            .post(format!("{}{}", self.base_url, path))
-            .bearer_auth(&self.token)
-            .json(body)
-            .send()?;
+        self.post_with(path, body, false)
+    }
+
+    fn post_with<T: for<'de> Deserialize<'de>, B: Serialize>(
+        &self,
+        path: &str,
+        body: &B,
+        retry: bool,
+    ) -> Result<T> {
+        let mut attempt = 0;
+        let response = loop {
+            match self
+                .http
+                .post(format!("{}{}", self.base_url, path))
+                .bearer_auth(&self.token)
+                .json(body)
+                .send()
+            {
+                Ok(response) => break response,
+                Err(error) if retry && is_transient(&error) && attempt < RETRY_DELAYS.len() => {
+                    std::thread::sleep(RETRY_DELAYS[attempt]);
+                    attempt += 1;
+                }
+                Err(error) => return Err(describe(&error)),
+            }
+        };
         let status = response.status();
         if !status.is_success() {
             let message = response
@@ -92,6 +147,6 @@ impl ApiClient {
                 .unwrap_or_else(|_| format!("request failed ({status})"));
             bail!(message);
         }
-        Ok(response.json()?)
+        response.json().map_err(|error| describe(&error))
     }
 }

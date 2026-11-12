@@ -80,4 +80,25 @@ describe("deployment resolution cache", () => {
     expect(await cachedResolution(cacheKey, load)).toEqual(resolution as never);
     expect(load.calls).toBe(2);
   });
+
+  test("answers from a stale entry at once and refreshes it behind the response", async () => {
+    const cacheKey = nextKey();
+    const old = { deploymentId: "dep_old", projectId: "proj_1" };
+    // An entry whose fresh window ended a minute ago.
+    store.set(
+      `https://resolve.multivrs.internal/v2/${encodeURIComponent(cacheKey)}`,
+      JSON.stringify({ value: old, freshUntil: Date.now() - 60_000 }),
+    );
+    const load = counter(() => Response.json(resolution));
+    const refreshes: Promise<unknown>[] = [];
+    const answer = await cachedResolution(cacheKey, load, (p) => refreshes.push(p));
+    expect(answer).toEqual(old as never);
+    await flush(refreshes);
+    expect(load.calls).toBe(1);
+    const stored = JSON.parse(
+      store.get(`https://resolve.multivrs.internal/v2/${encodeURIComponent(cacheKey)}`) ?? "{}",
+    );
+    expect(stored.value).toEqual(resolution);
+    expect(stored.freshUntil).toBeGreaterThan(Date.now());
+  });
 });

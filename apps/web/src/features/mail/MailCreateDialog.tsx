@@ -1,18 +1,13 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
+import { DASH_DIALOG } from "@/components/dashboard/menu";
+import { LivePlus } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { MailCreateFields } from "@/features/mail/MailCreateFields";
 import type { MailResources } from "@/features/mail/mail.types";
 import { submitMailResource } from "@/features/mail/mail-resource.client";
@@ -20,14 +15,13 @@ import {
   type CreateMailView,
   createMailLabel,
 } from "@/features/mail/mail-resource-form";
+import {
+  MailSecretReveal,
+  type SmtpConnection,
+} from "@/features/mail/resources/MailSecretReveal";
+import { mailResourceView } from "@/features/mail/resources/mail-resource-views";
 
-interface SmtpConnection {
-  host: string;
-  port: number;
-  tls: boolean;
-  username: string;
-}
-
+/** Create any mail resource; secrets are revealed once before closing. */
 export function MailCreateDialog({
   resources,
   onOpenChange,
@@ -45,12 +39,11 @@ export function MailCreateDialog({
   const params = useParams<{ username?: string; scope?: string }>();
   const [saving, setSaving] = useState(false);
   const [secret, setSecret] = useState<string>();
-  const [copied, setCopied] = useState(false);
   const [connection, setConnection] = useState<SmtpConnection>();
+  const noun = createMailLabel(view).toLowerCase();
 
   const resetSecret = () => {
     setSecret(undefined);
-    setCopied(false);
     setConnection(undefined);
   };
   function submit(formData: FormData) {
@@ -65,9 +58,7 @@ export function MailCreateDialog({
         toast.success(`${createMailLabel(view)} created`);
         if (result.secret) {
           setSecret(result.secret);
-          setCopied(false);
           setConnection(result.connection);
-          toast.info("Copy this secret now. It will not be shown again.");
         } else {
           onOpenChange(false);
           if (
@@ -102,80 +93,40 @@ export function MailCreateDialog({
       }}
       open={open}
     >
-      <DialogContent className="border border-black/10 dark:border-white/10 bg-white dark:bg-black">
-        <DialogHeader>
-          <DialogTitle>
-            {secret
-              ? "Copy your secret"
-              : `Create ${createMailLabel(view).toLowerCase()}`}
-          </DialogTitle>
-          <DialogDescription>
-            {secret
-              ? "This value is only displayed once. Store it in a secret manager."
-              : "This is stored in Multivrs and scoped to the current workspace."}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className={DASH_DIALOG}>
+        <DashDialogHeader
+          description={
+            secret
+              ? view === "credentials"
+                ? "Store it in a secret manager; Multivrs keeps only a hash."
+                : "Store it in a secret manager; it is shown only this once."
+              : `Stored in Multivrs for ${projectId ? "this project" : "this account"}.`
+          }
+          icon={mailResourceView(view).icon}
+          title={secret ? "Copy your secret" : `New ${noun}`}
+        />
         {secret ? (
-          <div className="space-y-3">
-            {connection ? (
-              <div className="grid grid-cols-2 gap-2 rounded-lg border border-black/10 dark:border-white/10 bg-black/2.5 dark:bg-white/2.5 p-3 text-xs">
-                <span className="text-black/40 dark:text-white/40">Host</span>
-                <code>{connection.host}</code>
-                <span className="text-black/40 dark:text-white/40">
-                  Port / security
-                </span>
-                <code>{connection.port} / TLS</code>
-                <span className="text-black/40 dark:text-white/40">
-                  Username
-                </span>
-                <code className="break-all">{connection.username}</code>
-              </div>
-            ) : null}
-            <div className="rounded-lg border border-black/15 dark:border-white/20 bg-neutral-100 dark:bg-neutral-900 p-4">
-              <code className="block break-all font-mono text-xs font-semibold text-black dark:text-white select-all">
-                {secret}
-              </code>
-            </div>
-            <Button
-              className="w-full gap-2 bg-purple-600 hover:bg-purple-500 text-white font-medium"
-              onClick={async () => {
-                const value = connection
-                  ? `SMTP_HOST=${connection.host}\nSMTP_PORT=${connection.port}\nSMTP_USERNAME=${connection.username}\nSMTP_PASSWORD=${secret}\nSMTP_TLS=true`
-                  : secret;
-                await navigator.clipboard.writeText(value);
-                setCopied(true);
-                toast.success(
-                  connection ? "SMTP configuration copied" : "Secret copied to clipboard",
-                );
-              }}
-            >
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied
-                ? "Copied to clipboard!"
-                : connection
-                  ? "Copy SMTP configuration"
-                  : "Copy secret"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                resetSecret();
-                onOpenChange(false);
-              }}
-            >
-              Done
-            </Button>
-          </div>
+          <MailSecretReveal
+            connection={connection}
+            onDone={() => {
+              resetSecret();
+              onOpenChange(false);
+            }}
+            secret={secret}
+          />
         ) : (
           <form action={submit} className="space-y-4">
             <MailCreateFields resources={resources} view={view} />
             <DialogFooter>
-              <Button disabled={saving} type="submit">
-                {saving
-                  ? "Creating…"
-                  : `Create ${createMailLabel(view).toLowerCase()}`}
+              <Button
+                data-icon-trigger
+                disabled={saving}
+                size="sm"
+                type="submit"
+                variant="hero"
+              >
+                <LivePlus strokeWidth={2} />
+                {saving ? "Creating…" : `Create ${noun}`}
               </Button>
             </DialogFooter>
           </form>

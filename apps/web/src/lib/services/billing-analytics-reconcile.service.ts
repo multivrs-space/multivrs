@@ -1,30 +1,56 @@
 import "server-only";
-import { ConflictError } from "@multivrs/error-utils";
 import { z } from "zod";
 import { METER_CATALOG } from "@/lib/payments/billing.catalog";
-import { prisma } from "@/lib/prisma";
-import { resolveBillingEntitlements } from "@/lib/services/billing-entitlement.service";
-import { recordUsageEvent } from "@/lib/services/usage-event.service";
+import { hourEnd, reconcileWindow } from "@/lib/payments/reconcile-window";
+import {
+  reconcileEntries,
+  type UsageRow,
+} from "@/lib/services/billing-reconcile-entries.service";
 
 const responseSchema = z.object({
   data: z.array(z.record(z.string(), z.unknown())),
 });
 
+/**
+ * Copy edge usage from Analytics Engine into billing, one row per project,
+ * metric and hour. Each run re-reads the last 48 closed hours, so a missed
+ * or once-a-day cron still meters every hour exactly once.
+ */
 export async function reconcileCloudflareBillingUsage(now = new Date()) {
-  const end = new Date(Math.floor(now.getTime() / 3_600_000) * 3_600_000);
-  const start = new Date(end.getTime() - 3_600_000);
+  const { start, end } = reconcileWindow(now);
+  // Read a little more than the window, relative to NOW (the form Analytics
+  // Engine reads reliably), then keep only whole hours inside it below.
+  const window = "timestamp >= NOW() - INTERVAL '3' DAY";
+  const hourly = (
+    select: string,
+    dataset: string,
+    filter: string,
+    group = "",
+  ) =>
+    analyticsSql(
+      `SELECT toStartOfHour(timestamp) hour, index1 projectId, ${select} FROM ${dataset} WHERE ${[filter, window].filter(Boolean).join(" AND ")} GROUP BY hour, projectId${group}`,
+    );
   const [requests, runtime, webAnalytics, speedInsights] = await Promise.all([
-    analyticsSql(
-      `SELECT index1 projectId, SUM(_sample_interval) requests, SUM(double3 * _sample_interval) bytes FROM multivrs_requests WHERE blob4 = 'request' AND timestamp >= '${sqlDate(start)}' AND timestamp < '${sqlDate(end)}' GROUP BY projectId`,
+    hourly(
+      "SUM(_sample_interval) requests, SUM(double3 * _sample_interval) bytes",
+      "multivrs_requests",
+      "blob4 = 'request'",
     ),
-    analyticsSql(
-      `SELECT index1 projectId, blob1 metric, SUM(double1 * _sample_interval) quantity FROM multivrs_usage WHERE timestamp >= '${sqlDate(start)}' AND timestamp < '${sqlDate(end)}' GROUP BY projectId, metric`,
+    hourly(
+      "blob1 metric, SUM(double1 * _sample_interval) quantity",
+      "multivrs_usage",
+      "",
+      ", metric",
     ),
-    analyticsSql(
-      `SELECT index1 projectId, SUM(_sample_interval) quantity FROM multivrs_requests WHERE blob4 IN ('pageview', 'custom-event') AND timestamp >= '${sqlDate(start)}' AND timestamp < '${sqlDate(end)}' GROUP BY projectId`,
+    hourly(
+      "SUM(_sample_interval) quantity",
+      "multivrs_requests",
+      "blob4 IN ('pageview', 'custom-event')",
     ),
-    analyticsSql(
-      `SELECT index1 projectId, SUM(_sample_interval) quantity FROM multivrs_requests WHERE blob4 = 'web-vital' AND timestamp >= '${sqlDate(start)}' AND timestamp < '${sqlDate(end)}' GROUP BY projectId`,
+    hourly(
+      "SUM(_sample_interval) quantity",
+      "multivrs_requests",
+      "blob4 = 'web-vital'",
     ),
   ]);
   const entries = [
@@ -41,12 +67,21 @@ export async function reconcileCloudflareBillingUsage(now = new Date()) {
     ...speedInsights.map((row) =>
       usageRow(row, "speed_insights_events", "quantity"),
     ),
-  ].filter(isUsageRow);
-  const result = await reconcileEntries(entries, end);
-  return { ...result, periodEnd: end.toISOString() };
+  ].filter(
+    (row): row is UsageRow =>
+      row !== null &&
+      Boolean(METER_CATALOG[row.metric]) &&
+      row.quantity > 0 &&
+      row.periodEnd > start &&
+      row.periodEnd <= end,
+  );
+  const result = await reconcileEntries(entries);
+  return {
+    ...result,
+    periodStart: start.toISOString(),
+    periodEnd: end.toISOString(),
+  };
 }
-
-type UsageRow = { metric: string; projectId: string; quantity: number };
 
 function usageRow(
   row: Record<string, unknown>,
@@ -55,63 +90,10 @@ function usageRow(
 ): UsageRow | null {
   const quantity = Math.max(0, Math.round(Number(row[value] ?? 0)));
   const projectId = String(row.projectId ?? "");
-  return z.uuid().safeParse(projectId).success
-    ? { metric, projectId, quantity }
+  const periodEnd = hourEnd(row.hour);
+  return periodEnd && z.uuid().safeParse(projectId).success
+    ? { metric, projectId, quantity, periodEnd }
     : null;
-}
-
-function isUsageRow(value: UsageRow | null): value is UsageRow {
-  return value !== null;
-}
-
-async function reconcileEntries(
-  entries: UsageRow[],
-  end: Date,
-  index = 0,
-  result = { blocked: 0, recorded: 0 },
-): Promise<{ blocked: number; recorded: number }> {
-  const entry = entries[index];
-  if (!entry) return result;
-  const project = await prisma.project.findUnique({
-    where: { id: entry.projectId },
-    select: { ownerId: true },
-  });
-  if (!project || !METER_CATALOG[entry.metric] || entry.quantity <= 0) {
-    return reconcileEntries(entries, end, index + 1, result);
-  }
-  try {
-    await recordUsageEvent(
-      project.ownerId,
-      entry.projectId,
-      entry.metric,
-      entry.quantity,
-      { periodEnd: end.toISOString(), source: "cloudflare-analytics" },
-      {
-        idempotencyKey: `cf:${entry.projectId}:${entry.metric}:${end.toISOString()}`,
-      },
-    );
-    return reconcileEntries(entries, end, index + 1, {
-      ...result,
-      recorded: result.recorded + 1,
-    });
-  } catch (error) {
-    if (!(error instanceof ConflictError)) throw error;
-    const entitlements = await resolveBillingEntitlements(
-      project.ownerId,
-      entry.projectId,
-    );
-    await prisma.project.update({
-      where: { id: entry.projectId },
-      data: {
-        usageBlockReason: error.message,
-        usageBlockedUntil: entitlements.currentPeriodEnd,
-      },
-    });
-    return reconcileEntries(entries, end, index + 1, {
-      ...result,
-      blocked: result.blocked + 1,
-    });
-  }
 }
 
 async function analyticsSql(sql: string) {
@@ -130,8 +112,4 @@ async function analyticsSql(sql: string) {
   if (!response.ok)
     throw new Error(`Cloudflare Analytics returned ${response.status}`);
   return responseSchema.parse(await response.json()).data;
-}
-
-function sqlDate(value: Date): string {
-  return value.toISOString().replace("T", " ").replace(".000Z", "");
 }

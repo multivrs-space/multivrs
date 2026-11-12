@@ -63,9 +63,13 @@ export function instrumentHtml(
   ) {
     return response;
   }
+  // Some frameworks render a head per layout; the script belongs in one.
+  let injected = false;
   return new HTMLRewriter()
     .on("head", {
       element(element) {
+        if (injected) return;
+        injected = true;
         element.append(
           `<script defer src="/_multivrs/analytics.js" data-analytics="${deployment.analyticsEnabled ? "1" : "0"}" data-speed="${deployment.speedInsightsEnabled ? "1" : "0"}"></script>`,
           { html: true },

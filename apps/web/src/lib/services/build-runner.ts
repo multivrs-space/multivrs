@@ -10,7 +10,11 @@ import {
   resolveWorkingDirectory,
   runCommand,
 } from "@/lib/services/deployment-runner-command";
-import { appendRunnerLog } from "@/lib/services/deployment-runner-log.service";
+import { cliEnvironment } from "@/lib/services/deployment-runner-env";
+import {
+  appendRunnerLog,
+  createRunnerLogStream,
+} from "@/lib/services/deployment-runner-log.service";
 import { deploymentEnvironment } from "@/lib/services/environment-variable.service";
 import {
   issueProjectOidcToken,
@@ -99,28 +103,23 @@ async function executeDeployment(
       `Starting ${project.framework ?? "auto-detected"} production build`,
     );
 
-    await runCommand(runner.command, runner.args, workingDirectory, {
-      ...projectEnvironment,
-      ...input.env,
-      ...(oidc ? { MULTIVRS_OIDC_TOKEN: oidc.token } : {}),
-      MULTIVRS_API_URL: apiUrl,
-      MULTIVRS_TOKEN: rawToken,
-      MULTIVRS_DEPLOYMENT_ID: deploymentId,
-      MULTIVRS_BUN_BINARY:
-        process.env.MULTIVRS_BUN_BINARY ??
-        (process.versions.bun ? process.execPath : "bun"),
-      ...(project.framework ? { MULTIVRS_FRAMEWORK: project.framework } : {}),
-      ...(input.buildCommand
-        ? { MULTIVRS_BUILD_COMMAND: input.buildCommand }
-        : {}),
-      ...(input.installCommand
-        ? { MULTIVRS_INSTALL_COMMAND: input.installCommand }
-        : {}),
-      ...(input.outputDirectory
-        ? { MULTIVRS_OUTPUT_DIRECTORY: input.outputDirectory }
-        : {}),
-      ...runner.env,
-    });
+    const stream = createRunnerLogStream(deploymentId);
+    await runCommand(
+      runner.command,
+      runner.args,
+      workingDirectory,
+      cliEnvironment({
+        apiUrl,
+        deploymentId,
+        framework: project.framework,
+        input,
+        oidcToken: oidc?.token,
+        projectEnvironment,
+        runnerEnv: runner.env,
+        token: rawToken,
+      }),
+      stream.write,
+    ).finally(stream.close);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown deployment error";

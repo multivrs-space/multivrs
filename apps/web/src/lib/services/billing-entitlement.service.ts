@@ -2,8 +2,8 @@ import "server-only";
 import { ConflictError } from "@multivrs/error-utils";
 import type {
   AddOnKey,
+  DisplayPlan,
   EntitlementContext,
-  PlanKey,
   ResourceKey,
 } from "@/lib/payments/billing.types";
 import { hasAddOn, resourceLimit } from "@/lib/payments/billing-calculation";
@@ -89,43 +89,11 @@ export async function resolveBillingEntitlements(
 }
 
 /**
- * The plan an account is on, as shown in the dashboard. A whitelisted account
- * has no limits and every add-on, the same as Enterprise, so it reads as one.
+ * The plan an account is on, as shown in the dashboard. The limit-exempt
+ * Multivrs team account reads as "unlimited", never as a plan it didn't buy.
  */
-export function displayPlan(context: EntitlementContext): PlanKey {
-  return context.isLimitExempt ? "enterprise" : context.plan;
-}
-
-export async function accountPlan(username: string): Promise<PlanKey> {
-  const user = await prisma.user.findUnique({
-    where: { username },
-    select: { id: true },
-  });
-  if (user) {
-    const { context } = await resolveBillingEntitlements(user.id);
-    return displayPlan(context);
-  }
-
-  const org = await prisma.organization.findFirst({
-    where: {
-      OR: [
-        { slug: username },
-        { slug: username.toLowerCase() },
-        { name: username },
-      ],
-    },
-    select: { id: true, accountOwnerId: true },
-  });
-  if (org) {
-    const { context } = await resolveBillingEntitlements(
-      org.accountOwnerId ?? "",
-      null,
-      org.id,
-    );
-    return displayPlan(context);
-  }
-
-  return "hobby";
+export function displayPlan(context: EntitlementContext): DisplayPlan {
+  return context.isLimitExempt ? "unlimited" : context.plan;
 }
 
 export async function assertResourceAvailable(input: {

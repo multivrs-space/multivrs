@@ -1,5 +1,5 @@
-import { MailPageSkeleton } from "@/features/mail/MailPageSkeleton";
+import { MailDomainSkeleton } from "@/features/mail/domain/MailDomainSkeleton";
 
-export default function LoadingMailDomain() {
-  return <MailPageSkeleton />;
+export default function Loading() {
+  return <MailDomainSkeleton />;
 }

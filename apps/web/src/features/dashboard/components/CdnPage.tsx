@@ -1,7 +1,8 @@
 "use client";
 
-import { RefreshCw, Save } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { LiveRefresh } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import {
   CacheSettingsCard,
@@ -9,12 +10,12 @@ import {
 } from "@/features/dashboard/components/CdnSettingsControls";
 import { ContentPlatformManager } from "@/features/dashboard/components/ContentPlatformManager";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import type { ContentPlatformData } from "@/features/dashboard/types/content-platform.types";
 import type { EdgeSettingsData } from "@/features/dashboard/types/edge-settings.types";
 import { requestOk } from "@/lib/api/request.client";
 
-type ActionState = "idle" | "saving" | "purging" | "success" | "error";
-
+/** Cache policy, telemetry and the content platform for one project. */
 export function CdnPage({
   projectId,
   projectName,
@@ -27,10 +28,11 @@ export function CdnPage({
   initialContent: ContentPlatformData;
 }) {
   const [settings, setSettings] = useState(initialSettings);
-  const [state, setState] = useState<ActionState>("idle");
+  const [working, setWorking] = useState<"saving" | "purging" | null>(null);
+
   function request(path: string, method: "PATCH" | "POST") {
-    if (state === "saving" || state === "purging") return;
-    setState(method === "PATCH" ? "saving" : "purging");
+    if (working) return;
+    setWorking(method === "PATCH" ? "saving" : "purging");
     void requestOk(
       `/api/projects/${projectId}/edge${path}`,
       {
@@ -43,50 +45,59 @@ export function CdnPage({
       },
       "Edge configuration failed",
     )
-      .then(() => setState("success"))
-      .catch(() => setState("error"));
+      .then(() =>
+        toast.success(
+          method === "PATCH"
+            ? "Edge settings saved"
+            : "Cache purged everywhere",
+        ),
+      )
+      .catch(() =>
+        toast.error("The edge didn't accept that. Try again in a moment."),
+      )
+      .finally(() => setWorking(null));
   }
+
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
+        actions={
+          <>
+            <Button
+              data-icon-trigger
+              disabled={working !== null}
+              onClick={() => request("/purge", "POST")}
+              size="sm"
+              variant="raised"
+            >
+              <LiveRefresh
+                className={working === "purging" ? "animate-spin" : undefined}
+                strokeWidth={1.75}
+              />
+              {working === "purging" ? "Purging…" : "Purge cache"}
+            </Button>
+            <Button
+              disabled={working !== null}
+              onClick={() => request("", "PATCH")}
+              size="sm"
+              variant="hero"
+            >
+              {working === "saving" ? "Saving…" : "Save changes"}
+            </Button>
+          </>
+        }
+        description="How the edge caches and measures this project, and the storage and routing it serves."
+        eyebrow={`${projectName} · Deliver`}
         title="CDN"
-        description={<>Cache policy and edge services for {projectName}.</>}
       />
-      <CacheSettingsCard settings={settings} onChange={setSettings} />
-      <CdnTelemetryCard settings={settings} onChange={setSettings} />
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          disabled={state === "saving"}
-          onClick={() => request("", "PATCH")}
-        >
-          <Save className="size-4" />
-          {state === "saving" ? "Saving…" : "Save changes"}
-        </Button>
-        <Button
-          variant="outline"
-          disabled={state === "purging"}
-          onClick={() => request("/purge", "POST")}
-        >
-          <RefreshCw
-            className={state === "purging" ? "size-4 animate-spin" : "size-4"}
-          />
-          {state === "purging" ? "Purging…" : "Purge cache"}
-        </Button>
-        {state === "success" && (
-          <span className="text-xs text-emerald-400">
-            Edge configuration updated.
-          </span>
-        )}
-        {state === "error" && (
-          <span className="text-xs text-rose-400">
-            The edge request failed. Check Cloudflare configuration.
-          </span>
-        )}
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <CacheSettingsCard onChange={setSettings} settings={settings} />
+        <CdnTelemetryCard onChange={setSettings} settings={settings} />
       </div>
       <ContentPlatformManager
         initialData={initialContent}
         projectId={projectId}
       />
-    </div>
+    </PageBody>
   );
 }

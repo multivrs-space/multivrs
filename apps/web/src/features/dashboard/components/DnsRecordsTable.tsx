@@ -1,6 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import { DASH_MENU, DASH_MENU_ITEM } from "@/components/dashboard/menu";
+import { LiveSettings, LiveTrash } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,60 +11,51 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { DnsRecord } from "@/lib/domains/dns.types";
+import { cn } from "@/lib/utils";
 
 interface DnsRecordsTableProps {
   records: DnsRecord[];
-  onAdd: () => void;
   onEdit: (record: DnsRecord) => void;
   onRemove: (record: DnsRecord) => void;
 }
 
+/** Type, name, value and TTL per record, with edit and delete. */
 export function DnsRecordsTable({
   records,
-  onAdd,
   onEdit,
   onRemove,
 }: DnsRecordsTableProps) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]">
-      <div className="flex items-center justify-between border-b border-border px-5 py-4">
-        <div>
-          <h2 className="text-sm font-medium">DNS records</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {records.length} authoritative{" "}
-            {records.length === 1 ? "record" : "records"}
-          </p>
-        </div>
-        <Button size="sm" onClick={onAdd}>
-          <Plus /> Add record
-        </Button>
+  if (!records.length) {
+    return (
+      <div className="px-5 py-14 text-center">
+        <span className="mx-auto mb-3 block size-2 rounded-full bg-primary shadow-[0_0_0_4px_color-mix(in_oklab,var(--primary)_20%,transparent)]" />
+        <p className="text-[13.5px] font-medium">This zone is ready</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Add your first record to start routing traffic.
+        </p>
       </div>
-      <div className="hidden grid-cols-[80px_1fr_2fr_100px_44px] gap-4 border-b border-border px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-muted-foreground md:grid">
+    );
+  }
+  return (
+    <div className="p-2 pt-4">
+      <div className="hidden grid-cols-[72px_minmax(0,1fr)_minmax(0,2fr)_80px_36px] gap-4 px-3 pb-2 font-geist-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 md:grid">
         <span>Type</span>
         <span>Name</span>
         <span>Value</span>
         <span>TTL</span>
         <span />
       </div>
-      {records.length ? (
-        records.map((record) => (
+      <div className="divide-y divide-hairline">
+        {records.map((record) => (
           <DnsRecordRow
             key={record.id}
-            record={record}
             onEdit={onEdit}
             onRemove={onRemove}
+            record={record}
           />
-        ))
-      ) : (
-        <div className="px-5 py-14 text-center">
-          <div className="mx-auto mb-3 size-2 rounded-full bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,.8)]" />
-          <p className="text-sm font-medium">This zone is ready</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Add your first record to start routing traffic.
-          </p>
-        </div>
-      )}
-    </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -76,18 +69,18 @@ function DnsRecordRow({
   onRemove: (record: DnsRecord) => void;
 }) {
   return (
-    <div className="grid grid-cols-[64px_1fr_40px] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0 md:grid-cols-[80px_1fr_2fr_100px_44px] md:gap-4">
-      <span className="w-fit rounded-md border border-cyan-400/20 bg-cyan-400/8 px-2 py-1 font-mono text-[11px] font-semibold text-cyan-300">
+    <div className="grid grid-cols-[60px_minmax(0,1fr)_36px] items-center gap-3 rounded-tile px-3 py-3 transition-colors hover:bg-foreground/[0.025] md:grid-cols-[72px_minmax(0,1fr)_minmax(0,2fr)_80px_36px] md:gap-4">
+      <span className="w-fit rounded-full bg-primary/10 px-2 py-0.5 font-geist-mono text-[11px] font-semibold text-primary">
         {record.type}
       </span>
       <div className="min-w-0">
-        <p className="truncate font-mono text-xs">{record.name}</p>
-        <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground md:hidden">
+        <p className="truncate font-geist-mono text-[12px]">{record.name}</p>
+        <p className="mt-1 truncate font-geist-mono text-[11px] text-muted-foreground md:hidden">
           {record.value}
         </p>
       </div>
       <p
-        className="hidden truncate font-mono text-xs text-foreground/75 md:block"
+        className="hidden truncate font-geist-mono text-[12px] text-foreground/80 md:block"
         title={record.value}
       >
         {record.value}
@@ -97,23 +90,38 @@ function DnsRecordRow({
           </span>
         ) : null}
       </p>
-      <span className="hidden text-xs text-muted-foreground md:block">
+      <span className="hidden text-[12px] text-muted-foreground md:block">
         {formatTtl(record.ttl)}
       </span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" title="Record actions">
-            <MoreHorizontal />
+          <Button
+            aria-label={`Actions for ${record.type} ${record.name}`}
+            className="size-8 text-muted-foreground"
+            size="icon-sm"
+            variant="quiet"
+          >
+            <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(record)}>
+        <DropdownMenuContent align="end" className={cn(DASH_MENU, "w-40")}>
+          <DropdownMenuItem
+            className={DASH_MENU_ITEM}
+            data-icon-trigger
+            onClick={() => onEdit(record)}
+          >
+            <LiveSettings strokeWidth={1.75} />
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            variant="destructive"
+            className={cn(
+              DASH_MENU_ITEM,
+              "text-rose-600 focus:text-rose-600 dark:text-rose-400",
+            )}
+            data-icon-trigger
             onClick={() => onRemove(record)}
           >
+            <LiveTrash strokeWidth={1.75} />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>

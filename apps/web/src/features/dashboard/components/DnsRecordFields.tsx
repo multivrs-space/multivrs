@@ -1,5 +1,6 @@
 "use client";
 
+import { DASH_FIELD, DASH_MENU } from "@/components/dashboard/menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,10 +37,10 @@ export function DnsRecordFields(props: DnsRecordFieldsProps) {
           value={props.type}
           onValueChange={(value) => props.setType(value as DnsRecordType)}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className={`${DASH_FIELD} w-full`}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={DASH_MENU}>
             {DNS_RECORD_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
                 {type}
@@ -50,6 +51,7 @@ export function DnsRecordFields(props: DnsRecordFieldsProps) {
       </Field>
       <Field label="Name">
         <Input
+          className={`${DASH_FIELD} font-geist-mono`}
           value={props.name}
           onChange={(event) => props.setName(event.target.value)}
           placeholder="@"
@@ -59,6 +61,7 @@ export function DnsRecordFields(props: DnsRecordFieldsProps) {
       <div className="col-span-2">
         <Field label="Value">
           <Input
+            className={`${DASH_FIELD} font-geist-mono`}
             value={props.value}
             onChange={(event) => props.setValue(event.target.value)}
             placeholder={placeholder(props.type)}
@@ -69,6 +72,7 @@ export function DnsRecordFields(props: DnsRecordFieldsProps) {
       {props.type === "MX" || props.type === "SRV" ? (
         <Field label="Priority">
           <Input
+            className={DASH_FIELD}
             type="number"
             min={0}
             max={65535}
@@ -83,10 +87,10 @@ export function DnsRecordFields(props: DnsRecordFieldsProps) {
           value={String(props.ttl)}
           onValueChange={(value) => props.setTtl(Number(value))}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className={`${DASH_FIELD} w-full`}>
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={DASH_MENU}>
             {DNS_TTL_OPTIONS.map((ttl) => (
               <SelectItem key={ttl} value={String(ttl)}>
                 {formatTtl(ttl)}
@@ -107,8 +111,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-2">
-      <Label>{label}</Label>
+    <div className="grid gap-1.5">
+      <Label className="text-xs">{label}</Label>
       {children}
     </div>
   );

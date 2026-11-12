@@ -1,13 +1,21 @@
-import { Geist_Mono, Hanken_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 
-export const hankenGrotesk = Hanken_Grotesk({
+/*
+ * Self-hosted (Latin, variable weight) rather than fetched from Google at
+ * build time: a build then never depends on Google answering, or on the
+ * shape of the URLs it hands out.
+ */
+
+export const hankenGrotesk = localFont({
+  src: "../fonts/hanken-grotesk.woff2",
   variable: "--font-hanken",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "100 900",
+  display: "swap",
 });
 
-export const geistMono = Geist_Mono({
+export const geistMono = localFont({
+  src: "../fonts/geist-mono.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "100 900",
+  display: "swap",
 });

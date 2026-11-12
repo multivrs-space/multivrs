@@ -58,7 +58,7 @@ export async function createArtifact(dir: string): Promise<Artifact> {
       size: contents.byteLength,
     });
   }
-  files.sort((a, b) => a.path.localeCompare(b.path));
+  files.sort((a, b) => compareArtifactPaths(a.path, b.path));
 
   const manifest = createHash("sha256");
   for (const file of files) {
@@ -66,4 +66,13 @@ export async function createArtifact(dir: string): Promise<Artifact> {
   }
 
   return { hash: manifest.digest("hex"), files };
+}
+
+/**
+ * Manifest order: plain UTF-8 byte order, the same order the Rust CLI sorts
+ * by. Never `localeCompare`, which orders `_next/` and `BUILD_ID` by locale
+ * rules and makes the two sides hash the same files differently.
+ */
+export function compareArtifactPaths(a: string, b: string): number {
+  return Buffer.compare(Buffer.from(a, "utf8"), Buffer.from(b, "utf8"));
 }

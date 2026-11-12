@@ -1,20 +1,22 @@
 "use client";
 
-import { BarChart3, Grid2X2, LayoutGrid, List, ListFilter } from "lucide-react";
-import Link from "next/link";
+import { DASH_MENU, DASH_MENU_ITEM } from "@/components/dashboard/menu";
+import { SegmentedControl } from "@/components/dashboard/SegmentedControl";
+import {
+  LiveLayoutGrid,
+  LiveList,
+  LiveListFilter,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
-import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 import { cn } from "@/lib/utils";
 
 export type ProjectLayout = "grid" | "list";
@@ -29,144 +31,100 @@ interface ProjectsToolbarProps {
   onLayoutChange: (layout: ProjectLayout) => void;
   onQueryChange: (query: string) => void;
   onSortChange: (sort: ProjectSort) => void;
-  onViewChange: (view: ProjectView) => void;
   query: string;
   sort: ProjectSort;
-  view: ProjectView;
 }
 
+/** Search, status filter, sort and layout for the project list. */
 export function ProjectsToolbar(props: ProjectsToolbarProps) {
-  const { username } = useDashboardScope();
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-sm font-semibold">
-          {props.view === "projects" ? "All Projects" : "Usage"}
-        </h1>
-        <div className="flex rounded-lg border border-(--hairline) bg-black/5 dark:bg-black/20 p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => props.onViewChange("projects")}
-            className={
-              props.view === "projects"
-                ? "flex h-7 items-center gap-1.5 rounded-md bg-black/10 dark:bg-white/10 px-2.5"
-                : "flex h-7 items-center gap-1.5 px-2.5 text-muted-foreground"
-            }
+    <div className="flex flex-wrap items-center gap-2">
+      <DashboardSearchInput
+        containerClassName="min-w-56 flex-1"
+        onValueChange={props.onQueryChange}
+        placeholder="Search projects, domains and repositories"
+        value={props.query}
+      />
+      <SegmentedControl
+        aria-label="Filter by status"
+        className="hidden md:inline-flex"
+        onChange={props.onFilterChange}
+        options={[
+          { value: "all", label: "All" },
+          { value: "ready", label: "Ready" },
+          { value: "building", label: "Building" },
+          { value: "error", label: "Failed" },
+        ]}
+        value={props.filter}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            aria-label="Sort and filter projects"
+            className="size-9"
+            data-icon-trigger
+            size="icon-lg"
+            variant="raised"
           >
-            <LayoutGrid className="size-3.5" /> Projects
-          </button>
-          <button
-            type="button"
-            onClick={() => props.onViewChange("usage")}
-            className={
-              props.view === "usage"
-                ? "flex h-7 items-center gap-1.5 rounded-md bg-black/10 dark:bg-white/10 px-2.5"
-                : "flex h-7 items-center gap-1.5 px-2.5 text-muted-foreground"
-            }
-          >
-            <BarChart3 className="size-3.5" /> Usage
-          </button>
-        </div>
-      </div>
-      {props.view === "projects" ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <DashboardSearchInput
-            containerClassName="min-w-64 flex-1"
-            value={props.query}
-            onValueChange={props.onQueryChange}
-            placeholder="Search projects"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-lg"
-                aria-label="Filter and sort projects"
-                className={cn(
-                  "relative border-(--hairline) bg-black/5 dark:bg-black/20",
-                  props.filter !== "all" &&
-                    "border-foreground/30 text-foreground",
-                )}
-              >
-                <ListFilter className="size-4" />
-                {props.filter !== "all" ? (
-                  <span className="absolute right-1 top-1 size-1.5 rounded-full bg-foreground" />
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-xl">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={props.filter}
-                onValueChange={(value) =>
-                  props.onFilterChange(toProjectFilter(value))
-                }
-              >
-                <DropdownMenuRadioItem value="all">
-                  All projects
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ready">
-                  Ready
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="building">
-                  Building
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="error">
-                  Error
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={props.sort}
-                onValueChange={(value) =>
-                  props.onSortChange(toProjectSort(value))
-                }
-              >
-                <DropdownMenuRadioItem value="activity">
-                  Activity
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="name">Name</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div className="flex rounded-lg border border-(--hairline) bg-black/5 dark:bg-black/20 p-1">
-            <button
-              type="button"
-              onClick={() => props.onLayoutChange("grid")}
-              aria-label="Grid view"
-              aria-pressed={props.layout === "grid"}
-              className={
-                props.layout === "grid"
-                  ? "flex size-7 items-center justify-center rounded-md bg-black/10 dark:bg-white/10"
-                  : "flex size-7 items-center justify-center rounded-md text-muted-foreground"
+            <LiveListFilter className="size-4" strokeWidth={1.75} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className={cn(DASH_MENU, "w-56")}>
+          <div className="md:hidden">
+            <DropdownMenuLabel className="px-2.5 text-[11px] text-muted-foreground">
+              Status
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              onValueChange={(value) =>
+                props.onFilterChange(toProjectFilter(value))
               }
+              value={props.filter}
             >
-              <Grid2X2 className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => props.onLayoutChange("list")}
-              aria-label="List view"
-              aria-pressed={props.layout === "list"}
-              className={
-                props.layout === "list"
-                  ? "flex size-7 items-center justify-center rounded-md bg-black/10 dark:bg-white/10"
-                  : "flex size-7 items-center justify-center rounded-md text-muted-foreground"
-              }
-            >
-              <List className="size-4" />
-            </button>
+              {(["all", "ready", "building", "error"] as const).map((value) => (
+                <DropdownMenuRadioItem
+                  className={DASH_MENU_ITEM}
+                  key={value}
+                  value={value}
+                >
+                  {value === "all"
+                    ? "All projects"
+                    : value === "error"
+                      ? "Failed"
+                      : value[0]?.toUpperCase() + value.slice(1)}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
           </div>
-          <Link
-            href={`/${username}/new`}
-            className={buttonVariants({ size: "lg" })}
+          <DropdownMenuLabel className="px-2.5 text-[11px] text-muted-foreground">
+            Sort by
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            onValueChange={(value) => props.onSortChange(toProjectSort(value))}
+            value={props.sort}
           >
-            Add New
-          </Link>
-        </div>
-      ) : null}
+            <DropdownMenuRadioItem className={DASH_MENU_ITEM} value="activity">
+              Recent activity
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem className={DASH_MENU_ITEM} value="name">
+              Name
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <SegmentedControl
+        aria-label="Layout"
+        onChange={props.onLayoutChange}
+        options={[
+          {
+            value: "grid",
+            label: "Grid",
+            icon: LiveLayoutGrid,
+            iconOnly: true,
+          },
+          { value: "list", label: "List", icon: LiveList, iconOnly: true },
+        ]}
+        value={props.layout}
+      />
     </div>
   );
 }

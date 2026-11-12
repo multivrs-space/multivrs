@@ -42,6 +42,8 @@ const publicPrefixes = [
   "/templates",
   "/build",
   "/studio",
+  // Design lab for the dashboard; the page itself 404s in production.
+  ...(process.env.NODE_ENV === "production" ? [] : ["/admin/lab"]),
 ];
 
 export default async function proxy(req: NextRequest) {

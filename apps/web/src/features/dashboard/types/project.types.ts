@@ -20,6 +20,8 @@ export interface DashboardProject {
     label: string;
     branch: string;
     createdAt: string;
+    /** The stored status ("queued", "building", "ready"…), for live watching. */
+    rawStatus: string;
   } | null;
   /** Analytics data for the card. */
   analytics?: {

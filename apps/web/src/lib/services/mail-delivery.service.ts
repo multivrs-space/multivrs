@@ -67,6 +67,15 @@ export async function deliverMailMessage(userId: string, messageId: string) {
       subject: message.subject,
       text: message.textBody ?? undefined,
       html: message.htmlBody ?? undefined,
+      // Lets the recipient's mail app thread a reply with what it answers.
+      headers: message.inReplyTo
+        ? {
+            "In-Reply-To": message.inReplyTo,
+            References: [...message.references, message.inReplyTo]
+              .filter((id, index, all) => all.indexOf(id) === index)
+              .join(" "),
+          }
+        : undefined,
       attachments: message.attachments.flatMap((attachment) =>
         attachment.contentBase64
           ? [
@@ -74,6 +83,8 @@ export async function deliverMailMessage(userId: string, messageId: string) {
                 filename: attachment.filename,
                 contentType: attachment.contentType,
                 content: Buffer.from(attachment.contentBase64, "base64"),
+                inline: attachment.inline,
+                contentId: attachment.contentId ?? undefined,
               },
             ]
           : [],

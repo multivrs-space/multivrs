@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./dashboard-surfaces.css";
+@import "./living-icons.css";
 
 @source "../**/*.{js,ts,jsx,tsx}";
 
@@ -50,7 +52,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-canvas: 24px;
+  --radius-card: 20px;
+  --radius-tile: 14px;
+  --radius-control: 10px;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --color-hero-glow: var(--hero-glow);
+  --color-ink: var(--ink);
+  --color-ink-raised: var(--ink-raised);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
 }
 
 :root {
@@ -72,11 +83,12 @@
   --border: oklch(0.92 0 0);
   --input: oklch(0.92 0 0);
   --ring: #9333ea;
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Same purple + grey ramp as dark mode, stepped lighter for white canvases. */
+  --chart-1: #9333ea;
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.68 0 0);
+  --chart-4: oklch(0.78 0 0);
+  --chart-5: oklch(0.87 0 0);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);

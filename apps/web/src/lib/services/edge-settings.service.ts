@@ -75,7 +75,7 @@ export async function purgeProjectCache(
   const zoneId = process.env.CLOUDFLARE_ZONE_ID;
   const token = process.env.CLOUDFLARE_API_TOKEN;
   if (!zoneId || !token)
-    throw cloudflareError("Cloudflare cache purge is not configured");
+    throw cloudflareError("Cache purging isn't available in this environment");
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: { domains: true },
@@ -100,5 +100,7 @@ export async function purgeProjectCache(
     },
   );
   if (!response.ok)
-    throw cloudflareError(`Cloudflare cache purge failed (${response.status})`);
+    throw cloudflareError(
+      `Cache purge failed (${response.status}). Try again in a moment.`,
+    );
 }

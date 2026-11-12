@@ -15,6 +15,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import type {
+  MailActivityDay,
   MailDashboardData,
   MailMessageDetail,
   MailResources,
@@ -30,6 +31,8 @@ interface MailContextValue {
   shell: Promise<MailDashboardData>;
   /** Resource lists; only resource pages wait on these (`useMailResources`). */
   resources: Promise<MailResources>;
+  /** Thirty days of daily volume; only overview and analytics wait on it. */
+  activity: Promise<MailActivityDay[]>;
   projectId?: string;
   view: MailView;
   setView: (view: MailView) => void;
@@ -70,6 +73,7 @@ function getServerSnapshot() {
 }
 
 export function MailProvider({
+  activity,
   children,
   resources,
   shell,
@@ -77,6 +81,7 @@ export function MailProvider({
   initialView = "overview",
   projectId,
 }: {
+  activity: Promise<MailActivityDay[]>;
   children: ReactNode;
   resources: Promise<MailResources>;
   shell: Promise<MailDashboardData>;
@@ -143,6 +148,7 @@ export function MailProvider({
     () => ({
       shell,
       resources,
+      activity,
       projectId,
       view,
       setView,
@@ -161,6 +167,7 @@ export function MailProvider({
     [
       shell,
       resources,
+      activity,
       projectId,
       view,
       setView,
@@ -217,4 +224,9 @@ export function useMailData(): MailDashboardData {
 /** The account's resource lists. Suspends until they arrive. */
 export function useMailResources(): MailResources {
   return use(useMailContext().resources);
+}
+
+/** Daily mail volume for the last 30 days. Suspends until it arrives. */
+export function useMailActivity(): MailActivityDay[] {
+  return use(useMailContext().activity);
 }

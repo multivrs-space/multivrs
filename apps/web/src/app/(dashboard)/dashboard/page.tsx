@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth/session";
 import { findAccountTeam } from "@/lib/services/account-team.service";
 
+/** Reads the session at request time; it only ever redirects. */
+export const instant = false;
+
 /**
  * `/dashboard` — a redirect resolver, not a rendered page (mirrors the root
  * route at `src/app/page.tsx`).

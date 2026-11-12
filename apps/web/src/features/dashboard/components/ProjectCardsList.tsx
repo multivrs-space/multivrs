@@ -1,8 +1,11 @@
 "use client";
 
-import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
+import { DashCard } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LivePlus, LiveRocket, LiveSearch } from "@/components/icons/animated";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ProjectCard } from "@/features/dashboard/components/ProjectCard";
 import type {
   ProjectFilter,
@@ -51,7 +54,7 @@ export function ProjectCardsList({
     <div
       className={
         layout === "grid"
-          ? "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          ? "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
           : "grid grid-cols-1 gap-3"
       }
     >
@@ -68,31 +71,38 @@ export function ProjectCardsList({
 
 function EmptyProjects({ username }: { username: string }) {
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--hairline-strong)] bg-foreground/[0.03] px-6 text-center">
-      <span className="mb-5 flex size-14 items-center justify-center rounded-full border border-[var(--hairline)]">
-        <Plus className="size-6 text-muted-foreground" />
-      </span>
-      <h2 className="text-lg font-medium">No projects yet</h2>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Import a repository, confirm its framework, and deploy your first
-        application.
-      </p>
-      <Link
-        href={`/${username}/new`}
-        className="mt-7 inline-flex h-10 items-center gap-2 rounded-lg bg-foreground px-5 text-sm font-semibold text-background"
-      >
-        <Plus className="size-4" /> Create project
-      </Link>
-    </div>
+    <DashCard>
+      <EmptyState
+        actions={
+          <Link
+            className={buttonVariants({ size: "sm", variant: "hero" })}
+            data-icon-trigger
+            href={`/${username}/new`}
+          >
+            <LivePlus strokeWidth={2} />
+            Create project
+          </Link>
+        }
+        className="min-h-[420px]"
+        description="Import a repository, confirm its framework, and ship your first deployment in a couple of minutes."
+        glyph={LiveRocket}
+        title="Launch your first project"
+      />
+    </DashCard>
   );
 }
 
 function NoMatchingProjects() {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center border border-dashed border-[var(--hairline-strong)] text-center">
-      <Search className="size-5 text-muted-foreground" />
-      <h2 className="mt-3 text-base font-medium">No matching projects</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
+    <div
+      className="flex min-h-64 flex-col items-center justify-center gap-2 rounded-card border border-dashed border-hairline-strong text-center"
+      data-icon-trigger
+    >
+      <span className="surface-inset grid size-10 place-items-center rounded-tile text-muted-foreground">
+        <LiveSearch className="size-4" strokeWidth={1.75} />
+      </span>
+      <h2 className="text-[15px] font-semibold">No matching projects</h2>
+      <p className="text-[13px] text-muted-foreground">
         Try a different search or filter.
       </p>
     </div>

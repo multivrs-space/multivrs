@@ -1,29 +1,42 @@
-import { SectionSkeletonHeader } from "./SectionSkeletonParts";
+import {
+  SkeletonCard,
+  SkeletonHeader,
+} from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
+const FIELDS = ["issuer", "audience"];
+const PROVIDERS = ["aws", "gcp", "azure"];
+
+/** Mirrors Integrations: the OIDC card beside the cloud provider steps. */
 export function IntegrationsSectionSkeleton() {
   return (
-    <main className="w-full animate-pulse space-y-6 px-5 py-6" aria-busy>
-      <SectionSkeletonHeader titleWidth="w-40" />
-      <section className="overflow-hidden rounded-2xl border border-border bg-foreground/2">
-        <div className="flex gap-4 border-border border-b p-5">
-          <div className="size-10 rounded-xl bg-purple-400/10" />
-          <div className="flex-1">
-            <div className="h-4 w-36 rounded-sm bg-foreground/8" />
-            <div className="mt-3 h-3 max-w-xl rounded-sm bg-foreground/4" />
-          </div>
+    <PageBody>
+      <main aria-busy aria-label="Loading integrations" className="space-y-5">
+        <SkeletonHeader />
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+          <SkeletonCard>
+            <div className="space-y-4">
+              {FIELDS.map((field) => (
+                <div key={field}>
+                  <span className="skeleton block h-2.5 w-14" />
+                  <span className="skeleton mt-2 block h-9 rounded-control" />
+                </div>
+              ))}
+              <span className="skeleton block h-8 w-44 rounded-full" />
+            </div>
+          </SkeletonCard>
+          <SkeletonCard>
+            <div className="space-y-2">
+              {PROVIDERS.map((provider) => (
+                <span
+                  className="skeleton block h-14 rounded-tile"
+                  key={provider}
+                />
+              ))}
+            </div>
+          </SkeletonCard>
         </div>
-        <div className="space-y-5 p-5">
-          <div>
-            <div className="h-3 w-12 rounded-sm bg-foreground/4" />
-            <div className="mt-2 h-10 rounded-lg border border-border bg-muted/50" />
-          </div>
-          <div>
-            <div className="h-3 w-16 rounded-sm bg-foreground/4" />
-            <div className="mt-2 h-10 rounded-lg border border-border bg-muted/50" />
-          </div>
-          <div className="h-10 w-44 rounded-lg bg-muted" />
-        </div>
-      </section>
-    </main>
+      </main>
+    </PageBody>
   );
 }

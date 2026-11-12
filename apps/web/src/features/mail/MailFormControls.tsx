@@ -1,10 +1,17 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { DASH_FIELD } from "@/components/dashboard/menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { MailResources } from "@/features/mail/mail.types";
+import { cn } from "@/lib/utils";
+
+const LABEL = "text-[12px] font-medium text-muted-foreground";
+
+/** Native selects get the same recessed well as inputs. */
+export const MAIL_SELECT = cn(DASH_FIELD, "w-full border px-3");
 
 export function FormField({
   name,
@@ -19,13 +26,11 @@ export function FormField({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label
-        className="capitalize text-black/45 dark:text-white/45"
-        htmlFor={name}
-      >
+      <Label className={cn(LABEL, "capitalize")} htmlFor={name}>
         {name.replace(/([A-Z])/g, " $1")}
       </Label>
       <Input
+        className={DASH_FIELD}
         id={name}
         name={name}
         placeholder={placeholder}
@@ -45,14 +50,11 @@ export function FormArea({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label
-        className="capitalize text-black/45 dark:text-white/45"
-        htmlFor={name}
-      >
+      <Label className={cn(LABEL, "capitalize")} htmlFor={name}>
         {name}
       </Label>
       <Textarea
-        className="min-h-36"
+        className={cn(DASH_FIELD, "h-auto min-h-36 py-2.5")}
         id={name}
         name={name}
         placeholder={placeholder}
@@ -71,13 +73,8 @@ export function FormChoice({
 }) {
   return (
     <label className="block space-y-1.5">
-      <Label className="capitalize text-black/45 dark:text-white/45">
-        {name}
-      </Label>
-      <select
-        className="h-10 w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0c10] px-3 text-sm capitalize"
-        name={name}
-      >
+      <span className={cn(LABEL, "block capitalize")}>{name}</span>
+      <select className={cn(MAIL_SELECT, "capitalize")} name={name}>
         {options.map((option) => (
           <option key={option}>{option}</option>
         ))}
@@ -95,14 +92,10 @@ export function AudienceChoice({
 }) {
   return (
     <label className="block space-y-1.5">
-      <Label className="text-black/45 dark:text-white/45">
+      <span className={cn(LABEL, "block")}>
         Audience{optional ? " (optional)" : ""}
-      </Label>
-      <select
-        className="h-10 w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0c10] px-3 text-sm"
-        name="audienceId"
-        required={!optional}
-      >
+      </span>
+      <select className={MAIL_SELECT} name="audienceId" required={!optional}>
         <option value="">{optional ? "No audience" : "Select audience"}</option>
         {resources.audiences.map((item) => (
           <option key={item.id} value={item.id}>
@@ -123,9 +116,7 @@ export function ComposeField({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] text-black/45 dark:text-white/45">
-        {label}
-      </Label>
+      <Label className={LABEL}>{label}</Label>
       {children}
     </div>
   );

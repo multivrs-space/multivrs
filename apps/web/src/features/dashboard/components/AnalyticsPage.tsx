@@ -1,113 +1,114 @@
-"use client";
-
-import dynamic from "next/dynamic";
-import Link from "next/link";
+import { DashCard } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { UpsellBanner } from "@/components/dashboard/UpsellBanner";
+import { LiveActivity, LiveShieldAlert } from "@/components/icons/animated";
 import { AnalyticsProjectPicker } from "@/features/dashboard/components/AnalyticsProjectPicker";
-import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { AnalyticsDashboard } from "@/features/dashboard/components/analytics/AnalyticsDashboard";
+import { AnalyticsHeader } from "@/features/dashboard/components/analytics/AnalyticsHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import type {
-  AnalyticsRange,
+  AnalyticsAudience,
   PlatformAnalytics,
 } from "@/features/dashboard/types/analytics.types";
 import type { DashboardProject } from "@/features/dashboard/types/project.types";
-import { AnalyticsBreakdowns } from "./AnalyticsBreakdowns";
-import { AnalyticsMetrics } from "./AnalyticsMetrics";
-
-const AnalyticsChart = dynamic(() =>
-  import("./AnalyticsChart").then((module) => module.AnalyticsChart),
-);
 
 interface AnalyticsPageProps {
   username?: string;
   projects?: DashboardProject[];
   project?: DashboardProject;
   analytics?: PlatformAnalytics;
+  audience?: AnalyticsAudience;
   plusEnabled?: boolean;
 }
 
+const NO_AUDIENCE: AnalyticsAudience = {
+  live: 0,
+  countries: [],
+  cities: [],
+  browsers: [],
+  events: [],
+};
+
+const UNAVAILABLE = {
+  unconfigured: {
+    title: "Analytics isn't connected here",
+    description:
+      "Analytics isn't set up in this environment, so there's no traffic to read yet.",
+  },
+  error: {
+    title: "Analytics didn't load",
+    description:
+      "Analytics didn't answer this time. Nothing is lost; try again in a moment.",
+  },
+  locked: {
+    title: "Analytics is locked",
+    description: "Turn on Web Analytics for this team to see traffic.",
+  },
+} as const;
+
+/** Web Analytics: who visits, from where, what they read and how it changes. */
 export function AnalyticsPage({
   username,
   projects,
   project,
   analytics,
+  audience = NO_AUDIENCE,
   plusEnabled = false,
 }: AnalyticsPageProps) {
   if (username && projects && !project) {
     return <AnalyticsProjectPicker username={username} projects={projects} />;
   }
 
-  return (
-    <div className="relative z-10 w-full space-y-6 px-5 py-6">
-      <DashboardPageHeader
-        title="Analytics"
-        description={
-          project ? (
-            <>Traffic and engagement for {project.name}.</>
-          ) : (
-            "Traffic and engagement for your project."
-          )
-        }
-        actions={
-          <div className="flex items-center gap-4 border-b border-[var(--hairline)]">
-            {(
-              ["24h", "7d", ...(plusEnabled ? ["30d" as const] : [])] as const
-            ).map((range) => (
-              <RangeLink
-                active={analytics?.range === range}
-                key={range}
-                range={range}
-              />
-            ))}
-          </div>
-        }
-      >
-        {!plusEnabled ? (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Activate Web Analytics Plus in Billing for 30-day reporting and UTM
-            attribution.
-          </p>
-        ) : null}
-      </DashboardPageHeader>
+  const billingHref = username ? `/${username}/~/settings#billing` : "#billing";
+  const data = analytics;
+  const issue = !data
+    ? UNAVAILABLE.unconfigured
+    : data.state === "ready"
+      ? null
+      : UNAVAILABLE[data.state];
+  const empty =
+    data?.state === "ready" && data.requests === 0 && data.pageviews === 0;
 
-      {analytics?.state !== "ready" && (
-        <div className="border-y border-amber-400/20 bg-amber-400/[0.04] px-4 py-3 text-xs text-amber-200">
-          {analytics?.state === "error"
-            ? "Analytics could not be loaded from Cloudflare. Try again shortly."
-            : "Add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_ANALYTICS_API_TOKEN to load live edge analytics."}
-        </div>
-      )}
-      {analytics && <AnalyticsMetrics data={analytics} />}
-      {analytics && <AnalyticsChart points={analytics.series} />}
-      {analytics && (
-        <AnalyticsBreakdowns
-          paths={analytics.paths}
-          countries={analytics.countries}
-          devices={analytics.devices}
-          referrers={analytics.referrers}
-          sources={analytics.sources}
+  return (
+    <PageBody>
+      <AnalyticsHeader
+        plusEnabled={plusEnabled}
+        projectName={project?.name}
+        range={data?.range}
+      />
+
+      {issue || !data ? (
+        <DashCard>
+          <EmptyState
+            description={(issue ?? UNAVAILABLE.unconfigured).description}
+            glyph={data?.state === "error" ? LiveShieldAlert : LiveActivity}
+            title={(issue ?? UNAVAILABLE.unconfigured).title}
+          />
+        </DashCard>
+      ) : empty ? (
+        <DashCard>
+          <EmptyState
+            description="Traffic appears here within a minute of your project's first visit. Share its address to get the first one in."
+            glyph={LiveActivity}
+            title="Waiting for the first visit"
+          />
+        </DashCard>
+      ) : (
+        <AnalyticsDashboard
+          audience={audience}
+          data={data}
+          plusEnabled={plusEnabled}
         />
       )}
-    </div>
-  );
-}
 
-function RangeLink({
-  active,
-  range,
-}: {
-  active: boolean;
-  range: AnalyticsRange;
-}) {
-  return (
-    <Link
-      className={`flex h-9 items-center rounded-none border-b-2 px-0 text-xs uppercase ${
-        active
-          ? "border-foreground text-foreground"
-          : "border-transparent text-muted-foreground hover:text-foreground"
-      }`}
-      href={`?range=${range}`}
-      scroll={false}
-    >
-      {range}
-    </Link>
+      {plusEnabled ? null : (
+        <UpsellBanner
+          cta="Turn on in Billing"
+          description="Web Analytics Plus adds a 30-day range and UTM source attribution."
+          href={billingHref}
+          title="See 30 days of history and where campaigns convert"
+        />
+      )}
+    </PageBody>
   );
 }

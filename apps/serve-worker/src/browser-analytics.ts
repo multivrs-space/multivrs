@@ -1,4 +1,5 @@
 export const BROWSER_ANALYTICS_SCRIPT = `(()=>{
+if(window.__multivrsAnalytics)return;
 const tag=document.currentScript;
 const analytics=tag?.dataset.analytics==='1';
 const speed=tag?.dataset.speed==='1';

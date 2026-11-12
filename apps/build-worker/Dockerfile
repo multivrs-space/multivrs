@@ -15,14 +15,14 @@ RUN cargo build --locked --release -p cli
 FROM docker.io/cloudflare/sandbox:0.10.3
 
 USER root
-COPY --from=cli-builder /usr/local/cargo/bin /usr/local/cargo/bin
-COPY --from=cli-builder /usr/local/rustup /usr/local/rustup
-COPY --from=cli-builder /source/target/release/multivrs /usr/local/bin/multivrs
-ENV CARGO_HOME=/usr/local/cargo
-ENV RUSTUP_HOME=/usr/local/rustup
-ENV PATH=/root/.bun/bin:/usr/local/cargo/bin:/usr/local/bin:/usr/bin:/bin
-RUN rustup default stable && multivrs --version && /usr/local/bin/bun --version
+# No Rust toolchain in the machine: it was ~1.3 GB of every cold start, and
+# customer builds don't use it (swift-rust ships a prebuilt Linux binary).
+ENV PATH=/root/.bun/bin:/usr/local/bin:/usr/bin:/bin
 # Pinned publisher: runtime deploys never resolve wrangler from a customer's node_modules.
 RUN bun install -g wrangler@4.152.0 && /root/.bun/bin/wrangler --version
+# The CLI changes most often, so it goes last: a CLI-only change rebuilds and
+# uploads just this small layer.
+COPY --from=cli-builder /source/target/release/multivrs /usr/local/bin/multivrs
+RUN multivrs --version && /usr/local/bin/bun --version
 
 WORKDIR /workspace

@@ -15,9 +15,12 @@
       "class_name": "Sandbox",
       "image": "./Dockerfile",
       "image_build_context": "../..",
-      // The image unpacks to ~2.5 GB; smaller types fail with ImagePullRequestedDiskSizeToSmall.
+      // Builds need the CPU and disk; smaller types also refused the image's
+      // size (ImagePullRequestedDiskSizeToSmall) before the Rust toolchain left it.
       "instance_type": "standard-2",
-      "max_instances": 5
+      // Warm build machines stay up 15 minutes after a build; leave room for
+      // fresh ones while they idle.
+      "max_instances": 10
     }
   ],
   "durable_objects": {
@@ -38,6 +41,11 @@
     {
       "binding": "BUILD_CACHE",
       "bucket_name": "multivrs-build-cache"
+    },
+    {
+      // Screenshots of live deployments, read by the dashboard.
+      "binding": "ARTIFACTS",
+      "bucket_name": "multivrs-artifacts"
     }
   ],
   "queues": {

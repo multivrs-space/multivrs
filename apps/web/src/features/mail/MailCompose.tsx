@@ -1,19 +1,12 @@
 "use client";
 
-import { Clock3, Maximize2, Minimize2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { LiveSend } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { useResponsiveSheetSide } from "@/features/domains/use-responsive-sheet-side";
+import { MailSheet } from "@/features/mail/compose/MailSheet";
+import { SendLater } from "@/features/mail/compose/SendLater";
 import { MailComposeFields } from "@/features/mail/MailComposeFields";
 import type {
   MailboxSummary,
@@ -21,34 +14,33 @@ import type {
 } from "@/features/mail/mail.types";
 import { submitMailCompose } from "@/features/mail/mail-compose.client";
 import { useMailContext } from "@/features/mail/mail-context";
-import { cn } from "@/lib/utils";
 
+interface MailComposeProps {
+  mailboxes: MailboxSummary[];
+  forward?: MailMessageDetail;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  reply?: MailMessageDetail;
+}
+
+/** A side sheet (a bottom sheet on phones) for new mail, replies and forwards. */
 export function MailCompose({
   mailboxes,
   forward,
   onOpenChange,
   open,
   reply,
-}: {
-  mailboxes: MailboxSummary[];
-  forward?: MailMessageDetail;
-  onOpenChange: (open: boolean) => void;
-  open: boolean;
-  reply?: MailMessageDetail;
-}) {
+}: MailComposeProps) {
   const router = useRouter();
   const { notifyMailChanged } = useMailContext();
-  const side = useResponsiveSheetSide();
   const [sending, setSending] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [scheduled, setScheduled] = useState(false);
+
   function submit(formData: FormData) {
     setSending(true);
     void submitMailCompose(formData, reply).then((result) => {
       setSending(false);
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
+      if (!result.ok) return void toast.error(result.message);
       toast.success(
         formData.get("scheduledAt") ? "Email scheduled" : "Email queued",
       );
@@ -57,75 +49,35 @@ export function MailCompose({
       notifyMailChanged();
     });
   }
+
   return (
-    <Sheet onOpenChange={onOpenChange} open={open}>
-      <SheetContent
-        className={cn(
-          "w-full flex flex-col border-black/10 dark:border-white/10 bg-white dark:bg-[#07080a] transition-[max-width] duration-200 sm:max-w-xl",
-          expanded && "sm:max-w-[min(92vw,1100px)]",
-          side === "bottom" && "max-h-[calc(100dvh-2rem)] rounded-t-xl",
-        )}
-        side={side}
-        style={
-          expanded
-            ? side === "bottom"
-              ? {
-                  bottom: "1rem",
-                  height: "calc(100dvh - 2rem)",
-                  left: "1rem",
-                  maxHeight: "none",
-                  maxWidth: "none",
-                  right: "1rem",
-                  width: "auto",
-                }
-              : {
-                  bottom: "1rem",
-                  height: "auto",
-                  left: "1rem",
-                  maxWidth: "none",
-                  right: "1rem",
-                  top: "1rem",
-                  width: "auto",
-                }
-            : undefined
-        }
-      >
-        <SheetHeader className="relative border-b border-black/10 dark:border-white/10 pr-14">
-          <SheetTitle>
-            {reply ? "Reply" : forward ? "Forward message" : "New message"}
-          </SheetTitle>
-          <SheetDescription>
-            Rich text, inline images, links, and attachments are supported.
-          </SheetDescription>
+    <MailSheet
+      description="Rich text, inline images, links and attachments."
+      icon={LiveSend}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={reply ? "Reply" : forward ? "Forward" : "New message"}
+    >
+      <form action={submit} className="flex min-h-0 flex-1 flex-col">
+        <MailComposeFields
+          forward={forward}
+          mailboxes={mailboxes}
+          reply={reply}
+        />
+        <div className="flex flex-wrap items-center gap-2 border-t border-hairline px-4 py-3">
           <Button
-            aria-label={expanded ? "Restore compose size" : "Expand compose"}
-            className="absolute right-12 top-4"
-            onClick={() => setExpanded((value) => !value)}
-            size="icon-sm"
-            type="button"
-            variant="ghost"
+            data-icon-trigger
+            disabled={sending || !mailboxes.length}
+            size="sm"
+            type="submit"
+            variant="hero"
           >
-            {expanded ? <Minimize2 /> : <Maximize2 />}
+            <LiveSend strokeWidth={1.75} />
+            {sending ? "Queuing…" : scheduled ? "Schedule" : "Send"}
           </Button>
-        </SheetHeader>
-        <form action={submit} className="flex min-h-0 flex-1 flex-col">
-          <MailComposeFields
-            forward={forward}
-            mailboxes={mailboxes}
-            reply={reply}
-          />
-          <SheetFooter className="border-t border-black/10 dark:border-white/10">
-            <Button disabled={sending || !mailboxes.length} type="submit">
-              <Send />
-              {sending ? "Queuing…" : "Send message"}
-            </Button>
-            <p className="flex items-center gap-1 text-[10px] text-black/30 dark:text-white/30">
-              <Clock3 className="size-3" />
-              Scheduled mail is held until its send time.
-            </p>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+          <SendLater onChange={setScheduled} />
+        </div>
+      </form>
+    </MailSheet>
   );
 }

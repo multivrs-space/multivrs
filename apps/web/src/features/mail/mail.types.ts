@@ -9,6 +9,8 @@ export interface MailboxSummary {
 export interface MailThreadSummary {
   id: string;
   mailboxId: string;
+  /** Which of your mailboxes the conversation is in, e.g. hello@kontinueai.com. */
+  mailboxAddress?: string;
   subject: string;
   status: string;
   assignedTo?: string;
@@ -34,6 +36,10 @@ export interface MailAttachmentItem {
 
 export interface MailMessageDetail {
   id: string;
+  /** The mailbox it sits in: where a reply or forward is sent from. */
+  mailboxId: string;
+  /** Where the sender asked replies to go, when it isn't their address. */
+  replyTo?: string;
   direction: string;
   status: string;
   folder: string;
@@ -45,6 +51,8 @@ export interface MailMessageDetail {
   text?: string;
   html?: string;
   attachments?: MailAttachmentItem[];
+  /** Received mail hides remote images until the reader loads them. */
+  remoteImagesBlocked?: boolean;
   sentAt?: string;
   receivedAt?: string;
   createdAt: string;
@@ -79,11 +87,8 @@ export interface MailLogPage {
  * stream separately; thread lists and message bodies load per view.
  */
 export interface MailDashboardData {
+  /** Volume and rates live in `MailActivityDay`, which streams separately. */
   stats: {
-    sent: number;
-    received: number;
-    deliveryRate: number;
-    openRate: number;
     activeMailboxes: number;
     verifiedDomains: number;
     contacts: number;
@@ -91,6 +96,19 @@ export interface MailDashboardData {
   folderCounts: Record<string, number>;
   mailboxes: MailboxSummary[];
   recentThreads: MailThreadSummary[];
+}
+
+/** One UTC day of mail: messages each way, then what providers reported. */
+export interface MailActivityDay {
+  /** YYYY-MM-DD. */
+  day: string;
+  sent: number;
+  received: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  complained: number;
 }
 
 /** The account's mail resources, for the resource pages and their forms. */

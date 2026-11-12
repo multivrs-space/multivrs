@@ -27,7 +27,12 @@ export interface ArtifactStore {
   putManifest(artifact: Artifact): Promise<void>;
   getManifest(hash: string): Promise<Artifact | null>;
   deleteManifest(hash: string): Promise<void>;
+  /** A deployment's screenshot (`previews/<id>.jpg`), if one was captured. */
+  getPreview(deploymentId: string): Promise<Uint8Array | null>;
 }
+
+/** Same key the build worker writes; ids are uuids, so the path is safe. */
+const previewKey = (deploymentId: string) => `previews/${deploymentId}.jpg`;
 
 export class LocalArtifactStore implements ArtifactStore {
   private readonly root: string;
@@ -71,6 +76,14 @@ export class LocalArtifactStore implements ArtifactStore {
 
   async delete(hash: string): Promise<void> {
     await fs.rm(this.blobPath(hash), { force: true });
+  }
+
+  async getPreview(deploymentId: string): Promise<Uint8Array | null> {
+    try {
+      return await fs.readFile(join(this.root, previewKey(deploymentId)));
+    } catch {
+      return null;
+    }
   }
 
   async putManifest(artifact: Artifact): Promise<void> {
@@ -133,6 +146,8 @@ export class R2ArtifactStore implements ArtifactStore {
         secretAccessKey: options.secretAccessKey,
       },
       forcePathStyle: true,
+      // A storage hiccup should fail one request, not hang a whole deploy.
+      requestHandler: { connectionTimeout: 5_000, requestTimeout: 20_000 },
     };
     this.client = new S3Client(config);
   }
@@ -159,10 +174,12 @@ export class R2ArtifactStore implements ArtifactStore {
     }
   }
 
+  /**
+   * Write a blob. Content-addressed, so rewriting one is harmless; callers
+   * check `has` first (the upload's prepare step already did), so this
+   * skips a second round trip per file.
+   */
   async put(hash: string, contents: Uint8Array): Promise<void> {
-    if (await this.has(hash)) {
-      return;
-    }
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -190,6 +207,17 @@ export class R2ArtifactStore implements ArtifactStore {
     await this.client.send(
       new DeleteObjectCommand({ Bucket: this.bucket, Key: this.blobKey(hash) }),
     );
+  }
+
+  async getPreview(deploymentId: string): Promise<Uint8Array | null> {
+    try {
+      const object = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucket, Key: previewKey(deploymentId) }),
+      );
+      return streamToBytes(object.Body);
+    } catch {
+      return null;
+    }
   }
 
   async putManifest(artifact: Artifact): Promise<void> {

@@ -1,7 +1,10 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { DashCard } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LiveNetwork, LiveRefresh } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
 export default function DomainDnsError({
   reset,
@@ -10,22 +13,20 @@ export default function DomainDnsError({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto grid min-h-[60vh] max-w-xl place-items-center px-5 text-center">
-      <div>
-        <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-amber-400/10 text-amber-300">
-          <AlertTriangle className="size-5" />
-        </div>
-        <h1 className="mt-5 text-lg font-semibold">
-          DNS configuration unavailable
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Multivrs could not load this domain’s authoritative DNS zone. Check
-          the Openprovider configuration and try again.
-        </p>
-        <Button className="mt-5" onClick={reset}>
-          Try again
-        </Button>
-      </div>
-    </div>
+    <PageBody>
+      <DashCard>
+        <EmptyState
+          actions={
+            <Button data-icon-trigger onClick={reset} size="sm" variant="hero">
+              <LiveRefresh strokeWidth={2} />
+              Try again
+            </Button>
+          }
+          description="We couldn't load this domain's DNS zone from the registrar. It's usually temporary."
+          glyph={LiveNetwork}
+          title="DNS is unavailable right now"
+        />
+      </DashCard>
+    </PageBody>
   );
 }

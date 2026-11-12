@@ -1,15 +1,18 @@
 "use client";
 
-import { Bell, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { DASH_MENU } from "@/components/dashboard/menu";
+import { LiveBell } from "@/components/icons/animated";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { DashboardNotification } from "@/features/dashboard/types/notification.types";
-import type { PlanKey } from "@/lib/payments/billing.types";
+import type { DisplayPlan } from "@/lib/payments/billing.types";
+import { cn } from "@/lib/utils";
 import { AccountMenu } from "./AccountMenu";
 import { NotificationsPanel } from "./NotificationsPanel";
 
@@ -18,9 +21,13 @@ interface SidebarFooterProps {
   email: string;
   image?: string | null;
   notifications: DashboardNotification[];
-  plan?: PlanKey;
+  plan?: DisplayPlan;
 }
 
+const ROUND_KEY =
+  "surface-raised surface-press relative grid size-8 place-items-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring";
+
+/** The viewer, their menu and notifications, at the foot of the mobile sheet. */
 export function SidebarFooter({
   name,
   email,
@@ -32,18 +39,18 @@ export function SidebarFooter({
   const initial = (name?.[0] ?? "U").toUpperCase();
 
   return (
-    <div className="flex items-center gap-2 border-t border-(--hairline) px-4 py-3">
+    <div className="flex items-center gap-2 border-t border-hairline px-4 py-3">
       {image ? (
         <Image
-          src={image}
           alt=""
-          height={28}
+          className="size-8 shrink-0 rounded-full border border-hairline-strong object-cover"
+          height={32}
+          src={image}
           unoptimized
-          width={28}
-          className="size-7 shrink-0 rounded-full border border-(--hairline-strong) object-cover"
+          width={32}
         />
       ) : (
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-(--hairline-strong) bg-foreground/4 font-geist-mono text-[12px] font-medium text-foreground">
+        <span className="surface-inset grid size-8 shrink-0 place-items-center rounded-full font-geist-mono text-[12px] font-medium text-foreground">
           {initial}
         </span>
       )}
@@ -51,24 +58,21 @@ export function SidebarFooter({
         {name}
       </span>
 
-      <DropdownMenu open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
-        <DropdownMenuTrigger
-          aria-label="Account menu"
-          className="flex size-8 items-center justify-center rounded-full border border-(--hairline) text-muted-foreground transition-colors hover:border-(--hairline-strong) hover:text-foreground"
-        >
+      <DropdownMenu onOpenChange={setAccountMenuOpen} open={accountMenuOpen}>
+        <DropdownMenuTrigger aria-label="Account menu" className={ROUND_KEY}>
           <MoreHorizontal className="size-4" strokeWidth={1.75} />
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          side="top"
           align="end"
+          className={cn(DASH_MENU, "w-75")}
+          side="top"
           sideOffset={10}
-          className="w-75 rounded-2xl border border-(--hairline) bg-(--ink) p-1.5 font-hanken shadow-2xl shadow-black/40 dashboard-surface"
         >
           <AccountMenu
-            name={name}
             email={email}
-            plan={plan}
+            name={name}
             onClose={() => setAccountMenuOpen(false)}
+            plan={plan}
           />
         </DropdownMenuContent>
       </DropdownMenu>
@@ -76,18 +80,19 @@ export function SidebarFooter({
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label="Notifications"
-          className="relative flex size-8 items-center justify-center rounded-full border border-(--hairline) text-muted-foreground transition-colors hover:border-(--hairline-strong) hover:text-foreground"
+          className={ROUND_KEY}
+          data-icon-trigger
         >
-          <Bell className="size-4" strokeWidth={1.75} />
+          <LiveBell className="size-4" strokeWidth={1.75} />
           {notifications.some((item) => !item.read) ? (
-            <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-primary ring-2 ring-(--ink)" />
+            <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-primary ring-2 ring-ink" />
           ) : null}
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          side="top"
           align="end"
+          className={cn(DASH_MENU, "w-85 overflow-hidden p-0")}
+          side="top"
           sideOffset={10}
-          className="w-85 overflow-hidden rounded-2xl border border-(--hairline) bg-(--ink) p-0 font-hanken shadow-2xl shadow-black/40 dashboard-surface"
         >
           <NotificationsPanel initialNotifications={notifications} />
         </DropdownMenuContent>

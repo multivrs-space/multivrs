@@ -1,10 +1,16 @@
 "use client";
 
-import { MoreHorizontal, RefreshCw, Settings, Trash2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog, responseError } from "@/components/ConfirmDialog";
+import { DASH_MENU, DASH_MENU_ITEM } from "@/components/dashboard/menu";
+import {
+  LiveRefresh,
+  LiveSettings,
+  LiveTrash,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +20,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 interface DomainActionsProps {
   domainId: string;
@@ -34,8 +42,7 @@ export function DomainActions({
   const [autoRenew, setAutoRenew] = useState(initialAutoRenew);
   const [renewPending, setRenewPending] = useState(false);
 
-  async function toggleAutoRenew(e: React.MouseEvent) {
-    e.stopPropagation();
+  async function toggleAutoRenew() {
     if (renewPending) return;
     const next = !autoRenew;
     setAutoRenew(next);
@@ -80,64 +87,54 @@ export function DomainActions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          title="Domain actions"
+          aria-label={`${hostname} actions`}
+          className="size-8 text-muted-foreground"
           disabled={pending}
+          size="icon-sm"
+          variant="quiet"
         >
           <MoreHorizontal className="size-4" />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align="end"
-        className="w-64 rounded-2xl border border-border bg-card/95 p-1.5 shadow-2xl backdrop-blur-xl"
-      >
-        <DropdownMenuLabel className="px-3 py-2 text-xs font-normal text-muted-foreground">
+      <DropdownMenuContent align="end" className={cn(DASH_MENU, "w-64")}>
+        <DropdownMenuLabel className="truncate px-2.5 py-1.5 font-geist-mono text-[11px] font-normal text-muted-foreground">
           {hostname}
         </DropdownMenuLabel>
-
-        <div className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-foreground/90">
-          <div className="flex items-center gap-3">
-            <RefreshCw className="size-4 shrink-0 text-foreground/70" />
-            <span>Auto Renewal {autoRenew ? "On" : "Off"}</span>
-          </div>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={autoRenew}
+        <div
+          className="flex items-center justify-between gap-3 rounded-control px-2.5 py-2 text-[13px]"
+          data-icon-trigger
+        >
+          <span className="flex items-center gap-2.5 text-muted-foreground">
+            <LiveRefresh className="size-4" strokeWidth={1.75} />
+            Auto renewal
+          </span>
+          <Switch
             aria-label={`Turn auto renewal ${autoRenew ? "off" : "on"} for ${hostname}`}
+            checked={autoRenew}
             disabled={renewPending}
-            onClick={toggleAutoRenew}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-              autoRenew ? "bg-[#A855F7]" : "bg-foreground/20"
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                autoRenew ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
+            onCheckedChange={() => toggleAutoRenew()}
+          />
         </div>
-
         <DropdownMenuItem
+          className={DASH_MENU_ITEM}
+          data-icon-trigger
           onClick={() => router.push(detailUrl)}
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-muted cursor-pointer"
         >
-          <Settings className="size-4 shrink-0 text-foreground/70" />
-          <span>Configure</span>
+          <LiveSettings strokeWidth={1.75} />
+          Configure
         </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="-mx-1.5 my-1.5 bg-muted" />
+        <DropdownMenuSeparator className="mx-0 my-1.5 bg-hairline" />
         <DropdownMenuItem
+          className={cn(
+            DASH_MENU_ITEM,
+            "text-rose-600 focus:text-rose-600 dark:text-rose-400",
+          )}
+          data-icon-trigger
           onClick={() => setConfirmDelete(true)}
-          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
         >
-          <Trash2 className="size-4 shrink-0 text-red-500" />
-          <span>Delete</span>
+          <LiveTrash strokeWidth={1.75} />
+          Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
       <ConfirmDialog

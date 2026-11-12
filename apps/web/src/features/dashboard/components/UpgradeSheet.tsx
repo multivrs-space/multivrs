@@ -16,7 +16,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -37,7 +36,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { startSubscriptionCheckout } from "@/features/billing/subscription-checkout-api";
 import type { DashboardWorkspace } from "@/features/dashboard/types/workspace.types";
-import type { PlanKey } from "@/lib/payments/billing.types";
+import type { DisplayPlan } from "@/lib/payments/billing.types";
 import {
   PRO_BASE_PRICE_USD,
   PRO_MODULAR_MODULES,
@@ -73,7 +72,7 @@ interface WorkspaceOption {
   slug: string;
   isPersonal: boolean;
   organizationId?: string | null;
-  plan?: PlanKey;
+  plan?: DisplayPlan;
   username?: string;
   image?: string | null;
 }
@@ -92,14 +91,22 @@ const DEFAULT_PRO_CARD_FEATURES = [
 
 const DEFAULT_PRO_CARD_DESCRIPTIONS: Record<string, string> = {
   "Flat Rate CDN": "Protection from unexpected traffic spikes",
-  "Free Domain & Managed SSL": "Claim one domain from select TLDs with automated SSL",
-  "Serverless & Sandbox Runtimes": "1M monthly invocations and isolated container environments",
-  "Global Edge Network": "Cold start prevention and low-latency anycast routing",
-  "Observability & Tracing": "Advanced monitoring, distributed error tracing and longer retention",
-  "Advanced WAF Protection": "Custom security rules, DDoS mitigation and rate limiting",
-  "On-demand Concurrent Builds": "Faster builds that dynamically scale with zero queueing",
-  "Team Collaboration & RBAC": "Collaborate with your team with role-based member permissions",
-  "Enterprise-grade Paid Add-ons": "Dedicated mailboxes, SAML SSO, and volume discounts",
+  "Free Domain & Managed SSL":
+    "Claim one domain from select TLDs with automated SSL",
+  "Serverless & Sandbox Runtimes":
+    "1M monthly invocations and isolated container environments",
+  "Global Edge Network":
+    "Cold start prevention and low-latency anycast routing",
+  "Observability & Tracing":
+    "Advanced monitoring, distributed error tracing and longer retention",
+  "Advanced WAF Protection":
+    "Custom security rules, DDoS mitigation and rate limiting",
+  "On-demand Concurrent Builds":
+    "Faster builds that dynamically scale with zero queueing",
+  "Team Collaboration & RBAC":
+    "Collaborate with your team with role-based member permissions",
+  "Enterprise-grade Paid Add-ons":
+    "Dedicated mailboxes, SAML SSO, and volume discounts",
 };
 
 function renderModularIcon(iconName: string) {
@@ -184,9 +191,15 @@ export function UpgradeSheet({
       image: user.image,
       isPersonal: true,
       organizationId: null,
-      plan: currentPlan as PlanKey,
+      plan: currentPlan as DisplayPlan,
     }),
-    [activeWorkspaceName, workspaceName, user.username, user.image, currentPlan],
+    [
+      activeWorkspaceName,
+      workspaceName,
+      user.username,
+      user.image,
+      currentPlan,
+    ],
   );
 
   const selectableWorkspaces = useMemo<WorkspaceOption[]>(() => {
@@ -220,11 +233,12 @@ export function UpgradeSheet({
     return list;
   }, [propWorkspaces, personalWorkspace, organizations]);
 
-  const [selectedWorkspace, setSelectedWorkspace] =
-    useState<WorkspaceOption>(() => {
+  const [selectedWorkspace, setSelectedWorkspace] = useState<WorkspaceOption>(
+    () => {
       const match = selectableWorkspaces.find((w) => w.slug === workspaceName);
       return match || personalWorkspace;
-    });
+    },
+  );
 
   // Sync selected workspace when current workspace changes
   useEffect(() => {
@@ -313,10 +327,7 @@ export function UpgradeSheet({
         (mod) => selectedAddonKeys[mod.key],
       ).map(
         (mod) =>
-          mod.key as
-            | "developer_seat"
-            | "mail_volume"
-            | "observability_plus",
+          mod.key as "developer_seat" | "mail_volume" | "observability_plus",
       );
 
       const checkoutUrl = await startSubscriptionCheckout({
@@ -341,6 +352,7 @@ export function UpgradeSheet({
   const effectivePlan = selectedWorkspace.plan || currentPlan || "hobby";
   const isCurrentlyPro = effectivePlan === "pro";
   const isCurrentlyEnterprise = effectivePlan === "enterprise";
+  const isUnlimited = effectivePlan === "unlimited";
 
   let actionTitle = `Upgrade ${selectedWorkspace.name} to Pro`;
   let actionSubtitle = "Unlock collaboration and improved performance.";
@@ -350,6 +362,10 @@ export function UpgradeSheet({
     actionTitle = `Manage ${selectedWorkspace.name} Pro Plan`;
     actionSubtitle = "Customize active add-ons and compute capabilities.";
     actionButtonLabel = "Update subscription";
+  } else if (isUnlimited) {
+    actionTitle = `${selectedWorkspace.name} has no limits`;
+    actionSubtitle = "This is the Multivrs team account; nothing to upgrade.";
+    actionButtonLabel = "No changes needed";
   } else if (isCurrentlyEnterprise) {
     actionTitle = `Switch ${selectedWorkspace.name} to Pro`;
     actionSubtitle = "Change plan tier from Enterprise to Pro.";
@@ -474,11 +490,15 @@ export function UpgradeSheet({
                 >
                   <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-muted/60 hover:bg-muted text-xs text-foreground transition-colors cursor-pointer group shadow-xs">
                     <TeamAvatar
-                      name={selectedWorkspace.name || selectedWorkspace.username}
+                      name={
+                        selectedWorkspace.name || selectedWorkspace.username
+                      }
                       image={selectedWorkspace.image}
                       size={16}
                     />
-                    <span className="text-muted-foreground font-normal">Workspace:</span>
+                    <span className="text-muted-foreground font-normal">
+                      Workspace:
+                    </span>
                     <span className="font-medium text-foreground truncate max-w-[150px]">
                       {selectedWorkspace.name}
                     </span>
@@ -515,7 +535,9 @@ export function UpgradeSheet({
                               image={w.image}
                               size={16}
                             />
-                            <span className="truncate font-medium">{w.name}</span>
+                            <span className="truncate font-medium">
+                              {w.name}
+                            </span>
                             {w.plan && (
                               <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.2 text-[9px] font-medium text-muted-foreground capitalize border border-border">
                                 {w.plan}
@@ -574,9 +596,7 @@ export function UpgradeSheet({
                     <HelpCircle className="size-3 text-muted-foreground" />
                   </div>
                 </div>
-                <span className="font-semibold text-primary font-mono">
-                  $0
-                </span>
+                <span className="font-semibold text-primary font-mono">$0</span>
               </div>
 
               {/* Card 3: Payment Method card */}
@@ -701,7 +721,7 @@ export function UpgradeSheet({
                 <button
                   type="button"
                   onClick={handleUpgrade}
-                  disabled={isUpgrading}
+                  disabled={isUpgrading || isUnlimited}
                   className="w-full h-10 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
                 >
                   {isUpgrading ? (

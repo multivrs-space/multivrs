@@ -1,48 +1,19 @@
-import {
-  CircleAlert,
-  CircleCheck,
-  CircleDashed,
-  GitBranch,
-  LoaderCircle,
-  Rocket,
-} from "lucide-react";
 import Link from "next/link";
+import { type OrbTone, StatusOrb } from "@/components/dashboard/StatusOrb";
+import { LiveGitBranch, LiveRocket } from "@/components/icons/animated";
+import { GitHubMark } from "@/features/dashboard/components/GitHubMark";
 import { ProjectCardActions } from "@/features/dashboard/components/ProjectCardActions";
 import { ProjectFavicon } from "@/features/dashboard/components/ProjectFavicon";
 import type {
   DashboardProject,
   ProjectStatus,
 } from "@/features/dashboard/types/project.types";
-import { cn } from "@/lib/utils";
 
-const STATUS: Record<
-  ProjectStatus,
-  {
-    icon: typeof CircleCheck;
-    label: string;
-    className: string;
-  }
-> = {
-  idle: {
-    icon: CircleDashed,
-    label: "No deployments",
-    className: "text-muted-foreground",
-  },
-  ready: {
-    icon: CircleCheck,
-    label: "Ready",
-    className: "text-purple-400",
-  },
-  building: {
-    icon: LoaderCircle,
-    label: "Building",
-    className: "animate-spin text-amber-400",
-  },
-  error: {
-    icon: CircleAlert,
-    label: "Deployment failed",
-    className: "text-red-400",
-  },
+const STATUS: Record<ProjectStatus, { tone: OrbTone; label: string }> = {
+  idle: { tone: "idle", label: "No deployments" },
+  ready: { tone: "ready", label: "Ready" },
+  building: { tone: "building", label: "Building" },
+  error: { tone: "error", label: "Failed" },
 };
 
 interface ProjectCardProps {
@@ -50,30 +21,37 @@ interface ProjectCardProps {
   href: string;
 }
 
+/**
+ * One project: its face (favicon, name, live address), its state, the latest
+ * deploy and where the code lives. The whole card leads to the project.
+ */
 export function ProjectCard({ project, href }: ProjectCardProps) {
-  const deploymentHref = project.latestDeployment
-    ? `${href}/deployments/${project.latestDeployment.id}`
-    : null;
+  const deployment = project.latestDeployment;
   const status = STATUS[project.status];
-  const StatusIcon = status.icon;
 
   return (
-    <article className="group rounded-xl border border-[var(--hairline)] bg-[var(--ink-raised)]/65 p-4 transition-colors hover:border-[var(--hairline-strong)] hover:bg-[var(--ink-raised)]/85">
-      <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-background ring-1 ring-border">
-          <ProjectFavicon name={project.name} url={project.faviconUrl} />
+    <article
+      className="surface-card group relative flex flex-col rounded-card transition-[transform,box-shadow] duration-300 ease-out-expo hover:-translate-y-0.5"
+      data-dash-card
+    >
+      <div className="flex items-start gap-3 p-4 pb-3">
+        <span className="surface-inset grid size-11 shrink-0 place-items-center overflow-hidden rounded-tile">
+          <ProjectFavicon
+            className="size-7 rounded-[7px]"
+            name={project.name}
+            url={project.faviconUrl}
+          />
         </span>
-
         <div className="min-w-0 flex-1">
           <Link
-            className="block w-fit max-w-full truncate text-[15px] font-semibold tracking-tight text-foreground hover:underline"
+            className="block w-fit max-w-full truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-ring"
             href={href}
           >
             {project.name}
           </Link>
           {project.siteUrl && project.siteLabel ? (
             <a
-              className="mt-0.5 block w-fit max-w-full truncate text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline"
+              className="relative z-10 mt-0.5 block w-fit max-w-full truncate font-geist-mono text-[12px] text-muted-foreground transition-colors hover:text-foreground"
               href={project.siteUrl}
               rel="noreferrer"
               target="_blank"
@@ -81,78 +59,67 @@ export function ProjectCard({ project, href }: ProjectCardProps) {
               {project.siteLabel}
             </a>
           ) : (
-            <span className="mt-0.5 block text-sm text-muted-foreground">
-              No deployments yet
+            <span className="mt-0.5 block text-[12px] text-muted-foreground">
+              Not deployed yet
             </span>
           )}
         </div>
-
-        <div className="flex shrink-0 items-center gap-1">
-          <span
-            aria-label={status.label}
-            className="flex size-8 items-center justify-center rounded-full border border-[var(--hairline)] bg-muted/50"
-            role="img"
-            title={status.label}
-          >
-            <StatusIcon className={cn("size-[18px]", status.className)} />
-          </span>
+        <div className="relative z-10 flex shrink-0 items-center gap-1">
+          <StatusOrb label={status.label} pill tone={status.tone} />
           <ProjectCardActions
             href={href}
             projectId={project.id}
             projectName={project.name}
+            repositoryUrl={project.repositoryUrl}
+            siteUrl={project.siteUrl}
           />
         </div>
       </div>
 
-      <div className="mt-5 space-y-2">
-        {project.latestDeployment && deploymentHref ? (
+      <div className="px-4 pb-4">
+        {deployment ? (
           <Link
-            className="flex min-w-0 items-center gap-2 text-sm text-foreground/90 hover:underline"
-            href={deploymentHref}
+            className="relative z-10 flex min-w-0 items-center gap-2 rounded-control py-1 text-[13px] text-foreground/90 transition-colors hover:text-foreground"
+            data-icon-trigger
+            href={`${href}/deployments/${deployment.id}`}
           >
-            <Rocket className="size-3.5 shrink-0 text-muted-foreground" />
-            <span className="truncate">{project.latestDeployment.label}</span>
-            <span className="ml-auto flex shrink-0 items-center gap-1 font-geist-mono text-[11px] text-muted-foreground">
-              <GitBranch className="size-3" />
-              {project.latestDeployment.branch}
+            <LiveRocket
+              className="size-3.5 shrink-0 text-muted-foreground"
+              strokeWidth={1.75}
+            />
+            <span className="truncate">{deployment.label}</span>
+            <span className="ml-auto flex shrink-0 items-center gap-1 rounded-full bg-foreground/5 px-2 py-0.5 font-geist-mono text-[10.5px] text-muted-foreground">
+              <LiveGitBranch className="size-3" strokeWidth={2} />
+              {deployment.branch}
             </span>
           </Link>
-        ) : null}
+        ) : (
+          <p className="py-1 text-[13px] text-muted-foreground">
+            Deploy to get a live address.
+          </p>
+        )}
+      </div>
 
-        <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-          <GitHubMark className="size-3.5 shrink-0" />
-          {project.repositoryUrl && project.repositoryLabel ? (
-            <a
-              className="truncate transition-colors hover:text-foreground hover:underline"
-              href={project.repositoryUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {project.repositoryLabel}
-            </a>
-          ) : (
-            <span className="truncate">Repository unavailable</span>
-          )}
-          {project.latestDeployment ? (
-            <time className="ml-auto shrink-0 text-xs">
-              {project.latestDeployment.createdAt}
-            </time>
-          ) : null}
-        </div>
+      <div className="surface-inset mx-2 mb-2 mt-auto flex min-w-0 items-center gap-2 rounded-tile px-3 py-2 text-[12px] text-muted-foreground">
+        <GitHubMark className="size-3.5 shrink-0" />
+        {project.repositoryUrl && project.repositoryLabel ? (
+          <a
+            className="relative z-10 truncate transition-colors hover:text-foreground"
+            href={project.repositoryUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {project.repositoryLabel}
+          </a>
+        ) : (
+          <span className="truncate">No repository connected</span>
+        )}
+        {deployment ? (
+          <time className="ml-auto shrink-0 font-geist-mono text-[10.5px]">
+            {deployment.createdAt}
+          </time>
+        ) : null}
       </div>
     </article>
-  );
-}
-
-function GitHubMark({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 .7A11.5 11.5 0 0 0 8.4 23c.6.1.8-.3.8-.6v-2.2c-3.4.7-4.1-1.4-4.1-1.4-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .7Z" />
-    </svg>
   );
 }

@@ -2,7 +2,8 @@ import type { Sandbox } from "@cloudflare/sandbox";
 import type { BuildJob } from "@multivrs/client";
 import type { BuildWorkerEnv } from "./build-worker.types";
 
-const ARCHIVE = "/tmp/multivrs-build-cache.tgz";
+/** Per build, so its files are wiped with the build's lease. */
+const archive = (job: BuildJob) => `/tmp/multivrs-${job.deploymentId}-cache.tgz`;
 
 export async function restoreRemoteCache(
   sandbox: Sandbox,
@@ -12,8 +13,8 @@ export async function restoreRemoteCache(
 ): Promise<number> {
   const object = await env.BUILD_CACHE.get(cacheKey(job));
   if (!object?.body) return 0;
-  await sandbox.writeFile(ARCHIVE, object.body);
-  const extracted = await sandbox.exec(`tar -xzf ${ARCHIVE} -C .`, {
+  await sandbox.writeFile(archive(job), object.body);
+  const extracted = await sandbox.exec(`tar -xzf ${archive(job)} -C .`, {
     cwd,
   });
   return (await extracted.exitCode) === 0 ? object.size : 0;
@@ -26,11 +27,11 @@ export async function saveRemoteCache(
   cwd: string,
 ): Promise<number> {
   const archived = await sandbox.exec(
-    `found=""; for p in .next/cache .turbo node_modules/.cache; do [ -e "$p" ] && found="$found $p"; done; [ -n "$found" ] && tar -czf ${ARCHIVE} $found`,
+    `found=""; for p in .next/cache .turbo node_modules/.cache; do [ -e "$p" ] && found="$found $p"; done; [ -n "$found" ] && tar -czf ${archive(job)} $found`,
     { cwd },
   );
   if ((await archived.exitCode) !== 0) return 0;
-  const file = await sandbox.readFile(ARCHIVE, { encoding: "none" });
+  const file = await sandbox.readFile(archive(job), { encoding: "none" });
   const fixed = new FixedLengthStream(file.size);
   await Promise.all([
     file.content.pipeTo(fixed.writable),

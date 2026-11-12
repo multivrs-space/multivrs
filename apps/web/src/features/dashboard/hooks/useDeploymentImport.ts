@@ -1,174 +1,72 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import type { Project } from "@multivrs/client";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useDeploymentTimer } from "@/features/dashboard/hooks/useDeploymentTimer";
 import {
   createImportProject,
-  getImportProgress,
   queueImportDeployment,
+  saveImportEnvironment,
+  updateImportProject,
 } from "@/features/dashboard/lib/deployment-import.client";
 import type {
   DeploymentImportConfig,
   RepositorySource,
 } from "@/features/dashboard/types/deployment-import.types";
-import { randomId } from "@/lib/browser/random-id";
+import { readableError } from "@/lib/api/request.client";
 
-export type ImportDeploymentStatus =
-  | "idle"
-  | "building"
-  | "failed"
-  | "canceled"
-  | "ready";
+export interface StartedDeployment {
+  project: Project;
+  deploymentId: string;
+  /** When Deploy was pressed, for the elapsed clock. */
+  startedAt: string;
+}
 
+/**
+ * Creates the project once, saves its variables and queues the first build.
+ * A retry after a failed build reuses the same project instead of making a
+ * second one; following the build itself is `useLiveBuild`'s job.
+ */
 export function useDeploymentImport(source: RepositorySource) {
-  const router = useRouter();
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const active = useRef<{ deploymentId: string; projectId: string } | null>(
-    null,
-  );
-  const [deploying, setDeploying] = useState(false);
-  const [status, setStatus] = useState<ImportDeploymentStatus>("idle");
-  const [detailsUrl, setDetailsUrl] = useState<string>();
-  const [logs, setLogs] = useState<Array<{ id: string; message: string }>>([]);
-  const clock = useDeploymentTimer();
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
-
-  async function poll(
-    projectId: string,
-    deploymentId: string,
-    projectSlug: string,
-  ) {
-    try {
-      const progress = await getImportProgress(projectId, deploymentId);
-      setLogs(
-        progress.logs.map((log) => ({ id: log.id, message: log.message })),
-      );
-      const deployment = progress.deployment;
-      if (deployment.status === "ready") {
-        active.current = null;
-        setDeploying(false);
-        setStatus("ready");
-        clock.stop();
-        toast.success("Deployment ready");
-        router.push(`/${source.team}/${projectSlug}`);
-        return;
-      }
-      if (deployment.status === "error" || deployment.status === "canceled") {
-        active.current = null;
-        setDeploying(false);
-        setStatus(deployment.status === "error" ? "failed" : "canceled");
-        clock.stop();
-        if (deployment.errorMessage) {
-          setLogs((current) =>
-            current.some((log) => log.message === deployment.errorMessage)
-              ? current
-              : [
-                  ...current,
-                  {
-                    id: `failure-${deployment.id}`,
-                    message: deployment.errorMessage ?? "",
-                  },
-                ],
-          );
-        }
-        toast.error(
-          deployment.status === "error"
-            ? "Deployment failed"
-            : "Deployment canceled",
-        );
-        return;
-      }
-      timer.current = setTimeout(
-        () => poll(projectId, deploymentId, projectSlug),
-        1_500,
-      );
-    } catch (error) {
-      setLogs((current) => [
-        ...current,
-        {
-          id: randomId(),
-          message:
-            error instanceof Error ? error.message : "Status update failed",
-        },
-      ]);
-      timer.current = setTimeout(
-        () => poll(projectId, deploymentId, projectSlug),
-        2_500,
-      );
-    }
-  }
+  const [project, setProject] = useState<Project | null>(null);
+  const [started, setStarted] = useState<StartedDeployment | null>(null);
+  const [starting, setStarting] = useState(false);
 
   async function deploy(config: DeploymentImportConfig) {
-    if (!config.projectName.trim()) return toast.error("Enter a project name");
-    setDeploying(true);
-    setStatus("building");
-    setDetailsUrl(undefined);
-    setLogs([{ id: "queued", message: "Preparing the cloud build…" }]);
-    clock.start();
+    if (!config.projectName.trim()) {
+      toast.error("Enter a project name");
+      return;
+    }
+    setStarting(true);
     try {
-      const project = await createImportProject(config, source);
+      const current = project
+        ? await updateImportProject(project, config)
+        : await createImportProject(config, source);
+      setProject(current);
+      await saveImportEnvironment(current.id, config.environment);
       const deployment = await queueImportDeployment(
-        project.id,
+        current.id,
         config,
         source,
       );
-      active.current = { deploymentId: deployment.id, projectId: project.id };
-      setDetailsUrl(
-        `/${source.team}/${project.slug}/deployments/${deployment.id}`,
-      );
-      await poll(project.id, deployment.id, project.slug);
+      setStarted({
+        project: current,
+        deploymentId: deployment.id,
+        startedAt: new Date().toISOString(),
+      });
     } catch (error) {
-      setDeploying(false);
-      setStatus("failed");
-      clock.stop();
-      setLogs((current) => [
-        ...current,
-        {
-          id: randomId(),
-          message: error instanceof Error ? error.message : "Deployment failed",
-        },
-      ]);
-      toast.error("Deployment failed");
+      toast.error(readableError(error, "The deployment didn't start"));
+    } finally {
+      setStarting(false);
     }
-  }
-
-  async function cancel() {
-    const current = active.current;
-    if (!current) return;
-    const response = await fetch(
-      `/api/projects/${current.projectId}/deployments/${current.deploymentId}/status`,
-      {
-        body: JSON.stringify({ status: "canceled" }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      },
-    );
-    if (!response.ok) {
-      toast.error("Could not cancel deployment");
-      return;
-    }
-    if (timer.current) clearTimeout(timer.current);
-    active.current = null;
-    setDeploying(false);
-    setStatus("canceled");
-    clock.stop();
-    toast.success("Deployment canceled");
   }
 
   return {
-    cancel,
     deploy,
-    deploying,
-    detailsUrl,
-    logs,
-    seconds: clock.seconds,
-    status,
+    /** Back to the form after a failed build, keeping what was entered. */
+    edit: () => setStarted(null),
+    project,
+    started,
+    starting,
   };
 }

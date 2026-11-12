@@ -1,11 +1,11 @@
 "use client";
 
-import { Search, X } from "lucide-react";
 import {
   type ComponentPropsWithoutRef,
   forwardRef,
   type ReactNode,
 } from "react";
+import { LiveSearch, LiveX } from "@/components/icons/animated";
 import { cn } from "@/lib/utils";
 
 const sizeClasses = {
@@ -46,13 +46,17 @@ export const DashboardSearchInput = forwardRef<
 ) {
   return (
     <label
+      data-icon-trigger
       className={cn(
-        "flex items-center gap-2 rounded-lg border border-[var(--hairline)] bg-[var(--ink-raised)]/60 backdrop-blur-md transition-colors focus-within:border-[var(--hairline-strong)]",
+        "surface-inset flex items-center gap-2 rounded-control transition-shadow focus-within:ring-2 focus-within:ring-ring/60",
         sizeClasses[size],
         containerClassName,
       )}
     >
-      <Search className="size-3.5 shrink-0 text-muted-foreground/70" />
+      <LiveSearch
+        className="size-3.5 shrink-0 text-muted-foreground/80"
+        strokeWidth={2}
+      />
       <input
         {...inputProps}
         ref={ref}
@@ -70,8 +74,9 @@ export const DashboardSearchInput = forwardRef<
           onClick={() => onValueChange("")}
           aria-label="Clear search"
           className="grid size-4 shrink-0 place-items-center text-muted-foreground transition-colors hover:text-foreground"
+          data-icon-trigger
         >
-          <X className="size-3.5" />
+          <LiveX className="size-3.5" strokeWidth={2} />
         </button>
       ) : null}
     </label>

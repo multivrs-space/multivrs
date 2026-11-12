@@ -7,6 +7,8 @@ import { sanitizeMailHtml } from "@/lib/mail/sanitize-html";
 export function mapMessage(row: {
   id: string;
   threadId: string;
+  mailboxId: string;
+  replyTo?: string | null;
   direction: string;
   status: string;
   folder: string;
@@ -18,6 +20,7 @@ export function mapMessage(row: {
   textBody: string | null;
   sanitizedHtml: string | null;
   htmlBody?: string | null;
+  remoteImagesBlocked?: boolean;
   sentAt: Date | null;
   receivedAt: Date | null;
   createdAt: Date;
@@ -40,6 +43,8 @@ export function mapMessage(row: {
     row.threadId,
     {
       id: row.id,
+      mailboxId: row.mailboxId,
+      replyTo: row.replyTo ?? undefined,
       direction: row.direction,
       status: row.status,
       folder: row.folder,
@@ -50,6 +55,8 @@ export function mapMessage(row: {
       subject: row.subject,
       text: row.textBody ?? undefined,
       html: renderedHtml,
+      remoteImagesBlocked:
+        row.direction === "inbound" && row.remoteImagesBlocked !== false,
       attachments: row.attachments?.map((att) => ({
         id: att.id,
         filename: att.filename,

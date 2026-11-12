@@ -1,7 +1,13 @@
 "use client";
 
-import { Bold, ImagePlus, Italic, Link2, Underline } from "lucide-react";
 import { useEffect, useRef } from "react";
+import {
+  LiveBold,
+  LiveImagePlus,
+  LiveItalic,
+  LiveLink,
+  LiveUnderline,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 
 function editorCommand(command: string, value?: string) {
@@ -73,19 +79,19 @@ export function MailRichEditor({ initialHtml = "" }: { initialHtml?: string }) {
   }
 
   const tools = [
-    { label: "Bold", icon: Bold, run: () => editorCommand("bold") },
-    { label: "Italic", icon: Italic, run: () => editorCommand("italic") },
+    { label: "Bold", icon: LiveBold, run: () => editorCommand("bold") },
+    { label: "Italic", icon: LiveItalic, run: () => editorCommand("italic") },
     {
       label: "Underline",
-      icon: Underline,
+      icon: LiveUnderline,
       run: () => editorCommand("underline"),
     },
-    { label: "Insert link", icon: Link2, run: addLink },
+    { label: "Insert link", icon: LiveLink, run: addLink },
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20 focus-within:border-black/20 dark:focus-within:border-white/20">
-      <div className="flex items-center gap-0.5 border-b border-black/10 dark:border-white/10 p-1.5">
+    <div className="surface-inset overflow-hidden rounded-tile focus-within:ring-2 focus-within:ring-ring/40">
+      <div className="flex items-center gap-0.5 border-b border-hairline p-1">
         {tools.map((tool) => (
           <Button
             aria-label={tool.label}
@@ -95,15 +101,22 @@ export function MailRichEditor({ initialHtml = "" }: { initialHtml?: string }) {
               tool.run();
               queueMicrotask(syncHtml);
             }}
+            className="size-8 rounded-full"
+            data-icon-trigger
             size="icon-sm"
+            title={tool.label}
             type="button"
-            variant="ghost"
+            variant="quiet"
           >
-            <tool.icon className="size-3.5" />
+            <tool.icon className="size-3.5" strokeWidth={2} />
           </Button>
         ))}
-        <label className="grid size-8 cursor-pointer place-items-center rounded-md text-black/55 dark:text-white/55 hover:bg-black/5 dark:hover:bg-white/5 hover:text-black dark:hover:text-white">
-          <ImagePlus className="size-3.5" />
+        <label
+          className="grid size-8 cursor-pointer place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+          data-icon-trigger
+          title="Insert inline image"
+        >
+          <LiveImagePlus className="size-3.5" strokeWidth={2} />
           <span className="sr-only">Insert inline image</span>
           <input
             accept="image/*"
@@ -115,7 +128,7 @@ export function MailRichEditor({ initialHtml = "" }: { initialHtml?: string }) {
       </div>
       {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required for rich-text authoring. */}
       <div
-        className="min-h-56 px-4 py-3 text-sm leading-6 text-black/80 dark:text-white/80 outline-hidden [&_a]:text-cyan-300 [&_a]:underline [&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-lg"
+        className="min-h-56 px-4 py-3 text-[14px] leading-6 text-foreground/90 outline-hidden [&_a]:text-primary [&_a]:underline [&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-lg"
         contentEditable
         aria-label="Message body"
         onBlur={syncHtml}

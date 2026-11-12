@@ -1,17 +1,16 @@
-import {
-  CheckCircle2,
-  ChevronLeft,
-  CircleAlert,
-  CircleDashed,
-  CloudCog,
-  ExternalLink,
-  ShieldCheck,
-} from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { CopyButton } from "@/components/CopyButton";
-import { LocalTime } from "@/components/LocalTime";
+import { StatusOrb } from "@/components/dashboard/StatusOrb";
+import { LiveArrowLeft, LiveShieldCheck } from "@/components/icons/animated";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
+import { MailDnsRecordsCard } from "@/features/mail/domain/MailDnsRecordsCard";
+import { MailDomainChecks } from "@/features/mail/domain/MailDomainChecks";
+import { MailDomainSetupCard } from "@/features/mail/domain/MailDomainSetupCard";
+import {
+  domainChecks,
+  regionName,
+} from "@/features/mail/domain/mail-domain-checks";
 import { MailDomainDeleteButton } from "@/features/mail/MailDomainDeleteButton";
 import { MailDomainVerifyButton } from "@/features/mail/MailDomainVerifyButton";
 import { getServerSession } from "@/lib/auth/session";
@@ -39,255 +38,84 @@ export default async function MailDomainDnsPage({
   });
   if (!domain) notFound();
 
-  const dnsMode = await mailDomainDnsMode(domain.userId, domain.domain);
-  const automatic = dnsMode === "automatic";
-  const isVerified = isAuthenticatedSendingDomain(domain);
-  // Domains checked before the receiving MX existed have no row for it yet.
-  const inbound = domain.dnsRecords.find(
-    (record) => record.purpose === RECEIVING_PURPOSE,
-  );
-  const receiving = !inbound
-    ? "Press Refresh now to check"
-    : inbound.status === "verified"
-      ? "On"
-      : "Off, add the MX record below";
+  const automatic =
+    (await mailDomainDnsMode(domain.userId, domain.domain)) === "automatic";
+  const verified = isAuthenticatedSendingDomain(domain);
+  const status = verified
+    ? "Verified"
+    : domain.status === "failed"
+      ? "Failed"
+      : "Pending";
+  const backHref = `/${username}/${scope}/emails?view=domains`;
+  const facts = [
+    ["Region", regionName(domain.region)],
+    ["DNS", automatic ? "Managed by Multivrs" : "Your provider"],
+  ];
 
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <Link
-        href={`/${username}/${scope}/emails?view=domains`}
-        className="flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+        data-icon-trigger
+        href={backHref}
       >
-        <ChevronLeft className="size-4" />
-        Back to domains
+        <LiveArrowLeft className="size-3.5" strokeWidth={2} />
+        Domains
       </Link>
-
       <DashboardPageHeader
-        title={domain.domain}
         actions={
           <>
             <MailDomainDeleteButton
-              backHref={`/${username}/${scope}/emails?view=domains`}
+              backHref={backHref}
               domain={domain.domain}
               domainId={domain.id}
             />
-            <MailDomainVerifyButton
-              domainId={domain.id}
-              verified={isVerified}
-            />
+            <MailDomainVerifyButton domainId={domain.id} verified={verified} />
           </>
         }
+        eyebrow="Emails · Sending domain"
+        title={<span className="break-all">{domain.domain}</span>}
       >
-        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
-          <DomainStatus
-            verified={isVerified}
-            status={
-              isVerified
-                ? "verified"
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px]">
+          <StatusOrb
+            label={status}
+            pill
+            tone={
+              verified
+                ? "ready"
                 : domain.status === "failed"
-                  ? "failed"
-                  : "pending"
+                  ? "error"
+                  : "building"
             }
           />
-          <span className="text-muted-foreground">
-            Receiving: <span className="text-foreground/70">{receiving}</span>
-          </span>
-          <span className="text-muted-foreground">
-            Region:{" "}
-            <span className="text-foreground/70">{regionName(domain.region)}</span>
-          </span>
-          <span className="text-muted-foreground">
-            DNS:{" "}
-            <span className="text-foreground/70">
-              {automatic ? "Managed by Multivrs" : "External provider"}
+          {facts.map(([label, value]) => (
+            <span className="text-muted-foreground" key={label}>
+              {label} <span className="text-foreground/80">{value}</span>
             </span>
-          </span>
+          ))}
         </div>
       </DashboardPageHeader>
-
-      <section
-        className={`rounded-2xl border px-5 py-5 ${
-          automatic
-            ? "border-emerald-400/15 bg-emerald-400/[0.045]"
-            : "border-purple-400/15 bg-purple-400/[0.045]"
-        }`}
+      <MailDomainChecks
+        checks={domainChecks(domain.dnsRecords, RECEIVING_PURPOSE)}
+      />
+      <MailDomainSetupCard automatic={automatic} />
+      <MailDnsRecordsCard
+        automatic={automatic}
+        checkedAt={domain.verificationCheckedAt?.toISOString() ?? null}
+        receivingPurpose={RECEIVING_PURPOSE}
+        records={domain.dnsRecords}
+      />
+      <p
+        className="flex items-start gap-2.5 px-1 text-[12.5px] leading-relaxed text-muted-foreground"
+        data-icon-trigger
       >
-        <div className="flex items-start gap-4">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/50">
-            {automatic ? (
-              <CloudCog className="size-5 text-emerald-300" />
-            ) : (
-              <ExternalLink className="size-5 text-purple-300" />
-            )}
-          </span>
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">
-              {automatic
-                ? "Automatic DNS setup"
-                : "Add records at your DNS provider"}
-            </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {automatic
-                ? "This domain is registered and DNS-managed by Multivrs. Required sending records are installed and verified automatically; no registrar changes or manual verification are needed."
-                : "Keep your domain at Vercel, Namecheap, Cloudflare, or its current provider. Add the records below there. Multivrs automatically detects verification afterward, and you do not need a separate delivery-provider account."}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-lg font-medium text-foreground">
-              Authentication records
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              SPF authorizes the sending network, DKIM signs each message, and
-              DMARC tells inboxes how to validate the visible sender. The MX
-              record on the domain itself receives mail into Multivrs: add it
-              only if this domain's mail should arrive here, not at another
-              provider like Google Workspace.
-            </p>
-          </div>
-          {domain.verificationCheckedAt ? (
-            <p className="font-geist-mono text-[10px] text-muted-foreground">
-              Last checked{" "}
-              <LocalTime value={domain.verificationCheckedAt.toISOString()} />
-            </p>
-          ) : null}
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <div className="min-w-[1040px]">
-            <div className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] gap-4 border-b border-border bg-foreground/[0.04] px-4 py-3 font-geist-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">
-              <span>Type</span>
-              <span>Name</span>
-              <span>Value</span>
-              <span>TTL</span>
-              <span>Priority</span>
-              <span>Status</span>
-            </div>
-            {domain.dnsRecords.map((record) => (
-              <div
-                key={record.id}
-                className="grid grid-cols-[72px_minmax(220px,1fr)_minmax(300px,1.5fr)_80px_80px_150px] items-center gap-4 border-b border-border px-4 py-4 text-sm last:border-0"
-              >
-                <span className="w-fit rounded-md border border-border bg-foreground/5 px-2 py-1 font-geist-mono text-[11px] font-semibold text-foreground/70">
-                  {record.type}
-                </span>
-                <RecordValue value={record.name} />
-                <RecordValue value={record.value} />
-                <RecordMetadata value={record.ttl} />
-                <RecordMetadata value={record.priority?.toString() ?? "—"} />
-                <RecordStatus
-                  automatic={automatic && record.managedByMultivrs}
-                  receiving={record.purpose === RECEIVING_PURPOSE}
-                  status={record.status}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="flex items-start gap-3 border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-        Verification refreshes automatically. Messages remain blocked until the
-        sending domain is authenticated, preventing unauthenticated mail from
-        damaging your domain reputation.
-      </div>
-    </div>
+        <LiveShieldCheck
+          className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+          strokeWidth={1.75}
+        />
+        Checks refresh on their own. Mail from this domain stays blocked until
+        it's verified, so unsigned mail never hurts its reputation.
+      </p>
+    </PageBody>
   );
-}
-
-function RecordMetadata({ value }: { value: string }) {
-  return (
-    <span className="font-geist-mono text-[12px] tabular-nums text-foreground/55">
-      {value}
-    </span>
-  );
-}
-
-function DomainStatus({
-  verified,
-  status,
-}: {
-  verified: boolean;
-  status: string;
-}) {
-  return (
-    <span className="flex items-center gap-1.5 text-foreground/70">
-      {verified ? (
-        <CheckCircle2 className="size-4 text-emerald-400" />
-      ) : (
-        <CircleDashed className="size-4 text-amber-400" />
-      )}
-      <span className="capitalize">{status}</span>
-    </span>
-  );
-}
-
-function RecordValue({ value }: { value: string }) {
-  return (
-    <div className="group flex min-w-0 items-center gap-2">
-      <span
-        className="truncate font-geist-mono text-[12px] text-foreground/70"
-        title={value}
-      >
-        {value}
-      </span>
-      <CopyButton text={value} />
-    </div>
-  );
-}
-
-type RecordTone = "ok" | "wait" | "bad";
-
-const PENDING_RECORD = { label: "Pending", tone: "wait" as RecordTone };
-
-/** Labels for stored record statuses; "pending" and "failed" come from older checks. */
-const RECORD_STATUS: Record<string, { label: string; tone: RecordTone }> = {
-  verified: { label: "Verified", tone: "ok" },
-  found: { label: "Found, AWS checking", tone: "wait" },
-  missing: { label: "Not found", tone: "bad" },
-  pending: PENDING_RECORD,
-  failed: { label: "Failed", tone: "bad" },
-};
-
-function RecordStatus({
-  automatic,
-  receiving,
-  status,
-}: {
-  automatic: boolean;
-  receiving: boolean;
-  status: string;
-}) {
-  // The receiving MX is optional, so a missing one isn't an error.
-  const { label, tone } =
-    receiving && status !== "verified"
-      ? { label: "Add to receive", tone: "wait" as RecordTone }
-      : (RECORD_STATUS[status] ?? PENDING_RECORD);
-  return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      {tone === "ok" ? (
-        <CheckCircle2 className="size-3.5 text-emerald-400" />
-      ) : tone === "bad" ? (
-        <CircleAlert className="size-3.5 text-red-400" />
-      ) : (
-        <CircleDashed className="size-3.5 text-amber-400" />
-      )}
-      <span>{automatic && tone !== "ok" ? "Managed" : label}</span>
-    </span>
-  );
-}
-
-function regionName(region: string) {
-  const names: Record<string, string> = {
-    "ap-northeast-1": "Tokyo",
-    "eu-west-1": "Ireland",
-    "sa-east-1": "São Paulo",
-    "us-east-1": "N. Virginia",
-  };
-  return names[region] ?? region;
 }

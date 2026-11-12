@@ -21,9 +21,7 @@ function requireBuildWorkerConfig() {
   const url = process.env.CLOUDFLARE_BUILD_WORKER_URL;
   const token = process.env.CLOUDFLARE_BUILD_WORKER_TOKEN;
   if (!url || !token) {
-    throw new Error(
-      "Cloud builds are not configured. Set CLOUDFLARE_BUILD_WORKER_URL and CLOUDFLARE_BUILD_WORKER_TOKEN.",
-    );
+    throw new Error("Builds aren't set up in this environment yet.");
   }
   return { token, url };
 }
@@ -47,7 +45,7 @@ export async function dispatchCloudBuild({
   const [project, githubAccount, projectEnvironment] = await Promise.all([
     prisma.project.findFirst({
       where: { id: projectId },
-      select: { framework: true },
+      select: { framework: true, ownerId: true },
     }),
     prisma.account.findFirst({
       where: { userId, providerId: "github" },
@@ -81,6 +79,7 @@ export async function dispatchCloudBuild({
   const job = buildJobSchema.parse({
     apiUrl,
     apiToken,
+    accountId: project.ownerId,
     deploymentId,
     framework: project.framework,
     input: {
@@ -105,7 +104,9 @@ export async function dispatchCloudBuild({
       body: JSON.stringify(job),
     });
     if (!response.ok) {
-      throw new Error(`Cloudflare build worker returned ${response.status}`);
+      throw new Error(
+        `The build service couldn't start this build (${response.status}). Try again in a moment.`,
+      );
     }
   } catch (error) {
     await prisma.apiToken

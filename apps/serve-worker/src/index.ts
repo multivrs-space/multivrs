@@ -1,3 +1,4 @@
+import { platformError } from "./error-page";
 import { ResolutionNotFoundError } from "./resolution-cache";
 import { processRevalidation, serveDeployment } from "./serve";
 import { recordRequest } from "./telemetry";
@@ -28,9 +29,10 @@ export default {
     } catch (error: unknown) {
       const notFound = error instanceof ResolutionNotFoundError;
       if (!notFound) console.error("deployment resolution failed", error);
-      const response = notFound
-        ? new Response("Deployment not found", { status: 404 })
-        : new Response("Deployment resolution failed", { status: 502 });
+      const response = platformError(
+        request,
+        notFound ? "DEPLOYMENT_NOT_FOUND" : "DEPLOYMENT_UNAVAILABLE",
+      );
       recordRequest(env, request, "unresolved", "unresolved", response, Date.now() - startedAt);
       return response;
     }

@@ -1,6 +1,7 @@
 import type { RuntimeProjectConfig } from "@multivrs/routing-utils";
 import type { ControlResolution } from "./control";
 import type { Env, RevalidationMessage } from "./types";
+import { knownUncacheable, rememberUncacheable } from "./uncacheable";
 import { recordUsage } from "./usage";
 
 interface CachedMetadata {
@@ -221,14 +222,17 @@ export async function serveFunctionWithCache(
     return generation.generate();
   }
   const cacheKey = await functionCacheKey(request, deployment);
+  if (await knownUncacheable(cacheKey)) {
+    return cleanResponse(await generation.generate(), "BYPASS");
+  }
   const cached = await readCache(env, cacheKey, config);
   if (cached?.state === "fresh") {
     recordUsage(env, deployment.projectId, "isr_reads");
     return cleanResponse(cached.response, "HIT");
   }
   const owner = crypto.randomUUID();
-  const acquired = await acquire(env, cacheKey, owner);
   if (cached) {
+    const acquired = await acquire(env, cacheKey, owner);
     recordUsage(env, deployment.projectId, "isr_reads");
     if (acquired) {
       context.waitUntil(
@@ -247,7 +251,16 @@ export async function serveFunctionWithCache(
     }
     return cleanResponse(cached.response, "STALE");
   }
-  const response = await generation.generate();
+  // Nothing stored: render now, taking the lock alongside (it only guards the store).
+  const [response, acquired] = await Promise.all([
+    generation.generate(),
+    acquire(env, cacheKey, owner).catch(() => false),
+  ]);
+  if (!policy(response, deployment)) {
+    rememberUncacheable(cacheKey, (promise) => context.waitUntil(promise));
+    if (acquired) context.waitUntil(releaseCacheLock(env, cacheKey, owner));
+    return cleanResponse(response, "MISS");
+  }
   if (acquired) {
     context.waitUntil(
       storeGeneratedResponse(env, deployment, config, cacheKey, response.clone()).finally(() =>

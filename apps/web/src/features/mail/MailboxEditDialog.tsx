@@ -1,21 +1,18 @@
 "use client";
 
-import { Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { responseError } from "@/components/ConfirmDialog";
+import { CopyButton } from "@/components/CopyButton";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
+import { DASH_DIALOG, DASH_FIELD } from "@/components/dashboard/menu";
+import { LiveMailPlus } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MAIL_SELECT } from "@/features/mail/MailFormControls";
 
 const KINDS = [
   { value: "shared", label: "Shared: everyone on the team" },
@@ -59,39 +56,39 @@ export function MailboxEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border border-black/10 dark:border-white/10 bg-white dark:bg-black">
-        <DialogHeader>
-          <DialogTitle>Edit mailbox</DialogTitle>
-          <DialogDescription>{mailbox.address}</DialogDescription>
-        </DialogHeader>
+      <DialogContent className={DASH_DIALOG}>
+        <DashDialogHeader
+          description={mailbox.address}
+          icon={LiveMailPlus}
+          title="Edit mailbox"
+        />
         <form action={(form) => void save(form)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="mailbox-id">Mailbox ID (UUID)</Label>
-            <div className="flex items-center gap-2">
+            <Label
+              className="text-[12px] text-muted-foreground"
+              htmlFor="mailbox-id"
+            >
+              Mailbox ID
+            </Label>
+            <div className="flex items-center gap-1">
               <Input
+                className={`${DASH_FIELD} select-all font-geist-mono text-[12px] text-muted-foreground`}
+                id="mailbox-id"
                 readOnly
                 value={mailbox.id}
-                id="mailbox-id"
-                className="font-mono text-xs text-muted-foreground bg-black/5 dark:bg-white/5 select-all"
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="shrink-0 gap-1.5"
-                onClick={() => {
-                  navigator.clipboard.writeText(mailbox.id);
-                  toast.success("Mailbox ID copied to clipboard");
-                }}
-              >
-                <Copy className="size-3.5" />
-                Copy
-              </Button>
+              <CopyButton className="size-9" text={mailbox.id} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="mailbox-name">Name</Label>
+            <Label
+              className="text-[12px] text-muted-foreground"
+              htmlFor="mailbox-name"
+            >
+              Name
+            </Label>
             <Input
+              className={DASH_FIELD}
               defaultValue={mailbox.name}
               id="mailbox-name"
               name="name"
@@ -99,9 +96,14 @@ export function MailboxEditDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="mailbox-kind">Who sees it</Label>
+            <Label
+              className="text-[12px] text-muted-foreground"
+              htmlFor="mailbox-kind"
+            >
+              Who sees it
+            </Label>
             <select
-              className="h-10 w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-[#0b0c10] px-3 text-sm"
+              className={MAIL_SELECT}
               defaultValue={mailbox.kind}
               id="mailbox-kind"
               name="kind"
@@ -114,7 +116,7 @@ export function MailboxEditDialog({
             </select>
           </div>
           <DialogFooter>
-            <Button disabled={saving} type="submit">
+            <Button disabled={saving} size="sm" type="submit" variant="hero">
               {saving ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>

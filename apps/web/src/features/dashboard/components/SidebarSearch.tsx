@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
+import { DASH_MENU } from "@/components/dashboard/menu";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
 import {
   buildNavHref,
@@ -83,7 +84,7 @@ export function SidebarSearch() {
         aria-controls={listId}
         aria-expanded={open}
         aria-label="Search dashboard"
-        containerClassName="bg-foreground/[0.03] focus-within:bg-muted/40"
+        containerClassName="h-9"
         onValueChange={(value) => {
           setQuery(value);
           setActive(0);
@@ -94,7 +95,7 @@ export function SidebarSearch() {
         placeholder="Search…"
         role="combobox"
         trailing={
-          <kbd className="shrink-0 rounded-md border border-[var(--hairline)] bg-foreground/[0.04] px-1.5 py-0.5 font-geist-mono text-[10px] text-muted-foreground/80">
+          <kbd className="surface-raised shrink-0 rounded-[5px] px-1.5 font-geist-mono text-[10px] leading-4 text-muted-foreground">
             ⌘K
           </kbd>
         }
@@ -104,7 +105,10 @@ export function SidebarSearch() {
       {open && results.length > 0 && (
         <ul
           id={listId}
-          className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border border-[var(--hairline-strong)] bg-[var(--ink-raised)] p-1 shadow-2xl"
+          className={cn(
+            DASH_MENU,
+            "absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden",
+          )}
         >
           {results.map((item, i) => (
             <li key={item.name}>
@@ -113,11 +117,12 @@ export function SidebarSearch() {
                 onMouseEnter={() => setActive(i)}
                 onClick={() => go(item.slug)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors",
+                  "flex w-full items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-[13px] transition-colors",
                   i === active
-                    ? "bg-white/[0.06] text-foreground"
+                    ? "bg-foreground/6 text-foreground"
                     : "text-muted-foreground",
                 )}
+                data-icon-trigger
               >
                 <item.icon className="size-4 shrink-0" strokeWidth={1.75} />
                 {item.name}

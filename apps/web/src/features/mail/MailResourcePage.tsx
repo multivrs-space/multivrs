@@ -1,36 +1,28 @@
 "use client";
 
-import { CircleDashed, Plus } from "lucide-react";
 import { Suspense, useState } from "react";
+import { LivePlus } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { MailAnalytics, MailSettings } from "@/features/mail/MailAnalytics";
-import { MailBroadcastCompose } from "@/features/mail/MailBroadcastCompose";
-import { MailCreateDialog } from "@/features/mail/MailCreateDialog";
-import { MailResourceRow } from "@/features/mail/MailResourceRow";
-import { MailResourceSkeleton } from "@/features/mail/MailSkeletons";
-import type {
-  MailDashboardData,
-  MailResourceItem,
-  MailResources,
-} from "@/features/mail/mail.types";
-import { useMailData, useMailResources } from "@/features/mail/mail-context";
-import { useMailLog } from "@/features/mail/mail-data.client";
+import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
+import { MailAnalyticsPage } from "@/features/mail/analytics/MailAnalyticsPage";
+import { ContactImportButton } from "@/features/mail/contacts/ContactImportButton";
 import type { MailView } from "@/features/mail/mail-navigation";
-import { isCreateMailView } from "@/features/mail/mail-resource-form";
-
-const descriptions: Partial<Record<MailView, string>> = {
-  logs: "Every outbound and inbound message with its truthful delivery state.",
-  broadcasts: "Create and schedule campaigns for a consent-aware audience.",
-  automations: "Event-driven email workflows with versioned steps.",
-  templates: "Reusable, versioned content for transactional and campaign mail.",
-  contacts: "People, consent state, tags, and suppression history.",
-  audiences: "Reusable contact collections for campaigns.",
-  domains:
-    "DNS-backed sending, receiving, tracking, and return-path identities.",
-  mailboxes: "Personal and shared addresses with a real inbox.",
-  credentials: "Scoped API keys and SMTP credentials. Secrets are shown once.",
-  webhooks: "Signed event delivery with retries and delivery history.",
-};
+import {
+  createMailLabel,
+  isCreateMailView,
+} from "@/features/mail/mail-resource-form";
+import {
+  CreateFlow,
+  MailLogList,
+  ResourceData,
+} from "@/features/mail/resources/MailResourceData";
+import { MailResourceSkeleton } from "@/features/mail/resources/MailResourceSkeleton";
+import {
+  type MailResourceView,
+  mailResourceView,
+} from "@/features/mail/resources/mail-resource-views";
+import { MailSettingsPage } from "@/features/mail/settings/MailSettingsPage";
 
 export function MailResourcePage({
   projectId,
@@ -41,173 +33,77 @@ export function MailResourcePage({
   query: string;
   view: MailView;
 }) {
-  if (view === "settings") return <MailSettings />;
-  // The log pages through messages on its own; everything else is shared data.
-  if (view === "logs") return <MailLogTable query={query} />;
+  if (view === "settings") return <MailSettingsPage />;
+  if (view === "analytics") return <MailAnalyticsPage />;
+  const config = mailResourceView(view as MailResourceView);
   return (
-    <Suspense fallback={<MailResourceSkeleton />}>
-      {view === "analytics" ? (
-        <MailAnalyticsWithData />
-      ) : (
-        <MailResourceTable projectId={projectId} query={query} view={view} />
-      )}
-    </Suspense>
+    <ResourceScreen
+      config={config}
+      projectId={projectId}
+      query={query}
+      view={view as MailResourceView}
+    />
   );
 }
 
-function MailAnalyticsWithData() {
-  return <MailAnalytics data={useMailData()} />;
-}
-
-function MailResourceTable({
+function ResourceScreen({
+  config,
   projectId,
   query,
   view,
 }: {
+  config: ReturnType<typeof mailResourceView>;
   projectId?: string;
   query: string;
-  view: MailView;
+  view: MailResourceView;
 }) {
-  const data = useMailData();
-  const resources = useMailResources();
   const [creating, setCreating] = useState(false);
-  return (
-    <ResourceTable
-      action={
-        isCreateMailView(view) ? (
-          <Button
-            className="bg-foreground text-background hover:bg-foreground/90 shrink-0"
-            onClick={() => setCreating(true)}
-          >
-            <Plus />
-            Create
-          </Button>
-        ) : null
+  const [session, setSession] = useState(0);
+  const create = isCreateMailView(view)
+    ? () => {
+        setSession((value) => value + 1);
+        setCreating(true);
       }
-      items={matching(resourceItems(view, data, resources), query)}
-      view={view}
-    >
-      {view === "broadcasts" && creating ? (
-        <MailBroadcastCompose
-          key={`broadcast-${Date.now()}`}
-          open={creating}
-          onOpenChange={setCreating}
-          projectId={projectId}
-          resources={resources}
-        />
-      ) : isCreateMailView(view) && creating ? (
-        <MailCreateDialog
-          key={`${view}-${Date.now()}`}
-          resources={resources}
-          onOpenChange={setCreating}
-          open={creating}
-          projectId={projectId}
-          view={view}
-        />
-      ) : null}
-    </ResourceTable>
-  );
-}
-
-/** The email log, newest first, a page at a time. */
-function MailLogTable({ query }: { query: string }) {
-  const log = useMailLog();
-  if (log.loading) return <MailResourceSkeleton />;
+    : undefined;
+  const newButton =
+    create && isCreateMailView(view) ? (
+      <Button data-icon-trigger onClick={create} size="sm" variant="hero">
+        <LivePlus strokeWidth={2} />
+        New {createMailLabel(view).toLowerCase()}
+      </Button>
+    ) : null;
+  const createButton =
+    view === "contacts" ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <ContactImportButton />
+        {newButton}
+      </div>
+    ) : (
+      newButton
+    );
   return (
-    <ResourceTable items={matching(log.items, query)} view="logs">
-      {log.hasMore ? (
-        <Button
-          className="w-full"
-          disabled={log.loadingMore}
-          onClick={log.loadMore}
-          variant="outline"
-        >
-          {log.loadingMore ? "Loading…" : "Load older messages"}
-        </Button>
-      ) : null}
-    </ResourceTable>
+    <PageBody>
+      <DashboardPageHeader
+        actions={createButton}
+        description={config.description}
+        eyebrow="Emails · Communicate"
+        title={config.title}
+      />
+      {view === "logs" ? (
+        <MailLogList query={query} />
+      ) : (
+        <Suspense fallback={<MailResourceSkeleton layout={config.layout} />}>
+          <ResourceData emptyAction={createButton} query={query} view={view} />
+          {creating && isCreateMailView(view) ? (
+            <CreateFlow
+              key={`${view}-${session}`}
+              onOpenChange={setCreating}
+              projectId={projectId}
+              view={view}
+            />
+          ) : null}
+        </Suspense>
+      )}
+    </PageBody>
   );
-}
-
-function matching(items: MailResourceItem[], query: string) {
-  const needle = query.toLowerCase();
-  return items.filter((item) =>
-    `${item.name} ${item.detail} ${item.status}`.toLowerCase().includes(needle),
-  );
-}
-
-function ResourceTable({
-  action,
-  children,
-  items,
-  view,
-}: {
-  action?: React.ReactNode;
-  children?: React.ReactNode;
-  items: MailResourceItem[];
-  view: MailView;
-}) {
-  return (
-    <div className="w-full min-w-0 max-w-full space-y-6 px-4 py-6 sm:px-5 sm:py-8 lg:px-8">
-      <header className="flex items-end justify-between gap-5">
-        <p className="max-w-2xl text-sm leading-6 text-black/60 dark:text-white/60">
-          {descriptions[view]}
-        </p>
-        {action}
-      </header>
-      <section className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black">
-        <div className="min-w-[480px]">
-          <div className="grid grid-cols-[1.4fr_.9fr_.45fr_32px] border-b border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.13em] text-black/80 dark:text-white/80">
-            <span>Name</span>
-            <span>Detail</span>
-            <span>Status</span>
-            <span />
-          </div>
-          {items.map((item) => (
-            <MailResourceRow item={item} key={item.id} view={view} />
-          ))}
-        </div>
-        {!items.length ? (
-          <div className="grid min-h-64 place-items-center text-center">
-            <div>
-              <CircleDashed className="mx-auto size-7 text-black/60 dark:text-white/60" />
-              <p className="mt-3 text-sm font-medium text-black dark:text-white">
-                Nothing here yet
-              </p>
-              <p className="mt-1 text-xs text-black/80 dark:text-white/80">
-                Create your first resource to get started.
-              </p>
-            </div>
-          </div>
-        ) : null}
-      </section>
-      {children}
-    </div>
-  );
-}
-
-function resourceItems(
-  view: MailView,
-  data: MailDashboardData,
-  resources: MailResources,
-): MailResourceItem[] {
-  if (view === "mailboxes")
-    return data.mailboxes.map((item) => ({
-      id: item.id,
-      name: item.name,
-      detail: `${item.address} · ${item.kind}`,
-      status: item.status,
-      createdAt: "",
-      address: item.address,
-      kind: item.kind,
-    }));
-  if (view === "domains") return resources.domains;
-  if (view === "contacts") return resources.contacts;
-  if (view === "audiences") return resources.audiences;
-  if (view === "templates") return resources.templates;
-  if (view === "broadcasts") return resources.broadcasts;
-  if (view === "automations") return resources.automations;
-  if (view === "credentials") return resources.credentials;
-  if (view === "webhooks") return resources.webhooks;
-  return [];
 }

@@ -1,0 +1,448 @@
+/* ─── Living icons ───
+   Parts of an icon move on hover of the nearest [data-icon-trigger] (a nav
+   link, a button) or of the icon itself, once when a trigger becomes the
+   current page, and a card's header icon plays when the card is hovered. The icon's footprint never changes: only its strokes move.
+   Built by createAnimatedIcon (src/components/icons/animated). */
+
+[data-animated-icon] [data-motion] {
+  transform-box: fill-box;
+  transform-origin: center;
+  --ai-dur: 560ms;
+  --ai-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-animated-icon] [data-origin="t"] {
+  transform-origin: 50% 0%;
+}
+[data-animated-icon] [data-origin="b"] {
+  transform-origin: 50% 100%;
+}
+[data-animated-icon] [data-origin="l"] {
+  transform-origin: 0% 50%;
+}
+[data-animated-icon] [data-origin="r"] {
+  transform-origin: 100% 50%;
+}
+[data-animated-icon] [data-origin="tl"] {
+  transform-origin: 0% 0%;
+}
+[data-animated-icon] [data-origin="tr"] {
+  transform-origin: 100% 0%;
+}
+[data-animated-icon] [data-origin="bl"] {
+  transform-origin: 0% 100%;
+}
+[data-animated-icon] [data-origin="br"] {
+  transform-origin: 100% 100%;
+}
+[data-animated-icon] [data-origin="icon"] {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+
+[data-animated-icon] [data-delay="1"] {
+  --ai-delay: 70ms;
+}
+[data-animated-icon] [data-delay="2"] {
+  --ai-delay: 140ms;
+}
+[data-animated-icon] [data-delay="3"] {
+  --ai-delay: 210ms;
+}
+[data-animated-icon] [data-delay="4"] {
+  --ai-delay: 280ms;
+}
+
+[data-motion="draw"] {
+  --ai-name: ai-draw;
+}
+[data-motion="pop"] {
+  --ai-name: ai-pop;
+}
+[data-motion="grow"] {
+  --ai-name: ai-grow;
+}
+[data-motion="turn"] {
+  --ai-name: ai-turn;
+}
+[data-motion="quarter"] {
+  --ai-name: ai-quarter;
+}
+[data-motion="half"] {
+  --ai-name: ai-half;
+}
+[data-motion="spin"] {
+  --ai-name: ai-spin;
+}
+[data-motion="swing"] {
+  --ai-name: ai-swing;
+  --ai-ease: ease-in-out;
+}
+[data-motion="shake"] {
+  --ai-name: ai-shake;
+  --ai-ease: ease-in-out;
+  --ai-dur: 480ms;
+}
+[data-motion="flap"] {
+  --ai-name: ai-flap;
+  --ai-ease: ease-in-out;
+}
+[data-motion="squash"] {
+  --ai-name: ai-squash;
+  --ai-ease: ease-in-out;
+}
+[data-motion="lift"] {
+  --ai-name: ai-lift;
+  --ai-ease: ease-in-out;
+}
+[data-motion="sink"] {
+  --ai-name: ai-sink;
+  --ai-ease: ease-in-out;
+}
+[data-motion="nudge-r"] {
+  --ai-name: ai-nudge-r;
+  --ai-ease: ease-in-out;
+}
+[data-motion="nudge-l"] {
+  --ai-name: ai-nudge-l;
+  --ai-ease: ease-in-out;
+}
+[data-motion="launch"] {
+  --ai-name: ai-launch;
+  --ai-ease: ease-in-out;
+}
+[data-motion="exit-ne"] {
+  --ai-name: ai-exit-ne;
+  --ai-ease: ease-in-out;
+}
+[data-motion="exit-w"] {
+  --ai-name: ai-exit-w;
+  --ai-ease: ease-in-out;
+}
+[data-motion="blink"] {
+  --ai-name: ai-blink;
+  --ai-ease: steps(1, end);
+  --ai-dur: 600ms;
+}
+[data-motion="wink"] {
+  --ai-name: ai-wink;
+  --ai-ease: ease-in-out;
+  --ai-dur: 420ms;
+}
+[data-motion="flicker"] {
+  --ai-name: ai-flicker;
+  --ai-ease: ease-in-out;
+}
+[data-motion="scan"] {
+  --ai-name: ai-scan;
+  --ai-ease: ease-in-out;
+  --ai-dur: 600ms;
+}
+[data-motion="rise"] {
+  --ai-name: ai-rise;
+}
+[data-motion="twinkle"] {
+  --ai-name: ai-twinkle;
+}
+[data-motion="drift"] {
+  --ai-name: ai-drift;
+  --ai-ease: ease-in-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(
+      [data-icon-trigger]:hover,
+      [data-icon-trigger]:focus-visible,
+      [data-icon-trigger][aria-current="page"],
+      [data-icon-trigger][data-state="open"],
+      [data-dash-card]:hover [data-card-icon],
+      [data-animated-icon]:hover
+    )
+    [data-motion] {
+    animation: var(--ai-name) var(--ai-dur) var(--ai-ease) var(--ai-delay, 0ms)
+      both;
+  }
+
+  /* Work happening right now (a build step that is running) keeps moving,
+     slower than a hover so it reads as progress, not a flicker. */
+  [data-icon-loop] [data-motion] {
+    animation: var(--ai-name) calc(var(--ai-dur) * 2.2) var(--ai-ease)
+      var(--ai-delay, 0ms) infinite both;
+  }
+}
+
+@keyframes ai-draw {
+  from {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ai-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.5);
+  }
+  65% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes ai-grow {
+  0% {
+    transform: scaleY(0.12);
+  }
+  60% {
+    transform: scaleY(1.08);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+@keyframes ai-turn {
+  to {
+    transform: rotate(60deg);
+  }
+}
+@keyframes ai-quarter {
+  to {
+    transform: rotate(90deg);
+  }
+}
+@keyframes ai-half {
+  to {
+    transform: rotate(180deg);
+  }
+}
+@keyframes ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ai-swing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(14deg);
+  }
+  45% {
+    transform: rotate(-10deg);
+  }
+  70% {
+    transform: rotate(5deg);
+  }
+}
+@keyframes ai-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-7deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes ai-flap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(-0.85);
+  }
+}
+@keyframes ai-squash {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.18);
+  }
+}
+@keyframes ai-lift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes ai-sink {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(1.75px);
+  }
+}
+@keyframes ai-nudge-r {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(2px);
+  }
+}
+@keyframes ai-nudge-l {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(-2px);
+  }
+}
+@keyframes ai-launch {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  45% {
+    transform: translate(1.5px, -1.5px);
+  }
+}
+@keyframes ai-exit-ne {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(6px, -6px);
+    opacity: 0;
+  }
+  41% {
+    transform: translate(-6px, 6px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+@keyframes ai-exit-w {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(-6px);
+    opacity: 0;
+  }
+  41% {
+    transform: translateX(6px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes ai-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+}
+@keyframes ai-wink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes ai-flicker {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.55);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  75% {
+    transform: scale(0.85);
+  }
+}
+@keyframes ai-scan {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-5px);
+  }
+  70% {
+    transform: translateY(5px);
+  }
+}
+@keyframes ai-rise {
+  0% {
+    transform: translateY(3px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-1px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes ai-twinkle {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(0.7);
+  }
+  100% {
+    transform: rotate(90deg) scale(1);
+  }
+}
+@keyframes ai-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(1.5px);
+  }
+  70% {
+    transform: translateX(-1px);
+  }
+}

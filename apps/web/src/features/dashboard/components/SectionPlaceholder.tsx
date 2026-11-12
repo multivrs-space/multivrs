@@ -1,3 +1,6 @@
+import { DashCard } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LiveSparkles } from "@/components/icons/animated";
 import { DashboardPageHeader } from "./DashboardPageHeader";
 
 interface SectionPlaceholderProps {
@@ -6,29 +9,22 @@ interface SectionPlaceholderProps {
   scopeLabel: string;
 }
 
-/**
- * Premium scaffold for sections whose data UI is still to come. Flat surface,
- * hairline panel, no gradients — keeps the route real while the feature lands.
- */
+/** Keeps a section's route real while its data UI is still being built. */
 export function SectionPlaceholder({
   title,
   description,
   scopeLabel,
 }: SectionPlaceholderProps) {
   return (
-    <div className="w-full space-y-6 px-5 py-6">
-      <DashboardPageHeader title={title} description={description} />
-      <div>
-        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--hairline-strong)] bg-foreground/[0.02] px-6 text-center">
-          <span className="font-geist-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground/60">
-            Coming soon
-          </span>
-          <p className="mt-3 max-w-sm text-[14px] text-muted-foreground">
-            {title} for {scopeLabel.toLowerCase()} is being wired up. The route
-            is live — content lands next.
-          </p>
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-[1440px] space-y-5 px-4 py-5 lg:px-6 lg:py-6">
+      <DashboardPageHeader description={description} title={title} />
+      <DashCard>
+        <EmptyState
+          description={`${title} for ${scopeLabel.toLowerCase()} is on its way. The route is live; the view lands next.`}
+          glyph={LiveSparkles}
+          title="Coming soon"
+        />
+      </DashCard>
     </div>
   );
 }

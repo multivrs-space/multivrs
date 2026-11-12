@@ -36,6 +36,9 @@ export async function collectAnalyticsEvent(
   if (!parsed.success) return Response.json({ error: "Invalid analytics event" }, { status: 400 });
   const data = parsed.data;
   const url = new URL(request.url);
+  // Where the visitor is, at country and city level, for the dashboard map.
+  const country = typeof request.cf?.country === "string" ? request.cf.country : "";
+  const city = typeof request.cf?.city === "string" ? request.cf.city.slice(0, 80) : "";
   env.ANALYTICS.writeDataPoint({
     indexes: [deployment.projectId],
     blobs: [
@@ -52,6 +55,8 @@ export async function collectAnalyticsEvent(
       data.utmMedium,
       data.utmCampaign,
       data.kind === "custom" ? JSON.stringify(data.properties) : "",
+      country,
+      city,
     ],
     doubles: [1],
   });

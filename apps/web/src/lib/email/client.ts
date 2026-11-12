@@ -90,6 +90,9 @@ export interface SendEmailOptions {
     filename: string;
     contentType: string;
     content: Buffer | Uint8Array;
+    /** Shown in the body via `cid:` (an image in a forwarded email). */
+    inline?: boolean;
+    contentId?: string;
   }>;
 }
 
@@ -162,6 +165,12 @@ export async function sendEmail(
         Attachments: options.attachments?.map((attachment) => ({
           FileName: attachment.filename,
           ContentType: attachment.contentType,
+          ...(attachment.inline && attachment.contentId
+            ? {
+                ContentDisposition: "INLINE" as const,
+                ContentId: attachment.contentId.replace(/^<|>$/g, ""),
+              }
+            : {}),
           RawContent:
             attachment.content instanceof Uint8Array
               ? attachment.content
@@ -176,7 +185,7 @@ export async function sendEmail(
     const response = await sesClient.send(command);
 
     if (!response.MessageId) {
-      throw new Error("AWS SES v2 did not return a message ID");
+      throw new Error("The mail service didn't accept the message");
     }
 
     return { messageId: response.MessageId };
@@ -198,7 +207,7 @@ export async function sendEmail(
       const fallbackResponse = await sesClient.send(fallbackCommand);
 
       if (!fallbackResponse.MessageId) {
-        throw new Error("AWS SES v2 did not return a message ID");
+        throw new Error("The mail service didn't accept the message");
       }
 
       return { messageId: fallbackResponse.MessageId };

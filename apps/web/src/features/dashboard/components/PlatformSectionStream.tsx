@@ -41,6 +41,7 @@ export function PlatformSectionStream({
         analyticsRange={analyticsRange}
         initialMailCompose={compose === "1"}
         initialMailView={parseMailView(requestedView)}
+        requestedView={requestedView}
         meta={meta}
         scope={scope}
         section={section}

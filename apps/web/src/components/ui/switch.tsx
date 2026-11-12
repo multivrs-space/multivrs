@@ -64,20 +64,22 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         className={cn(
           "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
           size === "sm" ? "h-4 w-7" : "h-5 w-9",
-          isChecked ? "bg-primary" : "bg-zinc-800 hover:bg-zinc-700",
+          isChecked
+            ? "bg-primary shadow-[inset_0_1px_2px_rgb(0_0_0/0.2)]"
+            : "bg-foreground/15 shadow-[inset_0_1px_2px_rgb(0_0_0/0.12)] hover:bg-foreground/25",
           className,
         )}
         {...props}
       >
         <span
           className={cn(
-            "pointer-events-none block rounded-full shadow-xs ring-0 transition-transform duration-200 ease-in-out",
+            "pointer-events-none block rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.25)] ring-0 transition-transform duration-300 ease-out-expo",
             size === "sm" ? "h-3 w-3" : "h-4 w-4",
             isChecked
               ? size === "sm"
                 ? "translate-x-3 bg-primary-foreground"
                 : "translate-x-4 bg-primary-foreground"
-              : "translate-x-0 bg-zinc-400",
+              : "translate-x-0 bg-white",
           )}
         />
       </button>

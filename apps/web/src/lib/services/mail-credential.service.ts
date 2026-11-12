@@ -116,4 +116,3 @@ export async function deleteWebhook(actorId: string, webhookId: string) {
     where: { id: webhookId },
   });
 }
-

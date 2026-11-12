@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::api::{ApiClient, Deployment};
 
+/// Files sent in parallel when uploading a build.
+const UPLOAD_CONCURRENCY: usize = 16;
+
 #[derive(Serialize)]
 struct ArtifactMetadataPayload<'a> {
     #[serde(rename = "artifactHash")]
@@ -57,17 +60,23 @@ impl ApiClient {
         };
         let prefix = format!("/api/projects/{project_id}/deployments/{deployment_id}/artifact");
         let prepared: PrepareArtifactResponse =
-            self.post(&format!("{prefix}/prepare"), &metadata)?;
-        prepared.uploads.par_iter().try_for_each(|upload| {
-            let file = artifact
-                .files
-                .iter()
-                .find(|file| file.hash == upload.hash)
-                .ok_or_else(|| anyhow::anyhow!("Missing local blob {}", upload.hash))?;
-            let bytes = BASE64.decode(&file.contents_base64)?;
-            self.put_blob(&upload.url, bytes)
+            self.post_idempotent(&format!("{prefix}/prepare"), &metadata)?;
+        // Uploads wait on the network, not the CPU: run many at once, not one per core.
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(UPLOAD_CONCURRENCY)
+            .build()?;
+        pool.install(|| {
+            prepared.uploads.par_iter().try_for_each(|upload| {
+                let file = artifact
+                    .files
+                    .iter()
+                    .find(|file| file.hash == upload.hash)
+                    .ok_or_else(|| anyhow::anyhow!("Missing local blob {}", upload.hash))?;
+                let bytes = BASE64.decode(&file.contents_base64)?;
+                self.put_blob(&upload.url, bytes)
+            })
         })?;
-        self.post(&format!("{prefix}/complete"), &metadata)
+        self.post_idempotent(&format!("{prefix}/complete"), &metadata)
     }
 
     fn put_blob(&self, path: &str, body: Vec<u8>) -> Result<()> {
@@ -76,15 +85,29 @@ impl ApiClient {
         } else {
             format!("{}{}", self.base_url, path)
         };
-        let response = self
-            .http
-            .put(url)
-            .bearer_auth(&self.token)
-            .body(body)
-            .send()?;
-        if !response.status().is_success() {
-            bail!("blob upload failed ({})", response.status());
+        // Blobs are content-addressed, so sending one twice is harmless.
+        for (attempt, delay) in std::iter::once(None)
+            .chain(crate::api::RETRY_DELAYS.iter().map(Some))
+            .enumerate()
+        {
+            if let Some(delay) = delay {
+                std::thread::sleep(*delay);
+            }
+            match self
+                .http
+                .put(&url)
+                .bearer_auth(&self.token)
+                .body(body.clone())
+                .send()
+            {
+                Ok(response) if response.status().is_success() => return Ok(()),
+                Ok(response) => bail!("a file upload was refused ({})", response.status()),
+                Err(error)
+                    if crate::api::is_transient(&error)
+                        && attempt < crate::api::RETRY_DELAYS.len() => {}
+                Err(error) => return Err(crate::api::describe(&error)),
+            }
         }
-        Ok(())
+        bail!("a file upload didn't finish")
     }
 }

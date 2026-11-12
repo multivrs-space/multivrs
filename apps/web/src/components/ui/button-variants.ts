@@ -14,6 +14,14 @@ export const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        // Dashboard surfaces (see app/dashboard-surfaces.css).
+        hero: "surface-hero surface-press hover:brightness-110",
+        raised:
+          "surface-raised surface-press text-foreground hover:text-foreground",
+        quiet:
+          "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
+        danger:
+          "border border-rose-600/25 bg-rose-500/10 text-rose-700 hover:bg-rose-500/15 dark:border-rose-400/25 dark:text-rose-300",
       },
       size: {
         default: "h-10 px-4 py-2 gap-2",
@@ -28,6 +36,12 @@ export const buttonVariants = cva(
         "icon-lg": "size-9",
       },
     },
+    compoundVariants: [
+      {
+        variant: ["hero", "raised", "quiet", "danger"],
+        class: "rounded-full focus-visible:ring-offset-0",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

@@ -2,12 +2,12 @@ import "server-only";
 import { ConflictError, NotFoundError } from "@multivrs/error-utils";
 import type { DashboardWorkspace } from "@/features/dashboard/types/workspace.types";
 import { prisma } from "@/lib/prisma";
+import { accountPlan } from "@/lib/services/account-plan.service";
 import {
   adoptionBlocker,
   teamSlugBase,
   teamSlugCandidates,
 } from "@/lib/services/account-team.helpers";
-import { accountPlan } from "@/lib/services/billing-entitlement.service";
 
 /**
  * Every account has one team. People on it can open the account's
@@ -22,7 +22,13 @@ export interface AccountTeam {
   createdAt?: Date;
 }
 
-const TEAM = { id: true, name: true, slug: true, logo: true, createdAt: true } as const;
+const TEAM = {
+  id: true,
+  name: true,
+  slug: true,
+  logo: true,
+  createdAt: true,
+} as const;
 
 export function findAccountTeam(userId: string): Promise<AccountTeam | null> {
   return prisma.organization.findUnique({

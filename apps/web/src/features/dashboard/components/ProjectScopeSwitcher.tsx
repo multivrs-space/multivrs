@@ -3,10 +3,12 @@
 import { ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { LiveLayoutGrid } from "@/components/icons/animated";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProjectFavicon } from "@/features/dashboard/components/ProjectFavicon";
 import { ProjectScopeMenu } from "@/features/dashboard/components/ProjectScopeMenu";
 import { buildNavHref } from "@/features/dashboard/constants/navigation";
 import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
@@ -14,6 +16,8 @@ import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 export interface ProjectOption {
   slug: string;
   name: string;
+  /** The live site's logo; absent until production is serving. */
+  faviconUrl?: string | null;
 }
 
 export function ProjectScopeSwitcher({
@@ -31,6 +35,9 @@ export function ProjectScopeSwitcher({
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Show the project's name rather than its URL slug when we know it.
+  const currentProject = projects.find((project) => project.slug === scope);
+  const current = currentProject?.name ?? scope;
   const filtered = projects.filter((project) =>
     project.name.toLowerCase().includes(query.trim().toLowerCase()),
   );
@@ -40,7 +47,9 @@ export function ProjectScopeSwitcher({
   };
   const select = (nextScope: string) => {
     close();
-    router.push(buildNavHref(username, nextScope, activeSlug));
+    // From the workspace project list, picking a project opens that project.
+    const slug = activeSlug === "projects" ? "" : activeSlug;
+    router.push(buildNavHref(username, nextScope, slug));
   };
 
   return (
@@ -53,11 +62,22 @@ export function ProjectScopeSwitcher({
     >
       <DropdownMenuTrigger asChild>
         <button
+          className="surface-raised surface-press flex h-8 items-center gap-2 rounded-full pl-1 pr-2.5 text-[13px] font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
           type="button"
-          className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-foreground/[0.04] px-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-[var(--hairline-strong)] hover:bg-muted/40"
         >
-          <span className="max-w-[110px] sm:max-w-[180px] truncate">
-            {isAllProjects ? "All Projects" : scope}
+          <span className="surface-inset grid size-6 place-items-center overflow-hidden rounded-full text-muted-foreground">
+            {isAllProjects ? (
+              <LiveLayoutGrid className="size-3.5" strokeWidth={1.75} />
+            ) : (
+              <ProjectFavicon
+                className="size-4 rounded-[4px]"
+                name={current}
+                url={currentProject?.faviconUrl ?? null}
+              />
+            )}
+          </span>
+          <span className="max-w-[110px] truncate sm:max-w-[180px]">
+            {isAllProjects ? "All projects" : current}
           </span>
           <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground/70" />
         </button>

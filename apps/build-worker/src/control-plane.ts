@@ -25,6 +25,13 @@ export async function appendBuildLog(
   });
 }
 
+/** The commit the build checked out, for the deployment's Source. */
+export async function recordBuildSource(job: BuildJob, commitSha: string) {
+  await post(job, `/api/projects/${job.projectId}/deployments/${job.deploymentId}/source`, {
+    commitSha,
+  });
+}
+
 export async function markBuildFailed(job: BuildJob, message: string) {
   await post(job, `/api/projects/${job.projectId}/deployments/${job.deploymentId}/status`, {
     status: "error",

@@ -98,6 +98,8 @@ export const buildJobSchema = z.object({
   projectId: z.string().min(1),
   apiUrl: z.url(),
   apiToken: z.string().startsWith("mvrs_"),
+  /** The owning account, so its builds can share one warm build machine. */
+  accountId: z.string().min(1).max(200).optional(),
   repositoryToken: z.string().min(1).optional(),
   framework: z.enum(FRAMEWORK_IDS).nullable(),
   input: createDeploymentInputSchema.extend({ repoUrl: repositoryUrlSchema }),

@@ -1,31 +1,42 @@
 import type { ReactNode } from "react";
+import type { AnimatedIcon } from "@/components/icons/animated";
 import { cn } from "@/lib/utils";
 
-interface SettingsCardProps {
+/**
+ * The stacked settings card: a raised panel per setting, its explanation on
+ * top, the control in the middle and a footer with the hint and the action.
+ */
+export function SettingsCard({
+  children,
+  className,
+  danger,
+  id,
+}: {
   children: ReactNode;
   className?: string;
   danger?: boolean;
-}
-
-export function SettingsCard({ children, className, danger }: SettingsCardProps) {
+  id?: string;
+}) {
   return (
-    <div
+    <section
       className={cn(
-        "overflow-hidden rounded-xl border bg-card dark:bg-[#000000] transition-colors",
-        danger
-          ? "border-red-500/30 bg-red-950/5 hover:border-red-500/50"
-          : "border-border dark:border-[#262626] hover:border-zinc-400/50 dark:hover:border-[#333333]",
+        "surface-card scroll-mt-20 overflow-hidden rounded-card",
+        danger && "ring-1 ring-rose-500/25 ring-inset",
         className,
       )}
+      data-dash-card
+      id={id}
     >
       {children}
-    </div>
+    </section>
   );
 }
 
 interface SettingsCardBodyProps {
   title?: string;
-  description?: string;
+  description?: ReactNode;
+  /** A living icon in a well beside the title. */
+  icon?: AnimatedIcon;
   children?: ReactNode;
   className?: string;
   badge?: ReactNode;
@@ -35,6 +46,7 @@ interface SettingsCardBodyProps {
 export function SettingsCardBody({
   title,
   description,
+  icon: Icon,
   children,
   className,
   badge,
@@ -42,37 +54,46 @@ export function SettingsCardBody({
 }: SettingsCardBodyProps) {
   const hasHeader = Boolean(title || description || aside);
   return (
-    <div className={cn("p-6", className)}>
-      {hasHeader && (
+    <div className={cn("p-5 sm:p-6", className)}>
+      {hasHeader ? (
         <div className="flex items-start justify-between gap-6">
-          <div className="min-w-0 flex-1">
-            {title && (
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-[17px] font-semibold text-foreground tracking-tight">
-                  {title}
-                </h2>
-                {badge}
-              </div>
-            )}
-            {description && (
-              <p className="mt-1 text-sm text-muted-foreground leading-normal whitespace-pre-line">
-                {description}
-              </p>
-            )}
+          <div className="flex min-w-0 flex-1 gap-3">
+            {Icon ? (
+              <span
+                className="surface-inset grid size-9 shrink-0 place-items-center rounded-tile text-muted-foreground"
+                data-card-icon
+              >
+                <Icon className="size-4" strokeWidth={1.75} />
+              </span>
+            ) : null}
+            <div className="min-w-0">
+              {title ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-[15.5px] font-semibold tracking-[-0.015em] text-foreground">
+                    {title}
+                  </h2>
+                  {badge}
+                </div>
+              ) : null}
+              {description ? (
+                <div className="mt-1 max-w-2xl whitespace-pre-line text-[13px] leading-relaxed text-muted-foreground">
+                  {description}
+                </div>
+              ) : null}
+            </div>
           </div>
-          {aside && <div className="shrink-0">{aside}</div>}
+          {aside ? <div className="shrink-0">{aside}</div> : null}
         </div>
-      )}
-      {children && <div className={cn(hasHeader && "mt-5")}>{children}</div>}
+      ) : null}
+      {children ? (
+        <div
+          className={cn(hasHeader && "mt-5", Icon && hasHeader && "sm:pl-12")}
+        >
+          {children}
+        </div>
+      ) : null}
     </div>
   );
-}
-
-interface SettingsCardFooterProps {
-  helperText?: ReactNode;
-  action?: ReactNode;
-  className?: string;
-  danger?: boolean;
 }
 
 export function SettingsCardFooter({
@@ -80,19 +101,48 @@ export function SettingsCardFooter({
   action,
   className,
   danger,
-}: SettingsCardFooterProps) {
+}: {
+  helperText?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+  danger?: boolean;
+}) {
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t px-6 py-3.5 text-xs",
+        "flex flex-col justify-between gap-3 border-t px-5 py-3 text-[12.5px] sm:flex-row sm:items-center sm:px-6",
         danger
-          ? "border-red-500/20 bg-red-950/10 text-red-400"
-          : "border-border dark:border-[#262626] bg-muted/40 dark:bg-[#080808] text-muted-foreground",
+          ? "border-rose-500/20 bg-rose-500/[0.04] text-rose-700 dark:text-rose-300"
+          : "border-hairline bg-foreground/[0.02] text-muted-foreground",
         className,
       )}
     >
-      <div className="min-w-0 text-xs text-muted-foreground">{helperText}</div>
-      {action && <div className="shrink-0">{action}</div>}
+      <div className="min-w-0">{helperText}</div>
+      {action ? (
+        <div className="flex shrink-0 items-center gap-2">{action}</div>
+      ) : null}
     </div>
+  );
+}
+
+/** A small "Planned" style badge for a card's title row. */
+export function SettingsBadge({
+  children,
+  tone = "muted",
+}: {
+  children: ReactNode;
+  tone?: "muted" | "primary";
+}) {
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 font-geist-mono text-[10px] uppercase tracking-[0.12em]",
+        tone === "primary"
+          ? "bg-primary/10 text-primary"
+          : "border border-hairline text-muted-foreground",
+      )}
+    >
+      {children}
+    </span>
   );
 }

@@ -16,7 +16,7 @@ function config() {
   if (!url || !token)
     throw new MultivrsError(
       "internal_error",
-      "Cloudflare Sandboxes are not configured",
+      "Sandboxes aren't set up in this environment",
       503,
     );
   return { token, url };

@@ -14,20 +14,20 @@ export interface DeploymentStatusStyle {
 const STYLES: Record<DeploymentTone, Omit<DeploymentStatusStyle, "label">> = {
   ready: {
     tone: "ready",
-    dot: "bg-emerald-400",
-    text: "text-emerald-300",
+    dot: "bg-emerald-500",
+    text: "text-emerald-700 dark:text-emerald-300",
     ring: "ring-emerald-400/20",
   },
   building: {
     tone: "building",
-    dot: "bg-amber-300",
-    text: "text-amber-200",
+    dot: "bg-amber-500",
+    text: "text-amber-700 dark:text-amber-200",
     ring: "ring-amber-300/20",
   },
   error: {
     tone: "error",
-    dot: "bg-rose-400",
-    text: "text-rose-300",
+    dot: "bg-rose-500",
+    text: "text-rose-700 dark:text-rose-300",
     ring: "ring-rose-400/20",
   },
   idle: {

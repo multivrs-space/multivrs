@@ -1,39 +1,34 @@
-import { SectionLoadingHeader } from "./SectionSkeletonParts";
+import {
+  SkeletonCard,
+  SkeletonHeader,
+  SkeletonRows,
+} from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
+const MODES = ["smart", "aggressive", "bypass"];
+
+/** Mirrors the CDN page: cache modes beside telemetry, then content sections. */
 export function CdnSectionSkeleton() {
   return (
-    <main className="w-full space-y-6 px-5 py-6" aria-busy>
-      <SectionLoadingHeader
-        description="Cache policy and edge services for the selected project."
-        title="CDN"
-      />
-      <section className="animate-pulse rounded-2xl border border-border bg-foreground/2 p-5">
-        <h2 className="text-sm font-semibold text-muted-foreground">
-          Cache behavior
-        </h2>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div className="h-20 rounded-xl border border-border bg-muted/50" />
-          <div className="h-20 rounded-xl border border-border bg-muted/50" />
+    <PageBody>
+      <main aria-busy aria-label="Loading CDN" className="space-y-5">
+        <SkeletonHeader action="w-56" />
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <SkeletonCard>
+            <div className="grid gap-2 md:grid-cols-3">
+              {MODES.map((mode) => (
+                <span className="skeleton h-24 rounded-tile" key={mode} />
+              ))}
+            </div>
+          </SkeletonCard>
+          <SkeletonCard>
+            <SkeletonRows rows={2} />
+          </SkeletonCard>
         </div>
-        <div className="mt-5 h-10 rounded-lg bg-foreground/4" />
-      </section>
-      <section className="animate-pulse rounded-2xl border border-border bg-foreground/2 p-5">
-        <h2 className="text-sm font-semibold text-muted-foreground">
-          Edge telemetry
-        </h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {["compression", "stale", "browser"].map((item) => (
-            <div
-              className="h-24 rounded-xl border border-border bg-muted/50"
-              key={item}
-            />
-          ))}
-        </div>
-      </section>
-      <div className="flex animate-pulse gap-3">
-        <div className="h-10 w-32 rounded-lg bg-muted" />
-        <div className="h-10 w-28 rounded-lg border border-border bg-foreground/3" />
-      </div>
-    </main>
+        <SkeletonCard>
+          <SkeletonRows rows={3} />
+        </SkeletonCard>
+      </main>
+    </PageBody>
   );
 }

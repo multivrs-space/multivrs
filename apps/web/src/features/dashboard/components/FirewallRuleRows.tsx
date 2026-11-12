@@ -1,13 +1,28 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import {
+  LiveListFilter,
+  LiveShieldCheck,
+  LiveTrash,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import {
+  ACTION_CHIP,
+  ACTIONS,
+  describeCondition,
+} from "@/features/dashboard/lib/firewall-copy";
 import type { DashboardFirewallRule } from "@/features/dashboard/types/firewall-rule.types";
 import { requestOk } from "@/lib/api/request.client";
+import { cn } from "@/lib/utils";
 
+/** The rules in evaluation order, each pausable and removable. */
 export function FirewallRuleRows({
   projectId,
   rules,
@@ -17,11 +32,11 @@ export function FirewallRuleRows({
 }) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string>();
-  const [error, setError] = useState<string>();
+  const [deleting, setDeleting] = useState<DashboardFirewallRule | null>(null);
+
   const mutate = (rule: DashboardFirewallRule, method: "PATCH" | "DELETE") => {
     if (pendingId) return;
     setPendingId(rule.id);
-    setError(undefined);
     void requestOk(
       `/api/projects/${projectId}/firewall/${rule.id}`,
       {
@@ -37,63 +52,103 @@ export function FirewallRuleRows({
       },
       "Firewall update failed",
     )
-      .then(() => router.refresh())
+      .then(() => {
+        if (method === "DELETE") {
+          toast.success(`${rule.name} deleted`);
+          setDeleting(null);
+        }
+        router.refresh();
+      })
       .catch(() =>
-        setError(
-          `Could not ${method === "PATCH" ? "update" : "delete"} ${rule.name}.`,
+        toast.error(
+          `Couldn't ${method === "PATCH" ? "update" : "delete"} ${rule.name}.`,
         ),
       )
       .finally(() => setPendingId(undefined));
   };
+
+  if (!rules.length) {
+    return (
+      <DashCard>
+        <EmptyState
+          description="Traffic is allowed by default. Add a rule above to block, challenge or rate-limit."
+          glyph={LiveShieldCheck}
+          title="No custom rules"
+        />
+      </DashCard>
+    );
+  }
+
   return (
-    <div className="divide-y divide-[var(--hairline)] border-b border-[var(--hairline)]">
-      {rules.map((rule) => (
-        <div
-          key={rule.id}
-          className="grid items-center gap-4 px-4 py-4 md:grid-cols-[minmax(12rem,1fr)_8rem_minmax(14rem,1.5fr)_auto]"
-        >
-          <div>
-            <p className="text-sm font-medium text-foreground">{rule.name}</p>
-            <p className="mt-1 font-geist-mono text-[10px] text-muted-foreground">
-              Priority {rule.priority + 1}
-            </p>
-          </div>
-          <span className="w-fit rounded-md border border-[var(--hairline)] px-2 py-1 font-geist-mono text-[10px] uppercase text-purple-300">
-            {rule.action.replace("_", " ")}
-          </span>
-          <p className="truncate font-geist-mono text-xs text-muted-foreground">
-            {rule.conditions
-              .map(
-                (condition) =>
-                  `${condition.type} ${condition.op} ${Array.isArray(condition.value) ? condition.value.join(", ") : condition.value}`,
-              )
-              .join(" · ")}
-          </p>
-          <div className="flex items-center justify-end gap-3">
+    <DashCard aria-label="Rules">
+      <DashCardHeader
+        description="Evaluated top to bottom"
+        icon={LiveListFilter}
+        title="Rules"
+      />
+      <ol className="divide-y divide-hairline p-2 pt-3">
+        {rules.map((rule) => (
+          <li
+            className={cn(
+              "flex flex-wrap items-center gap-3 rounded-tile px-3 py-3 transition-colors hover:bg-foreground/[0.025]",
+              !rule.enabled && "opacity-60",
+            )}
+            key={rule.id}
+          >
+            <span className="surface-inset grid size-8 shrink-0 place-items-center rounded-full font-geist-mono text-[11px] text-muted-foreground">
+              {rule.priority + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13.5px] font-medium">{rule.name}</p>
+              <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                If{" "}
+                {rule.conditions
+                  .map((condition) =>
+                    describeCondition(
+                      condition.type,
+                      condition.op,
+                      condition.value,
+                    ),
+                  )
+                  .join(" and ")}
+              </p>
+            </div>
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                ACTION_CHIP[rule.action] ?? "bg-foreground/6",
+              )}
+            >
+              {ACTIONS[rule.action] ?? rule.action}
+            </span>
             <Switch
+              aria-label={`${rule.enabled ? "Pause" : "Enable"} ${rule.name}`}
               checked={rule.enabled}
               disabled={pendingId === rule.id}
               onCheckedChange={() => mutate(rule, "PATCH")}
-              aria-label={`Toggle ${rule.name}`}
             />
             <Button
-              variant="ghost"
-              size="icon"
-              disabled={pendingId === rule.id}
-              onClick={() => mutate(rule, "DELETE")}
               aria-label={`Delete ${rule.name}`}
+              className="size-8"
+              data-icon-trigger
+              disabled={pendingId === rule.id}
+              onClick={() => setDeleting(rule)}
+              size="icon-sm"
+              variant="quiet"
             >
-              <Trash2 className="size-4" />
+              <LiveTrash strokeWidth={1.75} />
             </Button>
-          </div>
-        </div>
-      ))}
-      {!rules.length && (
-        <p className="px-4 py-12 text-center text-sm text-muted-foreground">
-          No custom rules. Traffic is allowed by default.
-        </p>
-      )}
-      {error && <p className="px-4 py-3 text-xs text-rose-400">{error}</p>}
-    </div>
+          </li>
+        ))}
+      </ol>
+      <ConfirmDialog
+        busy={pendingId === deleting?.id}
+        description="Traffic it matched will fall through to the next rule."
+        onConfirm={() => (deleting ? mutate(deleting, "DELETE") : undefined)}
+        onOpenChange={(open) => (open ? null : setDeleting(null))}
+        open={deleting !== null}
+        title={`Delete ${deleting?.name ?? "rule"}?`}
+      />
+    </DashCard>
   );
 }

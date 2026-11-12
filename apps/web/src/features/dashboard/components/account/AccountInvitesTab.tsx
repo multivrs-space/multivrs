@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { Check, Mail, X } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LiveMail, LiveX } from "@/components/icons/animated";
 import { TeamAvatar } from "@/components/TeamAvatar";
+import { Button } from "@/components/ui/button";
+import {
+  SettingsCard,
+  SettingsCardBody,
+} from "@/features/dashboard/components/settings/SettingsCard";
 import { authClient } from "@/lib/auth-client";
 
 export interface AccountInviteItem {
@@ -20,137 +24,101 @@ export interface AccountInviteItem {
   createdAt: string;
 }
 
-interface AccountInvitesTabProps {
-  invites?: AccountInviteItem[];
-}
-
+/** Teams that asked you to join: accept to open their projects, or decline. */
 export function AccountInvitesTab({
   invites = [],
-}: AccountInvitesTabProps) {
-  const [items, setItems] = useState<AccountInviteItem[]>(invites);
-  const [processingId, setProcessingId] = useState<string | null>(null);
+}: {
+  invites?: AccountInviteItem[];
+}) {
+  const [items, setItems] = useState(invites);
+  const [busy, setBusy] = useState<string | null>(null);
 
-  const handleAccept = async (invite: AccountInviteItem) => {
-    if (processingId) return;
-    setProcessingId(invite.id);
+  async function respond(invite: AccountInviteItem, accept: boolean) {
+    if (busy) return;
+    setBusy(invite.id);
     try {
-      const res = await authClient.organization.acceptInvitation({
-        invitationId: invite.id,
-      });
-      if (res?.error) {
-        throw new Error(res.error.message || "Failed to accept invite");
-      }
-      toast.success(`Joined ${invite.organizationName}`);
-      setItems((prev) => prev.filter((i) => i.id !== invite.id));
-      window.location.href = `/${invite.organizationSlug}`;
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to accept invite");
+      const org = authClient.organization;
+      const result = accept
+        ? await org.acceptInvitation({ invitationId: invite.id })
+        : await org.rejectInvitation({ invitationId: invite.id });
+      if (result?.error)
+        throw new Error(result.error.message || "That didn't work.");
+      setItems((current) => current.filter((item) => item.id !== invite.id));
+      if (accept) {
+        toast.success(`Joined ${invite.organizationName}`);
+        window.location.href = `/${invite.organizationSlug}`;
+      } else toast.success("Invitation declined");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "That didn't work.");
     } finally {
-      setProcessingId(null);
+      setBusy(null);
     }
-  };
-
-  const handleReject = async (invite: AccountInviteItem) => {
-    if (processingId) return;
-    setProcessingId(invite.id);
-    try {
-      const res = await authClient.organization.rejectInvitation({
-        invitationId: invite.id,
-      });
-      if (res?.error) {
-        throw new Error(res.error.message || "Failed to decline invite");
-      }
-      toast.success("Invitation declined");
-      setItems((prev) => prev.filter((i) => i.id !== invite.id));
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to decline invite");
-    } finally {
-      setProcessingId(null);
-    }
-  };
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header matching Vercel */}
-      <div>
-        <h1 className="text-xl font-semibold text-foreground tracking-tight">Invites</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Manage your Multivrs team invites.
-        </p>
-      </div>
-
-      {/* Invites Container */}
-      <div className="rounded-xl border border-border bg-card p-6 min-h-[380px] flex flex-col justify-center">
-        {items.length > 0 ? (
-          <div className="divide-y divide-border">
-            {items.map((invite) => (
-              <div
-                key={invite.id}
-                className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
-              >
-                <div className="flex items-center gap-3">
-                  <TeamAvatar
-                    name={invite.organizationName}
-                    logo={invite.organizationLogo}
-                    size={32}
-                  />
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground">
-                        {invite.organizationName}
-                      </span>
-                      {invite.role && (
-                        <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground capitalize">
-                          {invite.role}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Invited by {invite.inviterName || invite.inviterEmail || "team owner"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={processingId === invite.id}
-                    onClick={() => handleReject(invite)}
-                    className="h-8 border-border bg-background text-xs text-foreground hover:bg-muted gap-1 cursor-pointer"
-                  >
-                    <X className="size-3.5" />
-                    Decline
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={processingId === invite.id}
-                    onClick={() => handleAccept(invite)}
-                    className="h-8 bg-primary text-xs font-medium text-primary-foreground hover:bg-primary/90 gap-1 cursor-pointer"
-                  >
-                    <Check className="size-3.5" />
-                    Accept
-                  </Button>
-                </div>
+    <SettingsCard id="invites">
+      <SettingsCardBody
+        description="Accepting opens the team's projects with the role they gave you."
+        icon={LiveMail}
+        title="Team invitations"
+      />
+      {items.length ? (
+        <ul className="divide-y divide-hairline px-5 pb-3 sm:px-6">
+          {items.map((invite) => (
+            <li
+              className="flex flex-wrap items-center gap-3 py-3"
+              key={invite.id}
+            >
+              <TeamAvatar
+                logo={invite.organizationLogo}
+                name={invite.organizationName}
+                size={36}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-2 text-[13.5px] font-medium">
+                  {invite.organizationName}
+                  {invite.role ? (
+                    <span className="rounded-full border border-hairline px-2 text-[10.5px] capitalize text-muted-foreground">
+                      {invite.role}
+                    </span>
+                  ) : null}
+                </p>
+                <p className="text-[12px] text-muted-foreground">
+                  Invited by{" "}
+                  {invite.inviterName ||
+                    invite.inviterEmail ||
+                    "the team owner"}
+                </p>
               </div>
-            ))}
-          </div>
-        ) : (
-          /* Exact empty state matching Vercel style */
-          <div className="flex flex-col items-center justify-center text-center py-16">
-            <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/60 text-muted-foreground mb-3.5">
-              <Mail className="size-5" />
-            </div>
-            <h3 className="text-sm font-medium text-foreground">
-              No Invites Yet
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              When a team invites you, it&apos;ll show up here.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+              <Button
+                data-icon-trigger
+                disabled={busy === invite.id}
+                onClick={() => void respond(invite, false)}
+                size="sm"
+                variant="quiet"
+              >
+                <LiveX strokeWidth={2} />
+                Decline
+              </Button>
+              <Button
+                disabled={busy === invite.id}
+                onClick={() => void respond(invite, true)}
+                size="sm"
+                variant="hero"
+              >
+                Accept
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState
+          className="pt-2"
+          description="When a team invites you, it shows up here."
+          glyph={LiveMail}
+          title="No invitations"
+        />
+      )}
+    </SettingsCard>
   );
 }
