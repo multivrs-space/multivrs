@@ -1,4 +1,5 @@
 import "server-only";
+import { providerIdsIn } from "@/lib/mail/public-message-id";
 import { sanitizeMailHtml } from "@/lib/mail/sanitize-html";
 import { prisma } from "@/lib/prisma";
 import type { InboundMailInput } from "@/lib/schemas/mail-message.schemas";
@@ -23,7 +24,12 @@ const ACTIONS = {
   restore: { folder: "inbox" },
 } as const;
 
-/** Read and unread are open to every role; moving mail needs one that can manage. */
+/**
+ * Read and unread are open to every role; moving mail needs one that can
+ * manage. Read, unread and unstar cover the whole conversation: a thread
+ * shows as starred while any of its messages is, so clearing one message
+ * could leave the star on.
+ */
 export async function updateMailMessage(
   actorId: string,
   messageId: string,
@@ -35,7 +41,7 @@ export async function updateMailMessage(
     messageId,
     readOnly ? "read" : "manage",
   );
-  if (readOnly) {
+  if (readOnly || action === "unstar") {
     return prisma.mailMessage.updateMany({
       where: { threadId: message.threadId },
       data: ACTIONS[action],
@@ -91,9 +97,24 @@ export async function receiveMail(input: InboundMailInput) {
   }
   // One email can sit in several of an account's mailboxes. Thread it with
   // this mailbox's copy.
-  const reply = input.inReplyTo
+  // Mail we sent carries the delivery provider's Message-ID, so a reply to it
+  // names that id; match ours and theirs, In-Reply-To first, then References.
+  const answered = [input.inReplyTo, ...[...input.references].reverse()].filter(
+    (id): id is string => Boolean(id),
+  );
+  const providerIds = providerIdsIn(answered);
+  const reply = answered.length
     ? await prisma.mailMessage.findFirst({
-        where: { mailboxId: mailbox.id, messageId: input.inReplyTo },
+        where: {
+          mailboxId: mailbox.id,
+          OR: [
+            { messageId: { in: answered } },
+            ...(providerIds.length
+              ? [{ providerMessageId: { in: providerIds } }]
+              : []),
+          ],
+        },
+        orderBy: { createdAt: "desc" },
       })
     : null;
   const fallback = reply
@@ -103,7 +124,15 @@ export async function receiveMail(input: InboundMailInput) {
           userId: mailbox.userId,
           mailboxId: mailbox.id,
           normalizedSubject: normalized(input.subject),
-          messages: { some: { fromAddress: input.from } },
+          // They wrote in this thread, or we wrote to them in it.
+          messages: {
+            some: {
+              OR: [
+                { fromAddress: input.from },
+                { toAddresses: { has: input.from } },
+              ],
+            },
+          },
         },
         orderBy: { lastMessageAt: "desc" },
       });

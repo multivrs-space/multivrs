@@ -2,13 +2,24 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { MailOverviewHero } from "@/features/mail/MailOverviewHero";
 import {
-  MailOverviewDataSkeleton,
-  MailResourceSkeleton,
-  MailThreadListSkeleton,
-} from "@/features/mail/MailSkeletons";
+  SkeletonCard,
+  SkeletonHeader,
+  SkeletonRows,
+} from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
+import { MailAnalyticsSkeleton } from "@/features/mail/analytics/MailAnalyticsSkeleton";
+import { MailThreadListSkeleton } from "@/features/mail/MailSkeletons";
 import { type MailView, parseMailView } from "@/features/mail/mail-view";
+import {
+  MailOverviewHeader,
+  OVERVIEW_SLOTS,
+} from "@/features/mail/overview/overview-layout";
+import { MailResourceSkeleton } from "@/features/mail/resources/MailResourceSkeleton";
+import {
+  type MailResourceView,
+  mailResourceView,
+} from "@/features/mail/resources/mail-resource-views";
 
 const FOLDER_VIEWS = new Set<MailView>([
   "inbox",
@@ -25,13 +36,44 @@ export function MailViewSkeleton({ view }: { view: MailView }) {
   if (FOLDER_VIEWS.has(view)) return <MailThreadListSkeleton view={view} />;
   if (view === "overview") {
     return (
-      <div className="w-full min-w-0 max-w-full space-y-6 px-4 py-6 sm:space-y-8 sm:px-5 sm:py-8 lg:px-8">
-        <MailOverviewHero />
-        <MailOverviewDataSkeleton />
-      </div>
+      <PageBody>
+        <MailOverviewHeader />
+        <div aria-busy className="grid gap-3 lg:grid-cols-12">
+          <SkeletonCard className={`h-[268px] ${OVERVIEW_SLOTS.volume}`} />
+          <SkeletonCard className={`h-[268px] ${OVERVIEW_SLOTS.hero}`} />
+          <SkeletonCard className={`min-h-[360px] ${OVERVIEW_SLOTS.recent}`}>
+            <SkeletonRows rows={5} />
+          </SkeletonCard>
+          <SkeletonCard className={`min-h-[360px] ${OVERVIEW_SLOTS.health}`} />
+          <SkeletonCard className={`min-h-[360px] ${OVERVIEW_SLOTS.setup}`}>
+            <SkeletonRows rows={3} />
+          </SkeletonCard>
+        </div>
+      </PageBody>
     );
   }
-  return <MailResourceSkeleton />;
+  return (
+    <PageBody>
+      <SkeletonHeader
+        action={
+          view === "logs" || view === "analytics" || view === "settings"
+            ? undefined
+            : "w-36"
+        }
+      />
+      {view === "analytics" ? (
+        <MailAnalyticsSkeleton />
+      ) : view === "settings" ? (
+        <SkeletonCard>
+          <SkeletonRows rows={3} />
+        </SkeletonCard>
+      ) : (
+        <MailResourceSkeleton
+          layout={mailResourceView(view as MailResourceView).layout}
+        />
+      )}
+    </PageBody>
+  );
 }
 
 /**
@@ -48,6 +90,9 @@ export function MailPageSkeleton({ view }: { view?: MailView }) {
 }
 
 function ViewFromUrl() {
-  const view = parseMailView(useSearchParams().get("view") ?? undefined);
-  return <MailViewSkeleton view={view} />;
+  return (
+    <MailViewSkeleton
+      view={parseMailView(useSearchParams().get("view") ?? undefined)}
+    />
+  );
 }

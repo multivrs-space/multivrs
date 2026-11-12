@@ -12,6 +12,8 @@ export interface OutboundMailMessage {
     filename: string;
     contentType: string;
     content: Buffer;
+    inline?: boolean;
+    contentId?: string;
   }>;
 }
 

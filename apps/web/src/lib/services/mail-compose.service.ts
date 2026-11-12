@@ -2,13 +2,16 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { ConflictError } from "@multivrs/error-utils";
 import { isAuthenticatedSendingDomain } from "@/lib/mail/mail-domain-dns";
+import { publicMessageId } from "@/lib/mail/public-message-id";
 import { sanitizeOutboundMailHtml } from "@/lib/mail/sanitize-html";
 import { prisma } from "@/lib/prisma";
 import type { ComposeMailInput } from "@/lib/schemas/mail-message.schemas";
+import { accessibleMailbox } from "@/lib/services/mail-access.service";
 import {
-  accessibleMailbox,
-  accessibleMailMessage,
-} from "@/lib/services/mail-access.service";
+  type ForwardAttachment,
+  forwardParts,
+} from "@/lib/services/mail-forward.service";
+import { repliedMessage } from "@/lib/services/mail-reply.service";
 import { enqueueMailWebhooks } from "@/lib/services/mail-webhook-delivery.service";
 
 function normalizeSubject(subject: string): string {
@@ -42,15 +45,30 @@ export async function composeMail(
     );
   }
   const reply = input.replyToMessageId
-    ? asAccount
-      ? await prisma.mailMessage.findFirst({
-          where: { id: input.replyToMessageId, userId },
-          select: { messageId: true, references: true, threadId: true },
-        })
-      : await accessibleMailMessage(actorId, input.replyToMessageId, "read")
+    ? await repliedMessage(actorId, userId, input.replyToMessageId, asAccount)
     : null;
+  // The id the other side saw, so their mail app threads the reply.
+  const repliedTo = reply ? publicMessageId(reply) : undefined;
+  const forward = input.forwardMessageId
+    ? await forwardParts(
+        actorId,
+        userId,
+        input.forwardMessageId,
+        { html: input.html, text: input.text },
+        asAccount,
+      )
+    : null;
+  const attachments: ForwardAttachment[] = [
+    ...(forward?.attachments ?? []),
+    ...input.attachments.map((file) => ({
+      ...file,
+      inline: false,
+      contentId: null,
+    })),
+  ];
   const scheduledAt = input.scheduledAt ? new Date(input.scheduledAt) : null;
-  const safeHtml = sanitizeOutboundMailHtml(input.html);
+  const safeHtml = sanitizeOutboundMailHtml(forward?.html ?? input.html);
+  const text = forward?.text ?? input.text;
   const addressParts = mailbox.address.split("@");
   const messageIdDomain =
     addressParts[addressParts.length - 1] ?? "multivrs.space";
@@ -71,8 +89,8 @@ export async function composeMail(
         mailboxId: mailbox.id,
         threadId: thread.id,
         messageId: `<${randomUUID()}@${messageIdDomain}>`,
-        inReplyTo: reply?.messageId,
-        references: reply ? [...reply.references, reply.messageId] : [],
+        inReplyTo: repliedTo,
+        references: repliedTo && reply ? [...reply.references, repliedTo] : [],
         direction: "outbound",
         status: scheduledAt ? "scheduled" : "queued",
         folder: scheduledAt ? "scheduled" : "sent",
@@ -82,22 +100,24 @@ export async function composeMail(
         ccAddresses: input.cc,
         bccAddresses: input.bcc,
         subject: input.subject,
-        textBody: input.text,
+        textBody: text,
         htmlBody: safeHtml,
         sanitizedHtml: safeHtml,
         replyTo: input.replyTo,
         scheduledAt,
       },
     });
-    if (input.attachments.length) {
+    if (attachments.length) {
       await tx.mailAttachment.createMany({
-        data: input.attachments.map((attachment) => ({
+        data: attachments.map((attachment) => ({
           messageId: message.id,
           filename: attachment.filename,
           contentType: attachment.contentType,
           size: attachment.size,
           storageKey: `database:${message.id}:${attachment.filename}`,
           contentBase64: attachment.contentBase64,
+          inline: attachment.inline,
+          contentId: attachment.contentId,
         })),
       });
       await tx.mailMessage.update({

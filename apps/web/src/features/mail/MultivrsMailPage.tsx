@@ -1,9 +1,8 @@
 "use client";
 
-import { type ComponentProps, Suspense, useState } from "react";
+import { type ComponentProps, Suspense } from "react";
 import { MailboxView } from "@/features/mail/MailboxView";
 import { MailCompose } from "@/features/mail/MailCompose";
-import { MailMobileMenu } from "@/features/mail/MailMobileMenu";
 import { MailOverview } from "@/features/mail/MailOverview";
 import { MailResourcePage } from "@/features/mail/MailResourcePage";
 import { useMailContext, useMailData } from "@/features/mail/mail-context";
@@ -23,7 +22,6 @@ export function MultivrsMailPage() {
   const {
     projectId,
     view,
-    setView,
     composeOpen,
     setComposeOpen,
     reply,
@@ -33,12 +31,10 @@ export function MultivrsMailPage() {
     query,
   } = useMailContext();
 
-  const [menuOpen, setMenuOpen] = useState(false);
-
   let content = (
     <MailResourcePage projectId={projectId} query={query} view={view} />
   );
-  if (view === "overview") content = <MailOverview onView={setView} />;
+  if (view === "overview") content = <MailOverview />;
   if (mailboxViews.has(view))
     content = (
       <MailboxView
@@ -70,12 +66,6 @@ export function MultivrsMailPage() {
           forward={forward}
         />
       </Suspense>
-      <MailMobileMenu
-        onOpenChange={setMenuOpen}
-        onView={setView}
-        open={menuOpen}
-        view={view}
-      />
     </>
   );
 }

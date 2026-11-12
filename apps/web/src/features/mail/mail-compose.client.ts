@@ -55,6 +55,7 @@ export function mailComposePayload(form: FormData, reply?: MailMessageDetail) {
     text,
     html: html || undefined,
     replyToMessageId: reply?.id,
+    forwardMessageId: form.get("forwardMessageId") || undefined,
     scheduledAt: scheduledAt
       ? new Date(String(scheduledAt)).toISOString()
       : undefined,
@@ -79,7 +80,8 @@ export async function submitMailCompose(
     ) {
       throw new Error("Attachments cannot exceed 10 MB in total");
     }
-    if (!payload.text)
+    // A forward carries the original, so a note is optional.
+    if (!payload.text && !payload.forwardMessageId)
       return { ok: false as const, message: "Write a message before sending" };
     const response = await fetch("/api/mail/messages", {
       method: "POST",

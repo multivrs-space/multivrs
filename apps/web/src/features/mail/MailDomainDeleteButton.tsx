@@ -1,10 +1,10 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog, responseError } from "@/components/ConfirmDialog";
+import { LiveTrash } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -44,18 +44,19 @@ export function MailDomainDeleteButton({
   return (
     <>
       <Button
+        data-icon-trigger
         disabled={deleting}
         onClick={() => setConfirming(true)}
-        variant="outline"
-        className="text-red-400 hover:text-red-400"
+        size="sm"
+        variant="danger"
       >
-        <Trash2 className="size-4" />
+        <LiveTrash strokeWidth={1.75} />
         Remove
       </Button>
       <ConfirmDialog
         busy={deleting}
         confirmLabel="Remove"
-        description="This removes it from Multivrs and AWS. You can add it again to get new DKIM records, then replace the old ones at your DNS provider."
+        description="This removes it from Multivrs. You can add it again to get new DKIM records, then replace the old ones at your DNS provider."
         onConfirm={() => void remove()}
         onOpenChange={setConfirming}
         open={confirming}

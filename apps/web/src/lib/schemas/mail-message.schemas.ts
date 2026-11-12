@@ -15,6 +15,8 @@ export const composeMailBaseSchema = z.object({
   html: z.string().max(2_000_000).optional(),
   replyTo: mailAddressSchema.optional(),
   replyToMessageId: z.uuid().optional(),
+  /** Forwards this message as it was, under the body above. */
+  forwardMessageId: z.uuid().optional(),
   scheduledAt: z.iso.datetime().optional(),
   attachments: z
     .array(
@@ -34,7 +36,7 @@ export const composeMailBaseSchema = z.object({
 });
 
 export const composeMailSchema = composeMailBaseSchema
-  .refine((value) => value.text || value.html, {
+  .refine((value) => value.text || value.html || value.forwardMessageId, {
     message: "An email body is required",
   })
   .refine(

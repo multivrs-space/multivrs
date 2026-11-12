@@ -1,9 +1,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  emptyTrashRequest,
+  updateMessage,
+} from "@/features/mail/list/mailbox-actions";
+import { useMailShortcuts } from "@/features/mail/list/useMailShortcuts";
 import { MailReader } from "@/features/mail/MailReader";
 import { MailThreadListSkeleton } from "@/features/mail/MailSkeletons";
 import { MailThreadList } from "@/features/mail/MailThreadList";
@@ -109,69 +114,34 @@ export function MailboxView({
   );
 
   const handleToggleStar = useCallback(
-    async (threadId: string) => {
+    async (threadId: string, starred: boolean) => {
       const latestId = threads.find(
         (item) => item.id === threadId,
       )?.latestMessageId;
-      if (latestId) await action(latestId, "star");
+      if (latestId) await action(latestId, starred ? "unstar" : "star");
     },
     [action, threads],
   );
 
-  // Keyboard shortcuts (J: next, K: prev, E: archive, R: reply). An effect
-  // event reads the latest state without re-subscribing every render.
-  const handleKeyDown = useEffectEvent((e: KeyboardEvent) => {
-    const activeTag = (document.activeElement?.tagName || "").toLowerCase();
-    if (
-      activeTag === "input" ||
-      activeTag === "textarea" ||
-      (document.activeElement as HTMLElement)?.isContentEditable
-    ) {
-      return;
-    }
-
-    if (e.key === "j" || e.key === "J") {
-      e.preventDefault();
-      handleNavigate(1);
-    } else if (e.key === "k" || e.key === "K") {
-      e.preventDefault();
-      handleNavigate(-1);
-    } else if (e.key === "r" || e.key === "R") {
-      if (selected && latestLoaded) {
-        e.preventDefault();
-        onReply(latestLoaded);
-      }
-    } else if (e.key === "e" || e.key === "E") {
-      if (selected?.latestMessageId) {
-        e.preventDefault();
-        void action(selected.latestMessageId, "archive");
-      }
-    }
+  useMailShortcuts({
+    next: () => handleNavigate(1),
+    previous: () => handleNavigate(-1),
+    reply: selected && latestLoaded ? () => onReply(latestLoaded) : undefined,
+    archive: selected?.latestMessageId
+      ? () => void action(selected.latestMessageId as string, "archive")
+      : undefined,
   });
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => handleKeyDown(e);
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, []);
 
   async function emptyTrash() {
     setConfirmEmpty(false);
-    const query = new URLSearchParams(
+    const ok = await emptyTrashRequest(
       projectId
         ? { projectId }
         : params.username
           ? { account: params.username }
           : {},
-    ).toString();
-    const suffix = query ? `?${query}` : "";
-    const response = await fetch(`/api/mail/messages${suffix}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      toast.error("Trash could not be emptied");
-      return;
-    }
+    );
+    if (!ok) return void toast.error("Trash could not be emptied");
     toast.success("Trash emptied");
     refresh();
   }
@@ -179,13 +149,7 @@ export function MailboxView({
   if (list.loading) return <MailThreadListSkeleton view={view} />;
 
   return (
-    <div
-      className="flex h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] min-h-0 w-full overflow-hidden bg-background dark:bg-[#07080a]"
-      style={{
-        height: "calc(100vh - 3.5rem)",
-        maxHeight: "calc(100vh - 3.5rem)",
-      }}
-    >
+    <div className="flex h-(--dash-content-h) max-h-(--dash-content-h) min-h-0 w-full overflow-hidden bg-ink">
       <MailThreadList
         className={selectedId ? "hidden md:flex" : "flex"}
         hasMore={list.hasMore}
@@ -204,11 +168,7 @@ export function MailboxView({
         view={view}
       />
       <MailReader
-        className={
-          selectedId
-            ? "flex h-full min-h-0 min-w-0 flex-1 flex-col bg-background dark:bg-[#07080a]"
-            : "hidden md:flex h-full min-h-0 min-w-0 flex-1 flex-col bg-background dark:bg-[#07080a]"
-        }
+        className={selectedId ? "flex" : "hidden md:flex"}
         currentIndex={currentIndex}
         loading={Boolean(selected) && conversation.loading}
         messages={messages}
@@ -231,13 +191,4 @@ export function MailboxView({
       />
     </div>
   );
-}
-
-async function updateMessage(messageId: string, mailAction: string) {
-  const response = await fetch(`/api/mail/messages/${messageId}`, {
-    method: "PATCH",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ action: mailAction }),
-  });
-  if (!response.ok) throw new Error("Mail action failed");
 }
