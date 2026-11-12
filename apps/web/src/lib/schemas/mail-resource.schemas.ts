@@ -39,6 +39,26 @@ export const createMailContactSchema = z.object({
   audienceIds: z.array(z.uuid()).max(50).default([]),
 });
 
+/** Most contacts one import request carries; the dashboard sends batches. */
+export const CONTACT_IMPORT_BATCH = 1_000;
+
+/**
+ * A batch of contacts from uploaded files. The sender confirms these people
+ * agreed to hear from them; anyone who unsubscribed stays unsubscribed.
+ */
+export const importMailContactsSchema = z.object({
+  account,
+  contacts: z
+    .array(createMailContactSchema.omit({ account: true, audienceIds: true }))
+    .min(1)
+    .max(CONTACT_IMPORT_BATCH),
+  audienceId: z.uuid().optional(),
+  tags: z.array(z.string().trim().min(1).max(64)).max(30).default([]),
+  consent: z.literal(true, {
+    error: "Confirm these contacts agreed to receive email from you",
+  }),
+});
+
 export const createMailAudienceSchema = z.object({
   account,
   name: z.string().trim().min(1).max(160),

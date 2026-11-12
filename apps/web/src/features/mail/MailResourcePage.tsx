@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
 import { PageBody } from "@/features/dashboard/components/PageBody";
 import { MailAnalyticsPage } from "@/features/mail/analytics/MailAnalyticsPage";
+import { ContactImportButton } from "@/features/mail/contacts/ContactImportButton";
 import type { MailView } from "@/features/mail/mail-navigation";
 import {
   createMailLabel,
@@ -64,13 +65,22 @@ function ResourceScreen({
         setCreating(true);
       }
     : undefined;
-  const createButton =
+  const newButton =
     create && isCreateMailView(view) ? (
       <Button data-icon-trigger onClick={create} size="sm" variant="hero">
         <LivePlus strokeWidth={2} />
         New {createMailLabel(view).toLowerCase()}
       </Button>
     ) : null;
+  const createButton =
+    view === "contacts" ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <ContactImportButton />
+        {newButton}
+      </div>
+    ) : (
+      newButton
+    );
   return (
     <PageBody>
       <DashboardPageHeader
