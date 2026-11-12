@@ -135,6 +135,15 @@ const item = (
 ): MailResourceItem => ({ id, name, detail, status, createdAt: ago(hours) });
 
 export const LAB_RESOURCES: MailResources = {
+  audience: {
+    total: 1248,
+    subscribed: 1203,
+    unsubscribed: 45,
+    properties: [
+      { key: "company", contacts: 980, example: "Acme" },
+      { key: "plan", contacts: 612, example: "pro" },
+    ],
+  },
   domains: [
     item("d1", "studio.dev", "Sends and receives", "verified"),
     item("d2", "news.studio.dev", "Sends only", "pending", 3),

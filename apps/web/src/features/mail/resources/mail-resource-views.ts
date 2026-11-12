@@ -35,15 +35,24 @@ export interface MailResourceViewConfig {
   empty: string;
 }
 
+const TAB_TITLES = { contacts: "Contacts", audiences: "Segments" } as const;
+
 export function mailResourceView(
   view: MailResourceView,
 ): MailResourceViewConfig {
   const nav = MAIL_NAVIGATION.find(
-    (item) => "view" in item && item.view === view,
+    (item) =>
+      "view" in item &&
+      (item.view === view ||
+        ("also" in item && (item.also as readonly string[]).includes(view))),
   );
   const fallback = { title: view, icon: MAIL_NAVIGATION[0].icon };
   return {
     ...(nav && "view" in nav ? { title: nav.label, icon: nav.icon } : fallback),
+    // Tabs of the Audience page are named for what they list.
+    ...(view in TAB_TITLES
+      ? { title: TAB_TITLES[view as keyof typeof TAB_TITLES] }
+      : {}),
     ...MAIL_RESOURCE_COPY[view],
   };
 }

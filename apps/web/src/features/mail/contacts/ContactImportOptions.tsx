@@ -29,13 +29,13 @@ export function ContactImportOptions({
     <>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="space-y-1.5">
-          <span className={LABEL}>Add to audience (optional)</span>
+          <span className={LABEL}>Add to segment (optional)</span>
           <select
             className={MAIL_SELECT}
             onChange={(event) => set({ audienceId: event.target.value })}
             value={choices.audienceId}
           >
-            <option value="">No audience</option>
+            <option value="">No segment</option>
             {audiences.map((audience) => (
               <option key={audience.id} value={audience.id}>
                 {audience.name}

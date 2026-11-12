@@ -93,10 +93,10 @@ export function AudienceChoice({
   return (
     <label className="block space-y-1.5">
       <span className={cn(LABEL, "block")}>
-        Audience{optional ? " (optional)" : ""}
+        Segment{optional ? " (optional)" : ""}
       </span>
       <select className={MAIL_SELECT} name="audienceId" required={!optional}>
-        <option value="">{optional ? "No audience" : "Select audience"}</option>
+        <option value="">{optional ? "No segment" : "Select segment"}</option>
         {resources.audiences.map((item) => (
           <option key={item.id} value={item.id}>
             {item.name}

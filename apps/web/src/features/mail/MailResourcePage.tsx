@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
 import { PageBody } from "@/features/dashboard/components/PageBody";
 import { MailAnalyticsPage } from "@/features/mail/analytics/MailAnalyticsPage";
+import { AudienceStats } from "@/features/mail/audience/AudienceStats";
+import {
+  AUDIENCE_VIEWS,
+  AudienceTabs,
+} from "@/features/mail/audience/AudienceTabs";
+import { AUDIENCE_DESCRIPTION } from "@/features/mail/audience/audience-copy";
+import { PropertiesScreen } from "@/features/mail/audience/PropertiesScreen";
 import { ContactImportButton } from "@/features/mail/contacts/ContactImportButton";
 import type { MailView } from "@/features/mail/mail-navigation";
 import {
@@ -35,6 +42,7 @@ export function MailResourcePage({
 }) {
   if (view === "settings") return <MailSettingsPage />;
   if (view === "analytics") return <MailAnalyticsPage />;
+  if (view === "properties") return <PropertiesScreen />;
   const config = mailResourceView(view as MailResourceView);
   return (
     <ResourceScreen
@@ -57,6 +65,7 @@ function ResourceScreen({
   query: string;
   view: MailResourceView;
 }) {
+  const audience = AUDIENCE_VIEWS.includes(view);
   const [creating, setCreating] = useState(false);
   const [session, setSession] = useState(0);
   const create = isCreateMailView(view)
@@ -85,14 +94,21 @@ function ResourceScreen({
     <PageBody>
       <DashboardPageHeader
         actions={createButton}
-        description={config.description}
+        description={audience ? AUDIENCE_DESCRIPTION : config.description}
         eyebrow="Emails · Communicate"
-        title={config.title}
-      />
+        title={audience ? "Audience" : config.title}
+      >
+        {audience ? (
+          <div className="mt-4">
+            <AudienceTabs view={view} />
+          </div>
+        ) : null}
+      </DashboardPageHeader>
       {view === "logs" ? (
         <MailLogList query={query} />
       ) : (
         <Suspense fallback={<MailResourceSkeleton layout={config.layout} />}>
+          {view === "contacts" ? <AudienceStats /> : null}
           <ResourceData emptyAction={createButton} query={query} view={view} />
           {creating && isCreateMailView(view) ? (
             <CreateFlow

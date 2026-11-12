@@ -5,6 +5,11 @@ import {
   contactColumns,
   parseCsv,
 } from "@/features/mail/contacts/contact-csv";
+import {
+  type ExtraColumn,
+  extraColumns,
+  propertiesFrom,
+} from "@/features/mail/contacts/contact-properties";
 
 /** The same check the server runs, so a batch is never rejected for one row. */
 const emailSchema = z.email();
@@ -14,6 +19,8 @@ export interface ImportContact {
   firstName?: string;
   lastName?: string;
   tags: string[];
+  /** Values from the extra columns the person chose to keep. */
+  properties?: Record<string, string>;
 }
 
 export interface CsvFileSummary {
@@ -32,6 +39,8 @@ export interface MergedContacts {
   /** Rows whose address was already in an earlier row or file. */
   duplicates: number;
   invalid: number;
+  /** Other columns across the files that could be kept as properties. */
+  columns: { key: string; header: string }[];
 }
 
 const clip = (value: string | undefined, length: number) =>
@@ -44,15 +53,20 @@ function isEmail(value: string) {
 /** A header row, or for files without one, the column holding addresses. */
 function layout(
   rows: string[][],
-): { columns: ContactColumns; start: number } | null {
+): { columns: ContactColumns; extras: ExtraColumn[]; start: number } | null {
   const header = rows[0] ?? [];
   const named = contactColumns(header);
-  if (named) return { columns: named, start: 1 };
+  if (named)
+    return { columns: named, extras: extraColumns(header, named), start: 1 };
   const email = header.findIndex((value) => isEmail(addressIn(value)));
-  return email >= 0 ? { columns: { email }, start: 0 } : null;
+  return email >= 0 ? { columns: { email }, extras: [], start: 0 } : null;
 }
 
-function contactFrom(row: string[], columns: ContactColumns): ImportContact {
+function contactFrom(
+  row: string[],
+  columns: ContactColumns,
+  kept: ExtraColumn[],
+): ImportContact {
   const cell = (index?: number) =>
     index === undefined ? "" : (row[index] ?? "").trim();
   const [first, ...rest] = cell(columns.name).split(/\s+/);
@@ -64,6 +78,7 @@ function contactFrom(row: string[], columns: ContactColumns): ImportContact {
       .split(/[,;|]/)
       .map((tag) => tag.trim().slice(0, 64))
       .filter(Boolean),
+    properties: propertiesFrom(row, kept),
   };
 }
 
@@ -74,13 +89,19 @@ function merged(into: ImportContact, next: ImportContact): ImportContact {
     firstName: into.firstName ?? next.firstName,
     lastName: into.lastName ?? next.lastName,
     tags: [...new Set([...into.tags, ...next.tags])].slice(0, 30),
+    properties:
+      into.properties || next.properties
+        ? { ...next.properties, ...into.properties }
+        : undefined,
   };
 }
 
 /** One list from any number of exports, one contact per address. */
 export function mergeContactFiles(
   files: { key?: string; name: string; text: string }[],
+  keep: readonly string[] = [],
 ): MergedContacts {
+  const columns = new Map<string, string>();
   const byEmail = new Map<string, ImportContact>();
   const summaries: CsvFileSummary[] = [];
   let duplicates = 0;
@@ -98,8 +119,11 @@ export function mergeContactFiles(
     };
     summaries.push(summary);
     if (!found) continue;
+    for (const extra of found.extras)
+      if (!columns.has(extra.key)) columns.set(extra.key, extra.header);
+    const kept = found.extras.filter((extra) => keep.includes(extra.key));
     for (const row of rows.slice(found.start)) {
-      const contact = contactFrom(row, found.columns);
+      const contact = contactFrom(row, found.columns, kept);
       if (!isEmail(contact.email)) {
         summary.invalid += 1;
         invalid += 1;
@@ -116,5 +140,6 @@ export function mergeContactFiles(
     files: summaries,
     duplicates,
     invalid,
+    columns: [...columns].map(([key, header]) => ({ key, header })),
   };
 }

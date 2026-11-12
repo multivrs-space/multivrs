@@ -27,7 +27,7 @@ const labels: Record<CreateMailView, string> = {
   domains: "Domain",
   mailboxes: "Mailbox",
   contacts: "Contact",
-  audiences: "Audience",
+  audiences: "Segment",
   templates: "Template",
   broadcasts: "Broadcast",
   automations: "Automation",
@@ -57,10 +57,7 @@ function project(value?: string) {
   return value ? { projectId: value } : {};
 }
 
-/**
- * The JSON body for creating `view`. `account` is the username of the
- * account being viewed, so a team member's creates land in that account.
- */
+/** The JSON body for creating `view`, in the account being viewed (`account`). */
 export function resourcePayload(
   view: CreateMailView,
   form: FormData,
@@ -121,8 +118,9 @@ function fields(
       subject: text(form, "subject"),
       body: text(form, "body"),
       fromAddress: text(form, "fromAddress"),
-      audienceId: text(form, "audienceId"),
+      audienceId: optional(form, "audienceId"),
       scheduledAt: isoDate(form, "scheduledAt"),
+      draft: form.get("intent") === "draft" || undefined,
     };
   if (view === "automations")
     return {

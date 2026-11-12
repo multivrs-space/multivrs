@@ -93,7 +93,8 @@ export async function composeMail(
         references: repliedTo && reply ? [...reply.references, repliedTo] : [],
         direction: "outbound",
         status: scheduledAt ? "scheduled" : "queued",
-        folder: scheduledAt ? "scheduled" : "sent",
+        // A broadcast's copies stay out of Sent: one campaign isn't hundreds of conversations.
+        folder: scheduledAt ? "scheduled" : broadcastId ? "broadcast" : "sent",
         fromName: input.fromName || mailbox.name,
         fromAddress: mailbox.address,
         toAddresses: input.to,

@@ -14,6 +14,7 @@
  */
 export const RESERVED_USERNAMES = new Set([
   "home",
+  "unsubscribe",
   "about",
   "pricing",
   "blog",

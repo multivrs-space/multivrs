@@ -126,10 +126,11 @@ export async function sendEmail(
     "mime-version",
   ]);
 
-  const headerList: MessageHeader[] | undefined = options.headers
-    ? Object.entries(options.headers)
-        .filter(([name]) => !FORBIDDEN_SES_HEADERS.has(name.toLowerCase()))
-        .map(([Name, Value]) => ({ Name, Value }))
+  const allowedHeaders = Object.entries(options.headers ?? {})
+    .filter(([name]) => !FORBIDDEN_SES_HEADERS.has(name.toLowerCase()))
+    .map(([Name, Value]) => ({ Name, Value }));
+  const headerList: MessageHeader[] | undefined = allowedHeaders.length
+    ? allowedHeaders
     : undefined;
 
   const input: SendEmailCommandInput = {

@@ -146,10 +146,18 @@ describe("mail resource views", () => {
   ];
 
   test("every resource view has a title and icon from the mail navigation", () => {
+    // Contacts and segments are tabs of the Audience item, named for what they list.
+    const tabTitles: Record<string, string> = { contacts: "Contacts", audiences: "Segments" };
     for (const view of views) {
       const config = mailResourceView(view);
-      const nav = MAIL_NAVIGATION.find((item) => "view" in item && item.view === view);
-      expect(nav && "label" in nav ? nav.label : "").toBe(config.title);
+      const nav = MAIL_NAVIGATION.find(
+        (item) =>
+          "view" in item &&
+          (item.view === view ||
+            ("also" in item && (item.also as readonly string[]).includes(view))),
+      );
+      expect(nav).toBeDefined();
+      expect(config.title).toBe(tabTitles[view] ?? (nav && "label" in nav ? nav.label : ""));
       expect(config.icon.parts.length).toBeGreaterThan(0);
     }
   });
