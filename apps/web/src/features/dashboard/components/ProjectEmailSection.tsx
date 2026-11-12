@@ -4,6 +4,7 @@ import { MailProvider } from "@/features/mail/mail-context";
 import type { MailView } from "@/features/mail/mail-navigation";
 import { getScopedProject } from "@/lib/services/dashboard-scope.service";
 import { mailAccount } from "@/lib/services/mail-access.service";
+import { mailActivity } from "@/lib/services/mail-activity.service";
 import {
   mailDashboard,
   mailResources,
@@ -35,6 +36,7 @@ export async function ProjectEmailSection({
     );
     return (
       <MailProvider
+        activity={mailActivity(ownerId, userId)}
         key={`all:${initialView}`}
         resources={mailResources(ownerId)}
         shell={mailDashboard(ownerId, userId)}
@@ -53,6 +55,7 @@ export async function ProjectEmailSection({
   );
   return (
     <MailProvider
+      activity={mailActivity(ownerId, userId, project.id)}
       key={`${project.id}:${initialView}`}
       resources={mailResources(ownerId, project.id)}
       shell={mailDashboard(ownerId, userId, project.id)}

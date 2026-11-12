@@ -1,43 +1,71 @@
-import { Globe2, Hammer, ScanSearch } from "lucide-react";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import {
+  type AnimatedIcon,
+  LiveGitBranch,
+  LiveGlobe,
+  LiveRocket,
+  LiveSearchCode,
+  LiveSquareTerminal,
+} from "@/components/icons/animated";
 
-const STEPS = [
+const STEPS: { icon: AnimatedIcon; title: string; body: string }[] = [
   {
-    icon: ScanSearch,
-    title: "Detect",
-    body: "We read the repository and pick the framework, package manager and build command.",
+    icon: LiveSearchCode,
+    title: "Read",
+    body: "Multivrs looks at the repository and picks the framework, package manager and build command.",
   },
   {
-    icon: Hammer,
+    icon: LiveSquareTerminal,
     title: "Build",
-    body: "Each deployment builds in its own isolated environment. Logs stream as it runs.",
+    body: "The build runs on its own machine, and every line shows up as it happens.",
   },
   {
-    icon: Globe2,
+    icon: LiveGlobe,
     title: "Go live",
-    body: "Your project gets a URL on multivrs.app, and every push to the branch redeploys it.",
+    body: "The project gets its own address. You can add a domain whenever you like.",
   },
-] as const;
+  {
+    icon: LiveGitBranch,
+    title: "Keep shipping",
+    body: "Pushes to the default branch go to production; other branches and pull requests get previews.",
+  },
+];
 
+/** What happens after Import, as a short vertical timeline. */
 export function DeployStepsCard() {
   return (
-    <section className="rounded-xl border border-(--hairline) p-4">
-      <h2 className="text-sm font-semibold">What happens next</h2>
-      <ol className="mt-4 space-y-4">
+    <DashCard aria-label="How it ships">
+      <DashCardHeader icon={LiveRocket} title="How it ships" />
+      <ol className="relative p-5 pt-4">
         {STEPS.map((step, index) => (
-          <li key={step.title} className="flex gap-3">
-            <span className="relative grid size-7 shrink-0 place-items-center rounded-md border border-(--hairline) bg-foreground/[0.03]">
-              <step.icon className="size-3.5 text-primary" />
-              <span className="sr-only">Step {index + 1}</span>
+          <li
+            className="relative flex gap-3 pb-4 last:pb-0"
+            data-icon-trigger
+            key={step.title}
+          >
+            {index < STEPS.length - 1 ? (
+              <span
+                aria-hidden="true"
+                className="absolute top-8 bottom-0 left-[13.5px] w-px bg-hairline"
+              />
+            ) : null}
+            <span className="surface-raised relative grid size-7 shrink-0 place-items-center rounded-[8px] text-primary">
+              <step.icon className="size-3.5" strokeWidth={1.9} />
             </span>
-            <div>
-              <p className="text-[13px] font-medium">{step.title}</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+            <div className="min-w-0 pt-0.5">
+              <p className="text-[13px] font-semibold tracking-[-0.01em] text-foreground">
+                <span className="mr-1.5 font-geist-mono text-[11px] font-normal text-muted-foreground">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                {step.title}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {step.body}
               </p>
             </div>
           </li>
         ))}
       </ol>
-    </section>
+    </DashCard>
   );
 }

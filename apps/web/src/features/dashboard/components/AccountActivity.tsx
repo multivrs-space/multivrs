@@ -1,326 +1,130 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
-import { Calendar, Filter, User } from "lucide-react";
+import { useState } from "react";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { SegmentedControl } from "@/components/dashboard/SegmentedControl";
+import { LiveHistory } from "@/components/icons/animated";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  type ActivityCategory,
+  type ActivityWindow,
+  activityCategory,
+  byMonth,
+  describeActivity,
+  inWindow,
+} from "@/features/dashboard/components/account/activity/activity-events";
+import {
+  ACTIVITY_KINDS as CATEGORIES,
+  ACTIVITY_ICONS as ICONS,
+  ACTIVITY_WINDOWS as WINDOWS,
+} from "@/features/dashboard/components/account/activity/activity-filters";
+import {
+  SettingsCard,
+  SettingsCardBody,
+} from "@/features/dashboard/components/settings/SettingsCard";
+import { relativeTime } from "@/features/dashboard/lib/relative-time";
 import type { DashboardAuditEvent } from "@/lib/services/audit-event.service";
 
-interface AccountActivityProps {
+/** Everything done on the account, newest first, as a timeline by month. */
+export function AccountActivity({
+  events = [],
+}: {
   events: DashboardAuditEvent[];
   userImage?: string | null;
   userName?: string | null;
-}
-
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffHours = Math.floor(diffSec / 3600);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffDays === 0) {
-    if (diffHours === 0) {
-      const diffMins = Math.floor(diffSec / 60);
-      return diffMins <= 1 ? "just now" : `${diffMins}m`;
-    }
-    return `${diffHours}h`;
-  }
-  if (diffDays < 7) {
-    return `${diffDays}d`;
-  }
-
-  const isSameYear = date.getFullYear() === now.getFullYear();
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    ...(isSameYear ? {} : { year: "numeric" }),
-  });
-}
-
-function getMonthKey(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-}
-
-function renderEventSentence(event: DashboardAuditEvent): React.ReactNode {
-  const metadata = (event.metadata as Record<string, unknown>) || {};
-  const action = event.action;
-
-  switch (action) {
-    case "auth.login":
-      return <>You logged in to Multivrs.</>;
-    case "auth.logout":
-      return <>You logged out of Multivrs.</>;
-    case "oauth.connected": {
-      const provider = String(metadata.providerId || "GitHub");
-      const capitalized = provider.charAt(0).toUpperCase() + provider.slice(1);
-      return (
-        <>
-          You connected the{" "}
-          <span className="font-medium text-foreground">{capitalized}</span> account.
-        </>
-      );
-    }
-    case "oauth.unlinked": {
-      const provider = String(metadata.providerId || "GitHub");
-      const capitalized = provider.charAt(0).toUpperCase() + provider.slice(1);
-      return (
-        <>
-          Your{" "}
-          <span className="font-medium text-foreground">{capitalized}</span> account was unlinked.
-        </>
-      );
-    }
-    case "email.verified":
-      return (
-        <>
-          You verified email{" "}
-          <span className="font-medium text-foreground">
-            {String(metadata.email || "")}
-          </span>
-          .
-        </>
-      );
-    case "user.created":
-      return <>You created your Multivrs account.</>;
-    case "user.2fa_enabled":
-      return <>You enabled two-factor authentication in your account.</>;
-    case "user.2fa_disabled":
-      return <>Two-factor authentication was disabled for you.</>;
-    case "api_token.create":
-      return (
-        <>
-          You created a Personal Access Token{" "}
-          <span className="font-medium text-foreground">
-            &ldquo;{String(metadata.name || "Token")}&rdquo;
-          </span>
-          .
-        </>
-      );
-    case "api_token.revoke":
-      return <>You revoked a Personal Access Token.</>;
-    case "account.update_profile":
-      return <>You updated your account profile.</>;
-    case "project.create":
-      return (
-        <>
-          You created project{" "}
-          <span className="font-medium text-foreground">
-            {event.projectName || "project"}
-          </span>
-          .
-        </>
-      );
-    case "project.delete":
-      return <>You deleted a project.</>;
-    case "deployment.create":
-      return (
-        <>
-          You created a deployment in{" "}
-          <span className="font-medium text-foreground">
-            {event.projectName || "project"}
-          </span>
-          .
-        </>
-      );
-    default: {
-      const readable = action
-        .split(".")
-        .join(" ")
-        .replace(/_/g, " ");
-      return (
-        <>
-          You performed <span className="text-foreground">{readable}</span>
-          {event.projectName ? ` in ${event.projectName}` : ""}.
-        </>
-      );
-    }
-  }
-}
-
-export function AccountActivity({
-  events = [],
-  userImage,
-  userName,
-}: AccountActivityProps) {
-  const [timeFilter, setTimeFilter] = useState<string>("all");
-  const [eventCategoryFilter, setEventCategoryFilter] = useState<string>("all");
-
-  const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
-      // Time filter
-      if (timeFilter !== "all") {
-        const eventDate = new Date(event.createdAt).getTime();
-        const now = Date.now();
-        const diffMs = now - eventDate;
-        if (timeFilter === "24h" && diffMs > 24 * 3600 * 1000) return false;
-        if (timeFilter === "7d" && diffMs > 7 * 24 * 3600 * 1000) return false;
-        if (timeFilter === "30d" && diffMs > 30 * 24 * 3600 * 1000) return false;
-      }
-
-      // Category filter
-      if (eventCategoryFilter !== "all") {
-        if (
-          eventCategoryFilter === "auth" &&
-          !event.action.startsWith("auth.") &&
-          !event.action.startsWith("oauth.")
-        ) {
-          return false;
-        }
-        if (
-          eventCategoryFilter === "security" &&
-          !event.action.includes("2fa") &&
-          !event.action.includes("passkey")
-        ) {
-          return false;
-        }
-        if (
-          eventCategoryFilter === "tokens" &&
-          !event.action.includes("token")
-        ) {
-          return false;
-        }
-        if (
-          eventCategoryFilter === "projects" &&
-          !event.action.startsWith("project.") &&
-          !event.action.startsWith("deployment.")
-        ) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [events, timeFilter, eventCategoryFilter]);
-
-  // Group events by month
-  const groupedEvents = useMemo(() => {
-    const groups = new Map<string, DashboardAuditEvent[]>();
-    for (const event of filteredEvents) {
-      const monthKey = getMonthKey(event.createdAt);
-      const list = groups.get(monthKey) ?? [];
-      list.push(event);
-      groups.set(monthKey, list);
-    }
-    return Array.from(groups.entries());
-  }, [filteredEvents]);
+}) {
+  const [category, setCategory] = useState<"all" | ActivityCategory>("all");
+  const [period, setPeriod] = useState<ActivityWindow>("all");
+  const shown = events.filter(
+    (event) =>
+      (category === "all" || activityCategory(event.action) === category) &&
+      inWindow(event.createdAt, period),
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Top Filter Bar matching Vercel */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold text-foreground tracking-tight">Activity</h1>
-
-        <div className="flex items-center gap-2">
-          {/* All Time filter */}
-          <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="h-8 w-32 rounded-md border-border bg-muted px-2.5 text-xs font-medium text-foreground hover:bg-muted">
-              <Calendar className="mr-1.5 size-3 text-muted-foreground" />
-              <SelectValue placeholder="All Time" />
-            </SelectTrigger>
-            <SelectContent className="border-border bg-popover text-foreground">
-              <SelectItem value="all" className="text-xs">
-                All Time
-              </SelectItem>
-              <SelectItem value="24h" className="text-xs">
-                Past 24 Hours
-              </SelectItem>
-              <SelectItem value="7d" className="text-xs">
-                Past 7 Days
-              </SelectItem>
-              <SelectItem value="30d" className="text-xs">
-                Past 30 Days
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Filter by Event */}
-          <Select value={eventCategoryFilter} onValueChange={setEventCategoryFilter}>
-            <SelectTrigger className="h-8 w-36 rounded-md border-border bg-muted px-2.5 text-xs font-medium text-foreground hover:bg-muted">
-              <Filter className="mr-1.5 size-3 text-muted-foreground" />
-              <SelectValue placeholder="Filter by Event" />
-            </SelectTrigger>
-            <SelectContent className="border-border bg-popover text-foreground">
-              <SelectItem value="all" className="text-xs">
-                All Events
-              </SelectItem>
-              <SelectItem value="auth" className="text-xs">
-                Authentication
-              </SelectItem>
-              <SelectItem value="security" className="text-xs">
-                Security & 2FA
-              </SelectItem>
-              <SelectItem value="tokens" className="text-xs">
-                Tokens
-              </SelectItem>
-              <SelectItem value="projects" className="text-xs">
-                Projects
-              </SelectItem>
-            </SelectContent>
-          </Select>
+    <SettingsCard id="activity">
+      <SettingsCardBody
+        description="Sign-ins, security changes, tokens and projects, newest first."
+        icon={LiveHistory}
+        title="Activity"
+      >
+        <div className="flex flex-wrap gap-2">
+          <SegmentedControl
+            aria-label="Filter by kind"
+            onChange={setCategory}
+            options={CATEGORIES}
+            value={category}
+          />
+          <SegmentedControl
+            aria-label="Filter by time"
+            onChange={setPeriod}
+            options={WINDOWS}
+            value={period}
+          />
         </div>
-      </div>
-
-      {/* Activity Timeline */}
-      {groupedEvents.length > 0 ? (
-        <div className="space-y-8">
-          {groupedEvents.map(([month, monthEvents]) => (
-            <div key={month} className="space-y-3">
-              <h2 className="text-xs font-semibold text-muted-foreground tracking-tight">
+      </SettingsCardBody>
+      {shown.length ? (
+        <div className="space-y-6 px-5 pb-5 sm:px-6">
+          {byMonth(shown).map(([month, items]) => (
+            <section aria-label={month} key={month}>
+              <h3 className="mb-2 font-geist-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
                 {month}
-              </h2>
-
-              <div className="space-y-1">
-                {monthEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center justify-between gap-4 py-2 text-xs transition-colors rounded-md px-2 -mx-2 hover:bg-muted/60"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* User Avatar */}
-                      {userImage ? (
-                        <Image
-                          src={userImage}
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="size-5 rounded-full object-cover shrink-0"
-                        />
-                      ) : (
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-foreground">
-                          {userName ? userName.charAt(0).toUpperCase() : <User className="size-3" />}
-                        </span>
-                      )}
-
-                      <span className="text-foreground truncate">
-                        {renderEventSentence(event)}
+              </h3>
+              <ol className="relative space-y-1 before:absolute before:inset-y-3 before:left-[17px] before:w-px before:bg-hairline-strong">
+                {items.map((event) => {
+                  const Icon = ICONS[activityCategory(event.action)];
+                  return (
+                    <li
+                      className="relative flex items-center gap-3 rounded-tile py-1.5 pr-2"
+                      data-icon-trigger
+                      key={event.id}
+                    >
+                      <span className="surface-raised relative z-10 grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground">
+                        <Icon className="size-4" strokeWidth={1.75} />
                       </span>
-                    </div>
-
-                    <time className="shrink-0 text-muted-foreground font-mono text-[11px]">
-                      {formatRelativeTime(event.createdAt)}
-                    </time>
-                  </div>
-                ))}
-              </div>
-            </div>
+                      <p className="min-w-0 flex-1 truncate text-[13px] text-foreground/85">
+                        <ActivitySentence event={event} />
+                      </p>
+                      <time
+                        className="shrink-0 text-[11.5px] text-muted-foreground"
+                        dateTime={event.createdAt}
+                        suppressHydrationWarning
+                      >
+                        {relativeTime(event.createdAt)}
+                      </time>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-border/80 bg-muted/40 p-12 text-center">
-          <p className="text-xs text-muted-foreground">
-            No activity found for this period.
-          </p>
-        </div>
+        <EmptyState
+          className="pt-2"
+          description={
+            events.length
+              ? "Nothing matches these filters."
+              : "Sign-ins, security changes and new projects show up here."
+          }
+          glyph={LiveHistory}
+          title={events.length ? "No matching activity" : "No activity yet"}
+        />
       )}
-    </div>
+    </SettingsCard>
+  );
+}
+
+function ActivitySentence({ event }: { event: DashboardAuditEvent }) {
+  const sentence = describeActivity(event);
+  return (
+    <>
+      {sentence.before}
+      {sentence.strong ? (
+        <strong className="font-semibold text-foreground">
+          {sentence.strong}
+        </strong>
+      ) : null}
+      {sentence.after}
+    </>
   );
 }

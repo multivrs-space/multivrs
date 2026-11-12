@@ -1,0 +1,221 @@
+/* ─── Dashboard depth system ───
+   Every surface is built from the existing palette only: --ink, --card,
+   --foreground and --primary mixed with transparency, plus black/white shadow.
+   Light mode reads as paper on a soft grey desk; dark mode stays true black
+   with a faint top bevel so layers separate without glowing. */
+
+@utility surface-canvas {
+  background-color: var(--ink);
+  border: 1px solid var(--hairline);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 12px 32px -18px rgb(0 0 0 / 0.12);
+
+  @variant dark {
+    box-shadow: inset 0 1px 0 0
+      color-mix(in oklab, var(--foreground) 5%, transparent);
+  }
+}
+
+@utility surface-card {
+  background-color: var(--card);
+  border: 1px solid var(--hairline-strong);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 8px 20px -12px rgb(0 0 0 / 0.1),
+    0 28px 48px -32px rgb(0 0 0 / 0.14);
+
+  @variant dark {
+    border-color: var(--hairline);
+    box-shadow:
+      inset 0 1px 0 0 color-mix(in oklab, var(--foreground) 6%, transparent),
+      0 1px 0 0 rgb(0 0 0),
+      0 18px 40px -24px rgb(0 0 0 / 0.9);
+  }
+}
+
+/* A card floating over a live scene (the analytics map): the scene shows
+   through, softened, so the card reads without hiding what's behind it. */
+@utility surface-glass {
+  background-color: color-mix(in oklab, var(--card) 74%, transparent);
+  border: 1px solid var(--hairline-strong);
+  backdrop-filter: blur(18px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.7),
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 18px 40px -24px rgb(0 0 0 / 0.18);
+
+  @variant dark {
+    background-color: color-mix(in oklab, var(--card) 62%, transparent);
+    border-color: var(--hairline);
+    box-shadow:
+      inset 0 1px 0 0 color-mix(in oklab, var(--foreground) 7%, transparent),
+      0 18px 40px -24px rgb(0 0 0 / 0.9);
+  }
+}
+
+/* A control that sits above its track: segmented thumbs, chips, keycaps. */
+@utility surface-raised {
+  background-color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 2px 6px -2px rgb(0 0 0 / 0.08);
+
+  @variant dark {
+    background-color: color-mix(in oklab, var(--foreground) 9%, var(--ink));
+    border-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+    box-shadow:
+      inset 0 1px 0 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+      0 1px 2px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* A recessed well: tracks, inputs, chart beds, code. */
+@utility surface-inset {
+  background-color: color-mix(in oklab, var(--foreground) 3%, var(--ink));
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
+
+  @variant dark {
+    background-color: color-mix(in oklab, var(--foreground) 3%, var(--ink));
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+  }
+}
+
+/* The one purple card per page. Uses only --primary, lifted and deepened. */
+@utility surface-hero {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  background-image:
+    radial-gradient(
+      120% 90% at 0% 0%,
+      color-mix(in oklab, var(--primary) 70%, white) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      160deg,
+      var(--primary) 0%,
+      color-mix(in oklab, var(--primary) 72%, black) 100%
+    );
+  border: 1px solid color-mix(in oklab, var(--primary) 60%, white);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.35),
+    0 24px 48px -24px color-mix(in oklab, var(--primary) 70%, transparent);
+}
+
+/* Pressed feedback for anything clickable that carries a surface. */
+@utility surface-press {
+  transition:
+    transform 120ms var(--ease-out-expo),
+    box-shadow 120ms var(--ease-out-expo);
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+/* Faint dotted bed behind charts; reads as graph paper in both themes. */
+@utility chart-bed {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 9%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 12px 12px;
+}
+
+/* Numbers that line up and feel engineered. */
+@utility figure {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  font-feature-settings: "ss01", "tnum";
+}
+
+/* Loading placeholder: a soft block with a highlight sliding across it.
+   Only the pseudo-element's transform animates. */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: color-mix(in oklab, var(--foreground) 6%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--foreground) 6%, transparent),
+      transparent
+    );
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ─── Shell geometry ───
+   The frame publishes the rail and context widths; the canvas and its
+   children size themselves from these instead of hard-coded offsets. */
+.dashboard-frame {
+  --rail-w: 0px;
+  --context-w: 0px;
+  --topbar-h: 3.5rem;
+  --canvas-inset: 0px;
+  --dash-content-h: calc(100dvh - var(--topbar-h));
+}
+
+@media (min-width: 1024px) {
+  .dashboard-frame {
+    --rail-w: 240px;
+    --canvas-inset: 8px;
+    --dash-content-h: calc(
+      100dvh -
+      var(--topbar-h) -
+      var(--canvas-inset) *
+      2 -
+      2px
+    );
+  }
+  .dashboard-frame[data-rail="collapsed"] {
+    --rail-w: 68px;
+  }
+  .dashboard-frame[data-context="true"] {
+    --rail-w: 68px;
+    --context-w: 220px;
+  }
+}
+
+/* An indeterminate progress sweep for work that is running right now. */
+@keyframes deploy-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+/* Diagonal lines for "nothing here": quiet cells in heatmaps, empty tracks. */
+@utility hatch {
+  background-color: color-mix(in oklab, var(--foreground) 2.5%, transparent);
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--foreground) 13%, transparent) 0 1px,
+    transparent 1px 6px
+  );
+}

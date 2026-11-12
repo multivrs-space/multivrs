@@ -1,101 +1,134 @@
 "use client";
 
-import { ChevronRight, Plus, Trash2 } from "lucide-react";
+import type { ClipboardEvent } from "react";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { DASH_FIELD } from "@/components/dashboard/menu";
+import { LiveKeyRound, LivePlus, LiveTrash } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { parseDotenv, VARIABLE_NAME } from "@/features/dashboard/lib/dotenv";
 import type {
   DeploymentImportConfig,
   EnvironmentDraft,
 } from "@/features/dashboard/types/deployment-import.types";
 import { randomId } from "@/lib/browser/random-id";
+import { cn } from "@/lib/utils";
 
+const FIELD = cn(DASH_FIELD, "h-10 font-geist-mono text-[12.5px]");
+
+/** Name/value rows that become the project's variables on Deploy. */
 export function EnvironmentDraftEditor({
   config,
   onChange,
-  open,
-  onToggle,
 }: {
   config: DeploymentImportConfig;
   onChange: (config: DeploymentImportConfig) => void;
-  open: boolean;
-  onToggle: () => void;
 }) {
-  function update(id: string, patch: Partial<EnvironmentDraft>) {
-    onChange({
-      ...config,
-      environment: config.environment.map((item) =>
-        item.id === id ? { ...item, ...patch } : item,
+  const rows = config.environment;
+  const filled = rows.filter((row) => row.key.trim()).length;
+  const set = (environment: EnvironmentDraft[]) =>
+    onChange({ ...config, environment });
+  const update = (id: string, patch: Partial<EnvironmentDraft>) =>
+    set(rows.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+
+  // Pasting a whole .env file into a name field fills one row per line.
+  function paste(id: string, event: ClipboardEvent<HTMLInputElement>) {
+    const pairs = parseDotenv(event.clipboardData.getData("text"));
+    if (!pairs || (pairs.length === 1 && !pairs[0]?.value)) return;
+    event.preventDefault();
+    const added = pairs.map((pair) => ({ id: randomId(), ...pair }));
+    set(
+      rows.flatMap((row) =>
+        row.id !== id ? [row] : row.key || row.value ? [row, ...added] : added,
       ),
-    });
+    );
   }
+
   return (
-    <section className="overflow-hidden rounded-lg border border-(--hairline)">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center gap-2 px-3.5 py-3 text-[13px] font-medium text-foreground/80 hover:text-foreground"
-      >
-        <ChevronRight className={open ? "size-3.5 rotate-90" : "size-3.5"} />{" "}
-        Environment variables
-      </button>
-      {open ? (
-        <div className="space-y-3 p-4 pt-0">
-          {config.environment.map((item) => (
-            <div key={item.id} className="flex gap-2">
-              <label className="min-w-0 flex-1">
-                <span className="sr-only">Variable name</span>
-                <input
-                  value={item.key}
-                  onChange={(event) =>
-                    update(item.id, { key: event.target.value })
-                  }
-                  placeholder="EXAMPLE_KEY"
-                  className="h-9 w-full rounded-md border border-(--hairline) bg-foreground/[0.03] px-3 font-mono text-xs outline-hidden"
-                />
-              </label>
-              <label className="min-w-0 flex-1">
-                <span className="sr-only">Variable value</span>
-                <input
-                  value={item.value}
-                  onChange={(event) =>
-                    update(item.id, { value: event.target.value })
-                  }
-                  placeholder="value"
-                  className="h-9 w-full rounded-md border border-(--hairline) bg-foreground/[0.03] px-3 font-mono text-xs outline-hidden"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() =>
-                  onChange({
-                    ...config,
-                    environment: config.environment.filter(
-                      (entry) => entry.id !== item.id,
-                    ),
-                  })
+    <DashCard aria-label="Environment variables">
+      <DashCardHeader
+        description={
+          filled
+            ? `${filled} to save · encrypted, for every environment`
+            : "Saved to the project, encrypted"
+        }
+        icon={LiveKeyRound}
+        title="Environment variables"
+      />
+      <div className="space-y-2 p-5 pt-4">
+        {rows.map((row) => {
+          const invalid =
+            row.key.trim() !== "" && !VARIABLE_NAME.test(row.key.trim());
+          return (
+            <div
+              className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2"
+              key={row.id}
+            >
+              <Input
+                aria-invalid={invalid || undefined}
+                aria-label="Name"
+                className={cn(
+                  FIELD,
+                  invalid &&
+                    "border-rose-500/60 focus-visible:ring-rose-500/30",
+                )}
+                onChange={(event) =>
+                  update(row.id, { key: event.target.value })
                 }
-                className="p-2 text-muted-foreground hover:text-red-400"
-                aria-label="Remove variable"
+                onPaste={(event) => paste(row.id, event)}
+                placeholder="API_URL"
+                spellCheck={false}
+                value={row.key}
+              />
+              <Input
+                aria-label="Value"
+                className={FIELD}
+                onChange={(event) =>
+                  update(row.id, { value: event.target.value })
+                }
+                placeholder="value"
+                spellCheck={false}
+                value={row.value}
+              />
+              <Button
+                aria-label={`Remove ${row.key || "variable"}`}
+                className="size-10 rounded-control px-0 hover:text-rose-600 dark:hover:text-rose-400"
+                data-icon-trigger
+                onClick={() => set(rows.filter((entry) => entry.id !== row.id))}
+                type="button"
+                variant="quiet"
               >
-                <Trash2 className="size-4" />
-              </button>
+                <LiveTrash className="size-4" strokeWidth={1.75} />
+              </Button>
             </div>
-          ))}
-          <button
-            type="button"
+          );
+        })}
+        {rows.some(
+          (row) => row.key.trim() && !VARIABLE_NAME.test(row.key.trim()),
+        ) ? (
+          <p className="text-xs text-rose-700 dark:text-rose-300">
+            Names use letters, numbers and underscores, and can't start with a
+            number.
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <Button
+            data-icon-trigger
             onClick={() =>
-              onChange({
-                ...config,
-                environment: [
-                  ...config.environment,
-                  { id: randomId(), key: "", value: "" },
-                ],
-              })
+              set([...rows, { id: randomId(), key: "", value: "" }])
             }
-            className="flex items-center gap-1.5 text-xs font-medium text-primary"
+            size="sm"
+            type="button"
+            variant="raised"
           >
-            <Plus className="size-3.5" /> Add variable
-          </button>
+            <LivePlus strokeWidth={2} />
+            Add another
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Tip: paste a whole .env file into a name field.
+          </p>
         </div>
-      ) : null}
-    </section>
+      </div>
+    </DashCard>
   );
 }

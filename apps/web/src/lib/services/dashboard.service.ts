@@ -1,6 +1,5 @@
 import "server-only";
 import { cache } from "react";
-import type { DashboardDeployment } from "@/features/dashboard/components/DeploymentsPage";
 import type {
   DashboardProject,
   ProjectStatus,
@@ -8,8 +7,8 @@ import type {
 import { prisma } from "@/lib/prisma";
 import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import { projectAccessWhere } from "@/lib/services/project-access";
+import { faviconUrl, projectFavicon } from "@/lib/services/project-favicon";
 import { deploymentUrl, projectUrl } from "@/lib/services/serve.service";
-import { SITE_URL } from "@/lib/site";
 
 function relative(date: Date): string {
   const minutes = Math.max(
@@ -28,36 +27,40 @@ function status(value?: string): ProjectStatus {
   return "ready";
 }
 
-function duration(createdAt: Date, updatedAt: Date, state: string): string {
-  if (state === "queued") return "QUEUED";
-  if (state === "building") return "BUILDING";
-  const seconds = Math.max(
-    0,
-    Math.round((updatedAt.getTime() - createdAt.getTime()) / 1000),
-  );
-  return seconds >= 60
-    ? `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-    : `${seconds}s`;
-}
-
 export const dashboardProjectOptions = cache(
   async function dashboardProjectOptions(
     username: string,
     viewerId: string,
-  ): Promise<{ slug: string; name: string }[]> {
-    const owner = await prisma.user.findUnique({
-      where: { username },
-      select: { id: true },
-    });
-    if (!owner) return [];
-    return prisma.project.findMany({
+  ): Promise<{ slug: string; name: string; faviconUrl: string | null }[]> {
+    // The URL segment is a username or a team slug; both resolve to an owner.
+    const ownerId = await accountOwnerIdForSlug(username);
+    if (!ownerId) return [];
+    const projects = await prisma.project.findMany({
       where: {
-        ownerId: owner.id,
+        ownerId,
         OR: projectAccessWhere(viewerId),
       },
-      select: { slug: true, name: true },
+      select: {
+        slug: true,
+        name: true,
+        productionDeploymentId: true,
+        domains: {
+          where: { verified: true },
+          take: 1,
+          select: { hostname: true },
+        },
+      },
       orderBy: { updatedAt: "desc" },
     });
+    return projects.map((project) => ({
+      slug: project.slug,
+      name: project.name,
+      faviconUrl: projectFavicon({
+        slug: project.slug,
+        productionDeploymentId: project.productionDeploymentId,
+        hostname: project.domains[0]?.hostname ?? null,
+      }),
+    }));
   },
 );
 
@@ -100,7 +103,10 @@ export const dashboardProjects = cache(async function dashboardProjects(
       name: project.name,
       siteUrl,
       siteLabel: hostname ?? hostLabel(siteUrl),
-      faviconUrl: siteUrl ? faviconUrl(siteUrl) : null,
+      // Only a live site has a logo to fetch; asking one that never went
+      // live leaves the image hanging.
+      faviconUrl:
+        project.productionDeploymentId && siteUrl ? faviconUrl(siteUrl) : null,
       repositoryUrl: project.repositoryUrl,
       repositoryLabel,
       status: status(latest?.status),
@@ -112,6 +118,7 @@ export const dashboardProjects = cache(async function dashboardProjects(
               : `Deployment ${latest.id.slice(0, 8)}`,
             branch: latest.branch ?? "main",
             createdAt: relative(latest.createdAt),
+            rawStatus: latest.status,
           }
         : null,
     };
@@ -126,62 +133,4 @@ function hostLabel(url: string | null): string | null {
   } catch {
     return null;
   }
-}
-
-function faviconUrl(url: string): string | null {
-  try {
-    return new URL("/favicon.ico", new URL(url, SITE_URL)).toString();
-  } catch {
-    return null;
-  }
-}
-
-export async function dashboardDeployments(
-  viewerId: string,
-  username: string,
-  projectSlug?: string,
-): Promise<DashboardDeployment[] | null> {
-  const ownerId = await accountOwnerIdForSlug(username);
-  if (!ownerId) return null;
-  const rows = await prisma.deployment.findMany({
-    where: {
-      project: {
-        ownerId,
-        ...(projectSlug ? { slug: projectSlug } : {}),
-        OR: projectAccessWhere(viewerId),
-      },
-    },
-    include: { project: true },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
-  return rows.map((deployment) => ({
-    id: deployment.id,
-    projectId: deployment.projectId,
-    project: deployment.project.name,
-    status:
-      deployment.status === "ready"
-        ? "Ready"
-        : deployment.status === "queued" || deployment.status === "building"
-          ? "Building"
-          : "Failed",
-    branch: deployment.branch ?? "main",
-    duration: duration(
-      deployment.startedAt ?? deployment.createdAt,
-      deployment.finishedAt ?? deployment.updatedAt,
-      deployment.status,
-    ),
-    url: deployment.url ?? "",
-    createdAt: deployment.createdAt.toISOString(),
-    commitSha: deployment.commitSha?.slice(0, 7) ?? "—",
-    commitMessage: deployment.commitSha
-      ? `Commit ${deployment.commitSha.slice(0, 7)}`
-      : `Deployment ${deployment.id.slice(0, 8)}`,
-    environment:
-      deployment.project.productionDeploymentId === deployment.id
-        ? "Production"
-        : "Preview",
-    detailsUrl: `/${username}/${projectSlug ?? "~"}/deployments/${deployment.id}`,
-    errorMessage: deployment.errorMessage,
-  }));
 }

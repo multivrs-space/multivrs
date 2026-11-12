@@ -7,6 +7,7 @@ import { DomainConnectionSection } from "@/features/dashboard/components/DomainC
 import { DomainDnsRecordsSection } from "@/features/dashboard/components/DomainDnsRecordsSection";
 import { DomainDnsStatusPanels } from "@/features/dashboard/components/DomainDnsStatusPanels";
 import { DomainOverviewPanel } from "@/features/dashboard/components/DomainOverviewPanel";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { useDomainDns } from "@/features/dashboard/use-domain-dns";
 import type { DomainDetail, DomainDnsOverview } from "@/lib/domains/dns.types";
 import type { DomainProjectOption } from "@/lib/services/domain.service";
@@ -59,7 +60,7 @@ export function DomainDnsPage({
   }
 
   return (
-    <div className="w-full px-5 py-6 sm:px-8">
+    <PageBody>
       <DomainOverviewPanel
         autoRenew={autoRenew}
         backUrl={backUrl}
@@ -92,6 +93,6 @@ export function DomainDnsPage({
           onSubmit={dns.save}
         />
       ) : null}
-    </div>
+    </PageBody>
   );
 }

@@ -13,10 +13,13 @@ export function RepositoryIcon({
   framework,
   language,
   name,
+  size = "md",
 }: {
   framework: FrameworkId | null | undefined;
   language: string | null;
   name: string;
+  /** `lg` for page heroes. */
+  size?: "md" | "lg";
 }) {
   const icon =
     (framework ? FRAMEWORK_ICONS[framework] : undefined) ??
@@ -25,7 +28,11 @@ export function RepositoryIcon({
   return (
     <span
       title={label}
-      className="grid size-8 shrink-0 place-items-center rounded-md border border-(--hairline) bg-foreground/[0.04] text-xs font-semibold uppercase text-foreground/80"
+      className={
+        size === "lg"
+          ? "surface-raised grid size-12 shrink-0 place-items-center rounded-tile text-sm font-semibold uppercase text-foreground/80 [&_img]:size-6!"
+          : "surface-inset grid size-8 shrink-0 place-items-center rounded-[9px] text-xs font-semibold uppercase text-foreground/80"
+      }
     >
       {icon ? (
         <>

@@ -1,23 +1,33 @@
 "use client";
 
+import Link from "next/link";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LiveRefresh, LiveTriangleAlert } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+
 export default function DashboardError({ reset }: { reset: () => void }) {
   return (
-    <main className="grid min-h-svh place-items-center bg-background px-6 text-center">
-      <div>
-        <p className="font-mono text-xs tracking-[0.16em] text-purple-400 uppercase">
-          Dashboard unavailable
-        </p>
-        <h1 className="mt-3 text-2xl font-semibold text-foreground">
-          We could not load this view.
-        </h1>
-        <button
-          className="mt-6 rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background"
-          onClick={reset}
-          type="button"
-        >
-          Try again
-        </button>
-      </div>
+    <main className="dashboard-surface grid min-h-[70svh] place-items-center bg-ink px-6">
+      <EmptyState
+        actions={
+          <>
+            <Button data-icon-trigger onClick={reset} size="sm" variant="hero">
+              <LiveRefresh strokeWidth={2} />
+              Try again
+            </Button>
+            <Link
+              className={buttonVariants({ size: "sm", variant: "raised" })}
+              href="/dashboard"
+            >
+              Back to dashboard
+            </Link>
+          </>
+        }
+        description="Something went wrong while loading this view. Your projects and data are fine; trying again usually fixes it."
+        glyph={LiveTriangleAlert}
+        title="This view didn't load"
+      />
     </main>
   );
 }

@@ -41,6 +41,16 @@ export async function resolveCliRunner(): Promise<CliRunner> {
   }
 
   const workspaceRoot = await findWorkspaceRoot();
+  // A prebuilt binary goes stale whenever the CLI changes; cargo rebuilds it
+  // only when its sources moved, so this is near-instant when it's current.
+  await runCommand(
+    "cargo",
+    ["build", "--release", "-p", "cli"],
+    workspaceRoot,
+    {
+      RUSTUP_TOOLCHAIN: process.env.RUSTUP_TOOLCHAIN || "stable",
+    },
+  ).catch(() => undefined);
   for (const profile of ["release", "debug"] as const) {
     const binary = join(workspaceRoot, "target", profile, "multivrs");
     try {
@@ -70,6 +80,8 @@ export function runCommand(
   args: string[],
   cwd: string,
   environment?: Record<string, string>,
+  /** Each chunk of output as it arrives, e.g. to stream it into the build log. */
+  onOutput?: (text: string) => void,
 ): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     const processHandle = spawn(command, args, {
@@ -80,6 +92,7 @@ export function runCommand(
     let output = "";
     const capture = (data: Buffer) => {
       output = `${output}${data.toString()}`.slice(-50_000);
+      onOutput?.(data.toString());
     };
     processHandle.stdout.on("data", capture);
     processHandle.stderr.on("data", capture);
@@ -91,10 +104,16 @@ export function runCommand(
         resolvePromise();
         return;
       }
+      // The CLI ends with one plain line naming the failed step and why;
+      // show that, never the command line or raw tool output.
+      const reason = output
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .at(-1)
+        ?.replace(/^Error:\s*/, "");
       reject(
-        new Error(
-          `Command ${command} failed with exit code ${code ?? "unknown"}. Output: ${output}`,
-        ),
+        new Error(reason ?? `Build failed (exit code ${code ?? "unknown"})`),
       );
     });
   });

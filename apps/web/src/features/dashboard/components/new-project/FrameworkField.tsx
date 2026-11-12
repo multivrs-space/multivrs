@@ -1,7 +1,13 @@
 "use client";
 
 import { FRAMEWORK_IDS, type FrameworkId } from "@multivrs/config";
-import { CircleAlert, Loader2, Sparkles } from "lucide-react";
+import {
+  DASH_FIELD,
+  DASH_MENU,
+  DASH_MENU_ITEM,
+} from "@/components/dashboard/menu";
+import { Spinner } from "@/components/dashboard/Spinner";
+import { LiveSparkles, LiveTriangleAlert } from "@/components/icons/animated";
 import {
   Select,
   SelectContent,
@@ -9,76 +15,112 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FrameworkLogo } from "@/features/dashboard/components/new-project/FrameworkLogo";
 import { FRAMEWORK_LABELS } from "@/features/dashboard/constants/framework-labels";
 import type { DetectionState } from "@/features/dashboard/hooks/useFrameworkDetection";
+import { cn } from "@/lib/utils";
 
 export function FrameworkField({
   detection,
+  disabled = false,
   onChange,
   value,
 }: {
   detection: DetectionState;
+  disabled?: boolean;
   onChange: (framework: FrameworkId) => void;
   value: FrameworkId;
 }) {
-  const detected =
-    detection.status === "detected" ? detection.result.framework : null;
   return (
-    <div className="space-y-1.5 text-xs text-muted-foreground">
-      <span>Framework</span>
+    <div className="space-y-1.5">
+      <span className="block text-xs font-medium text-muted-foreground">
+        Framework
+      </span>
       <Select
-        value={value}
-        disabled={detection.status === "detecting"}
+        disabled={disabled || detection.status === "detecting"}
         onValueChange={(next) => {
           const framework = FRAMEWORK_IDS.find((id) => id === next);
           if (framework) onChange(framework);
         }}
+        value={value}
       >
-        <SelectTrigger className="h-9 w-full border-(--hairline) bg-foreground/[0.03] text-[13px] text-foreground">
+        <SelectTrigger
+          aria-label="Framework"
+          className={cn(DASH_FIELD, "h-10 w-full gap-2")}
+        >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className={DASH_MENU}>
           {FRAMEWORK_IDS.map((id) => (
-            <SelectItem key={id} value={id}>
-              {FRAMEWORK_LABELS[id]}
+            <SelectItem className={DASH_MENU_ITEM} key={id} value={id}>
+              <span className="inline-flex items-center gap-2 align-middle">
+                <FrameworkLogo framework={id} />
+                {FRAMEWORK_LABELS[id]}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <p className="flex items-center gap-1.5 text-[11px]" aria-live="polite">
-        {detection.status === "detecting" ? (
-          <>
-            <Loader2 className="size-3 animate-spin" /> Reading the repository…
-          </>
-        ) : detection.status === "failed" ? (
-          <>
-            <CircleAlert className="size-3 text-amber-400" />
-            Couldn’t read the repository. Choose the framework yourself.
-          </>
-        ) : detected === null ? (
-          <>
-            <CircleAlert className="size-3 text-amber-400" />
-            No framework found. It will deploy as a static site.
-          </>
-        ) : detected === value ? (
-          <>
-            <Sparkles className="size-3 text-primary" />
-            Detected {FRAMEWORK_LABELS[detected]} ·{" "}
-            {detection.result.packageManager}
-          </>
-        ) : (
-          <>
-            Overriding detected {FRAMEWORK_LABELS[detected]}.{" "}
-            <button
-              type="button"
-              onClick={() => onChange(detected)}
-              className="font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              Reset
-            </button>
-          </>
-        )}
+      <p
+        aria-live="polite"
+        className="flex min-h-4 items-center gap-1.5 text-[11.5px] text-muted-foreground"
+      >
+        <DetectionNote detection={detection} onUse={onChange} value={value} />
       </p>
     </div>
+  );
+}
+
+function DetectionNote({
+  detection,
+  onUse,
+  value,
+}: {
+  detection: DetectionState;
+  onUse: (framework: FrameworkId) => void;
+  value: FrameworkId;
+}) {
+  const warning = (
+    <LiveTriangleAlert
+      className="size-3 shrink-0 text-amber-600 dark:text-amber-400"
+      strokeWidth={2}
+    />
+  );
+  if (detection.status === "detecting")
+    return (
+      <>
+        <Spinner className="size-3" /> Reading the repository…
+      </>
+    );
+  if (detection.status === "failed")
+    return (
+      <>
+        {warning} Couldn't read the repository. Choose the framework yourself.
+      </>
+    );
+  const detected = detection.result.framework;
+  if (detected === null)
+    return <>{warning} No framework found, so it deploys as a static site.</>;
+  if (detected === value)
+    return (
+      <>
+        <LiveSparkles
+          className="size-3 shrink-0 text-primary"
+          strokeWidth={2}
+        />
+        Detected from the repository · {detection.result.packageManager}
+      </>
+    );
+  return (
+    <>
+      The repository looks like {FRAMEWORK_LABELS[detected]}.
+      <button
+        className="font-medium text-foreground underline-offset-4 hover:underline"
+        onClick={() => onUse(detected)}
+        type="button"
+      >
+        Use it
+      </button>
+    </>
   );
 }

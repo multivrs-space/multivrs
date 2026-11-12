@@ -1,8 +1,11 @@
-import { Globe2 } from "lucide-react";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { StatusOrb } from "@/components/dashboard/StatusOrb";
+import { LiveLayoutGrid } from "@/components/icons/animated";
 import { AssignDomainProjectDialog } from "@/features/dashboard/components/AssignDomainProjectDialog";
 import type { DomainDetail } from "@/lib/domains/dns.types";
 import type { DomainProjectOption } from "@/lib/services/domain.service";
 
+/** Which project answers requests for this domain. */
 export function DomainConnectionSection({
   domain,
   projects,
@@ -11,47 +14,42 @@ export function DomainConnectionSection({
   projects: DomainProjectOption[];
 }) {
   return (
-    <section className="mb-10">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Connected project
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Choose where requests for this domain should be served.
-          </p>
-        </div>
-        {domain.projectId ? null : (
-          <AssignDomainProjectDialog
-            domainId={domain.id}
-            hostname={domain.hostname}
-            projects={projects}
-          />
-        )}
-      </div>
-      <div className="rounded-xl border border-border bg-foreground/[0.04] p-5">
+    <DashCard aria-label="Connected project">
+      <DashCardHeader
+        action={
+          domain.projectId ? null : (
+            <AssignDomainProjectDialog
+              domainId={domain.id}
+              hostname={domain.hostname}
+              projects={projects}
+            />
+          )
+        }
+        description="Where requests for this domain are served"
+        icon={LiveLayoutGrid}
+        title="Connected project"
+      />
+      <div className="p-5 pt-4">
         {domain.projectId ? (
-          <div className="flex items-center justify-between gap-4">
+          <div className="surface-inset flex items-center justify-between gap-4 rounded-tile px-4 py-3">
             <div className="flex items-center gap-3">
-              <Globe2 className="size-4 text-muted-foreground" />
+              <StatusOrb label="Connected" tone="ready" />
               <div>
-                <p className="text-sm font-medium">{domain.hostname}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Routes to {domain.projectName}
+                <p className="text-[13.5px] font-medium">
+                  {domain.projectName}
+                </p>
+                <p className="mt-0.5 font-geist-mono text-[11.5px] text-muted-foreground">
+                  {domain.hostname} → {domain.projectSlug}
                 </p>
               </div>
             </div>
-            <span className="font-mono text-xs text-muted-foreground">
-              {domain.projectSlug}
-            </span>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            This domain is not connected to a project yet. DNS can still be
-            managed independently.
+          <p className="text-[13px] text-muted-foreground">
+            Not connected to a project yet. You can still manage its DNS below.
           </p>
         )}
       </div>
-    </section>
+    </DashCard>
   );
 }

@@ -1,48 +1,45 @@
 "use client";
 
-import {
-  BookOpen,
-  Home,
-  LifeBuoy,
-  LogOut,
-  PenLine,
-  Settings,
-  SmilePlus,
-} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { DASH_MENU_ITEM } from "@/components/dashboard/menu";
+import {
+  LiveBookOpen,
+  LiveFileText,
+  LiveGlobe,
+  LiveLifeBuoy,
+  LiveLogOut,
+  LiveSettings,
+  LiveSparkles,
+} from "@/components/icons/animated";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { buildNavHref } from "@/features/dashboard/constants/navigation";
-import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 import { authClient } from "@/lib/auth-client";
-import type { PlanKey } from "@/lib/payments/billing.types";
+import type { DisplayPlan } from "@/lib/payments/billing.types";
 
 interface AccountMenuProps {
   name: string;
   email: string;
   /** Plan of the workspace being viewed; only Hobby offers an upgrade. */
-  plan?: PlanKey;
+  plan?: DisplayPlan;
   onClose?: () => void;
 }
 
 const LINKS = [
-  { label: "Home Page", href: "/home", icon: Home },
-  { label: "Changelog", href: "/shipped", icon: PenLine },
-  { label: "Help", href: "/help", icon: LifeBuoy },
-  { label: "Docs", href: "/docs", icon: BookOpen },
+  { label: "Home page", href: "/home", icon: LiveGlobe },
+  { label: "Changelog", href: "/shipped", icon: LiveFileText },
+  { label: "Help", href: "/help", icon: LiveLifeBuoy },
+  { label: "Docs", href: "/docs", icon: LiveBookOpen },
 ] as const;
+
+const UPGRADE =
+  "surface-hero surface-press flex h-9 w-full items-center justify-center gap-2 rounded-control text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
   const router = useRouter();
-  const { username, scope } = useDashboardScope();
-  const settingsHref = buildNavHref(username, scope, "settings");
 
   const logOut = async () => {
     await authClient.signOut({
@@ -51,85 +48,88 @@ export function AccountMenu({ name, email, plan, onClose }: AccountMenuProps) {
   };
 
   return (
-    <div className="text-[14px]">
+    <div className="text-[13px]">
       <Link
+        aria-label="Account settings"
+        className="group flex items-center gap-3 rounded-tile p-2.5 outline-none transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring"
+        data-icon-trigger
         href="/account/settings"
         onClick={onClose}
-        className="group mx-1 my-1 flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/10 dark:hover:bg-white/10"
-        aria-label="Account settings"
       >
-        <div className="min-w-0">
-          <p className="truncate font-medium text-foreground group-hover:text-foreground">{name}</p>
-          <p className="truncate text-[12px] text-muted-foreground">{email}</p>
-        </div>
-        <Settings className="size-4 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" strokeWidth={1.75} />
+        <span className="surface-inset grid size-9 shrink-0 place-items-center rounded-full font-geist-mono text-[12px] font-medium text-foreground">
+          {(name?.[0] ?? "U").toUpperCase()}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-medium text-foreground">
+            {name}
+          </span>
+          <span className="block truncate text-[12px] text-muted-foreground">
+            {email}
+          </span>
+        </span>
+        <LiveSettings
+          className="size-4 shrink-0 text-muted-foreground"
+          strokeWidth={1.75}
+        />
       </Link>
 
-      <DropdownMenuSeparator />
+      <DropdownMenuSeparator className="mx-0 my-1.5 bg-hairline" />
 
-      <DropdownMenuItem className="rounded-lg">
-        <SmilePlus className="text-muted-foreground" strokeWidth={1.75} />
-        Feedback
-      </DropdownMenuItem>
-
-      <div className="flex items-center justify-between gap-2 px-3 py-2">
-        <span className="font-medium">Theme</span>
+      <div className="flex items-center justify-between gap-2 px-2.5 py-1.5">
+        <span className="text-muted-foreground">Theme</span>
         <ThemeToggle />
       </div>
-
       {LINKS.map(({ label, href, icon: Icon }) => (
-        <DropdownMenuItem key={label} className="rounded-lg" asChild>
+        <DropdownMenuItem
+          asChild
+          className={DASH_MENU_ITEM}
+          data-icon-trigger
+          key={label}
+        >
           <Link href={href}>
-            <Icon className="text-muted-foreground" strokeWidth={1.75} />
+            <Icon strokeWidth={1.75} />
             {label}
           </Link>
         </DropdownMenuItem>
       ))}
-
-      <DropdownMenuItem className="rounded-lg" onClick={logOut}>
-        <LogOut className="text-muted-foreground" strokeWidth={1.75} />
-        Log Out
+      <DropdownMenuItem
+        className={DASH_MENU_ITEM}
+        data-icon-trigger
+        onClick={logOut}
+      >
+        <LiveLogOut strokeWidth={1.75} />
+        Log out
       </DropdownMenuItem>
 
-      {plan === "hobby" && (
-        <div className="px-1.5 pt-1.5">
-          <Button
-            className="w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs"
-            size="sm"
+      {plan === "hobby" ? (
+        <div className="px-1 pt-2">
+          <button
+            className={UPGRADE}
+            data-icon-trigger
             onClick={() => {
               onClose?.();
               window.dispatchEvent(new CustomEvent("open-upgrade-sheet"));
             }}
+            type="button"
           >
+            <LiveSparkles className="size-4" strokeWidth={1.75} />
             Upgrade to Pro
-          </Button>
+          </button>
         </div>
-      )}
-
-      {plan === "pro" && (
-        <div className="px-1.5 pt-1.5">
+      ) : null}
+      {plan === "pro" ? (
+        <div className="px-1 pt-2">
           <Link
+            className={UPGRADE}
+            data-icon-trigger
             href="/contact/sales"
             onClick={onClose}
-            className={cn(
-              buttonVariants({ size: "sm" }),
-              "w-full h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-xs flex items-center justify-center cursor-pointer shadow-xs",
-            )}
           >
+            <LiveSparkles className="size-4" strokeWidth={1.75} />
             Upgrade to Enterprise
           </Link>
         </div>
-      )}
-
-      <DropdownMenuSeparator />
-
-      <div className="flex items-center justify-between px-3 py-1.5">
-        <div>
-          <p className="text-[12px] text-muted-foreground">Platform Status</p>
-          <p className="text-[13px] text-primary">All systems normal.</p>
-        </div>
-        <span className="size-2 rounded-full bg-primary" />
-      </div>
+      ) : null}
     </div>
   );
 }

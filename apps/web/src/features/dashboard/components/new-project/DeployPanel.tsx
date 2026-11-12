@@ -1,98 +1,70 @@
 "use client";
 
-import { GitBranch, Rocket } from "lucide-react";
+import type { FrameworkId } from "@multivrs/config";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { Spinner } from "@/components/dashboard/Spinner";
+import { LiveRocket } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { DeploymentProgress } from "@/features/dashboard/components/DeploymentProgress";
-import { GitHubMark } from "@/features/dashboard/components/GitHubMark";
-import { FRAMEWORK_LABELS } from "@/features/dashboard/constants/framework-labels";
-import type { useDeploymentImport } from "@/features/dashboard/hooks/useDeploymentImport";
-import type {
-  DeploymentImportConfig,
-  RepositorySource,
-} from "@/features/dashboard/types/deployment-import.types";
+import { ImportFacts } from "@/features/dashboard/components/new-project/ImportFacts";
+import type { RepositorySource } from "@/features/dashboard/types/deployment-import.types";
 
-type DeploymentState = ReturnType<typeof useDeploymentImport>;
-
+/** The summary beside the form, and the one button that ships it. */
 export function DeployPanel({
-  config,
-  deployment,
-  disabled,
+  address,
+  blocker,
+  framework,
   onDeploy,
+  rootDirectory,
   source,
+  starting,
 }: {
-  config: DeploymentImportConfig;
-  deployment: DeploymentState;
-  disabled: boolean;
+  address: string;
+  /** Why Deploy can't run yet, shown under the button; null when it can. */
+  blocker: string | null;
+  framework: FrameworkId;
   onDeploy: () => void;
+  rootDirectory: string;
   source: RepositorySource;
+  starting: boolean;
 }) {
-  const rows = [
-    {
-      label: "Repository",
-      value: (
-        <span className="flex items-center gap-1.5 truncate">
-          <GitHubMark className="size-3.5 shrink-0" />
-          {source.owner}/{source.name}
-        </span>
-      ),
-    },
-    {
-      label: "Branch",
-      value: (
-        <span className="flex items-center gap-1.5 font-mono">
-          <GitBranch className="size-3.5 shrink-0" />
-          {source.branch}
-        </span>
-      ),
-    },
-    { label: "Framework", value: FRAMEWORK_LABELS[config.framework] },
-    {
-      label: "Root",
-      value: <span className="font-mono">{config.rootDirectory}</span>,
-    },
-  ];
-
   return (
-    <section className="rounded-xl border border-(--hairline) bg-(--ink-raised) p-4">
-      <h2 className="text-sm font-semibold">
-        {deployment.status === "idle" ? "Ready to deploy" : "Deployment"}
-      </h2>
-      {deployment.status === "idle" ? (
-        <>
-          <dl className="mt-3 divide-y divide-(--hairline) text-xs">
-            {rows.map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between gap-3 py-2"
-              >
-                <dt className="text-muted-foreground">{row.label}</dt>
-                <dd className="min-w-0 truncate text-right text-foreground">
-                  {row.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <Button
-            type="button"
-            className="mt-4 w-full"
-            disabled={disabled}
-            onClick={onDeploy}
+    <DashCard aria-label="Deploy">
+      <DashCardHeader
+        description="Production · from the latest commit"
+        icon={LiveRocket}
+        title="Ready to deploy"
+      />
+      <div className="space-y-3 p-5 pt-4">
+        <ImportFacts
+          address={address}
+          framework={framework}
+          rootDirectory={rootDirectory}
+          source={source}
+        />
+        <Button
+          className="h-11 w-full text-[14px]"
+          data-icon-trigger
+          disabled={starting || blocker !== null}
+          onClick={onDeploy}
+          type="button"
+          variant="hero"
+        >
+          {starting ? (
+            <Spinner />
+          ) : (
+            <LiveRocket className="size-4" strokeWidth={1.9} />
+          )}
+          {starting ? "Starting the build…" : "Deploy"}
+        </Button>
+        {blocker ? (
+          <p
+            className="text-center text-xs text-muted-foreground"
+            role="status"
           >
-            <Rocket className="size-4" /> Deploy
-          </Button>
-        </>
-      ) : (
-        <div className="mt-3">
-          <DeploymentProgress
-            cancel={deployment.cancel}
-            deploying={deployment.deploying}
-            detailsUrl={deployment.detailsUrl}
-            logs={deployment.logs}
-            seconds={deployment.seconds}
-            status={deployment.status}
-          />
-        </div>
-      )}
-    </section>
+            {blocker}
+          </p>
+        ) : null}
+      </div>
+    </DashCard>
   );
 }

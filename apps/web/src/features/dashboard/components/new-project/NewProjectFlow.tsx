@@ -1,16 +1,17 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { BackLink } from "@/components/dashboard/BackLink";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
-import { DeployStepsCard } from "@/features/dashboard/components/DeployStepsCard";
-import { ImportFromUrlCard } from "@/features/dashboard/components/ImportFromUrlCard";
-import { RepositoryPicker } from "@/features/dashboard/components/RepositoryPicker";
+import { DeployStepsCard } from "@/features/dashboard/components/new-project/DeployStepsCard";
+import { ImportFromUrlCard } from "@/features/dashboard/components/new-project/ImportFromUrlCard";
+import { RepositoryPicker } from "@/features/dashboard/components/new-project/RepositoryPicker";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { githubImportHref } from "@/features/dashboard/lib/github-import";
 import type { GitHubRepository } from "@/lib/schemas/github.schemas";
 
+/** Step one of a new project: choose what to deploy. */
 export function NewProjectFlow({ username }: { username: string }) {
   const router = useRouter();
   const [importingId, setImportingId] = useState<number | null>(null);
@@ -21,28 +22,28 @@ export function NewProjectFlow({ username }: { username: string }) {
   }
 
   return (
-    <div className="w-full space-y-6 px-5 py-6 lg:px-8">
-      <Link
-        href={`/${username}`}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" /> All projects
-      </Link>
+    <PageBody>
+      <BackLink href={`/${username}/~/projects`} label="Projects" />
       <DashboardPageHeader
-        title="New Project"
-        description="Choose a repository to deploy. Multivrs detects how to build it."
+        description="Pick a repository. Multivrs reads it, works out how to build it, and puts it live on its own address."
+        eyebrow={`${username} · New project`}
+        title="What are you shipping?"
       />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid items-start gap-3 lg:grid-cols-12">
         <RepositoryPicker
           callbackURL={`/${username}/new`}
+          className="lg:col-span-8"
           importingId={importingId}
           onImport={openRepository}
         />
-        <aside className="space-y-4 lg:sticky lg:top-20">
-          <ImportFromUrlCard onImport={openRepository} />
+        <aside className="grid gap-3 lg:sticky lg:top-[calc(var(--topbar-h)+1.25rem)] lg:col-span-4">
+          <ImportFromUrlCard
+            busy={importingId === -1}
+            onImport={openRepository}
+          />
           <DeployStepsCard />
         </aside>
       </div>
-    </div>
+    </PageBody>
   );
 }

@@ -1,11 +1,13 @@
-import { Bot, ChevronDown } from "lucide-react";
-import SpecularButton from "@/components/SpecularButton";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
 import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DASH_FIELD,
+  DASH_MENU,
+  DASH_MENU_ITEM,
+} from "@/components/dashboard/menu";
+import { LiveLayoutGrid } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
 import type { DomainProjectOption } from "@/lib/services/domain.service";
+import { cn } from "@/lib/utils";
 
 interface AssignDomainTargetStepProps {
   fullDomain: string;
@@ -30,105 +33,90 @@ interface AssignDomainTargetStepProps {
   onSubmit(): void;
 }
 
-export function AssignDomainTargetStep({
-  fullDomain,
-  pending,
-  projectId,
-  projectSearch,
-  projects,
-  selectedProject,
-  dropdownOpen,
-  onBack,
-  onDropdownChange,
-  onProjectChange,
-  onSearchChange,
-  onSubmit,
-}: AssignDomainTargetStepProps) {
-  const filtered = projects.filter((project) =>
-    project.name.toLowerCase().includes(projectSearch.toLowerCase()),
+/** Step 2 of 2: pick the project the domain should serve. */
+export function AssignDomainTargetStep(props: AssignDomainTargetStepProps) {
+  const filtered = props.projects.filter((project) =>
+    project.name.toLowerCase().includes(props.projectSearch.toLowerCase()),
   );
   return (
     <>
-      <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-lg font-semibold text-foreground">
-          Connect Domain
-        </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground">
-          Connect{" "}
-          <span className="font-medium text-foreground/80">{fullDomain}</span> to a
-          project.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="my-4 space-y-2">
-        <span className="block text-xs font-medium text-foreground/80">Project</span>
-        <DropdownMenu open={dropdownOpen} onOpenChange={onDropdownChange}>
+      <DashDialogHeader
+        description={
+          <>
+            Choose which project{" "}
+            <span className="font-geist-mono text-foreground">
+              {props.fullDomain}
+            </span>{" "}
+            serves.
+          </>
+        }
+        icon={LiveLayoutGrid}
+        title="Connect domain · 2 of 2"
+      />
+      <div className="space-y-1.5">
+        <span className="block text-xs font-medium">Project</span>
+        <DropdownMenu
+          onOpenChange={props.onDropdownChange}
+          open={props.dropdownOpen}
+        >
           <DropdownMenuTrigger asChild>
             <button
+              className={cn(
+                DASH_FIELD,
+                "flex w-full items-center justify-between px-3",
+              )}
               type="button"
-              className="flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border border-border bg-muted px-3 text-sm text-foreground focus:border-ring"
             >
-              <span className="flex items-center gap-2.5">
-                <Bot className="size-4 text-foreground/60" />
-                {selectedProject?.name ?? "Select Project..."}
-              </span>
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <span>{props.selectedProject?.name ?? "Select a project"}</span>
+              <ChevronsUpDown className="size-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-(--radix-dropdown-menu-trigger-width) rounded-xl border-border bg-card p-2 shadow-2xl"
+            className={cn(DASH_MENU, "w-(--radix-dropdown-menu-trigger-width)")}
           >
             <DashboardSearchInput
-              containerClassName="mb-2 w-full"
-              value={projectSearch}
-              onValueChange={onSearchChange}
-              placeholder="Select Project..."
-              size="sm"
               onKeyDown={(event) => event.stopPropagation()}
+              onValueChange={props.onSearchChange}
+              placeholder="Find project…"
+              size="sm"
+              value={props.projectSearch}
             />
-            <div className="max-h-48 space-y-0.5 overflow-y-auto pt-1">
+            <div className="mt-1.5 max-h-48 space-y-0.5 overflow-y-auto">
               {filtered.map((project) => (
                 <DropdownMenuItem
+                  className={cn(
+                    DASH_MENU_ITEM,
+                    project.id === props.projectId && "text-foreground",
+                  )}
                   key={project.id}
-                  onSelect={() => onProjectChange(project.id)}
-                  className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
-                    project.id === projectId
-                      ? "bg-muted font-medium text-foreground"
-                      : "text-foreground/80 hover:bg-muted"
-                  }`}
+                  onSelect={() => props.onProjectChange(project.id)}
                 >
-                  <Bot className="size-3.5 shrink-0 text-foreground/60" />
-                  <span className="truncate">{project.name}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {project.name}
+                  </span>
+                  {project.id === props.projectId ? (
+                    <Check className="size-4 text-primary" />
+                  ) : null}
                 </DropdownMenuItem>
               ))}
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <DialogFooter className="flex items-center justify-between pt-2 sm:justify-between">
-        <SpecularButton
-          size="sm"
-          tint="#ffffff"
-          tintOpacity={0.05}
-          lineColor="#666666"
-          baseColor="#333333"
-          textColor="#cccccc"
-          onClick={onBack}
-        >
+      <DialogFooter className="gap-2">
+        <Button onClick={props.onBack} size="sm" type="button" variant="quiet">
           Back
-        </SpecularButton>
-        <SpecularButton
+        </Button>
+        <Button
+          disabled={!props.projectId || props.pending}
+          onClick={props.onSubmit}
           size="sm"
-          tint="#ffffff"
-          tintOpacity={0.9}
-          lineColor="#ffffff"
-          baseColor="#ffffff"
-          textColor="#000000"
-          disabled={!projectId || pending}
-          onClick={onSubmit}
+          type="button"
+          variant="hero"
         >
-          {pending ? "Connecting..." : "Connect"}
-        </SpecularButton>
+          {props.pending ? "Connecting…" : "Connect"}
+        </Button>
       </DialogFooter>
     </>
   );

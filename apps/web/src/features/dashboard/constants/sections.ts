@@ -2,11 +2,24 @@ import { DASHBOARD_NAV_ITEMS } from "./navigation";
 
 /** One-line description shown under each section title. */
 const SECTION_DESCRIPTIONS: Record<string, string> = {
+  projects:
+    "Every app in this workspace with its live address and latest deploy.",
   deployments: "Every build and promotion across this scope.",
-  logs: "Real-time and historical runtime logs.",
-  analytics: "Traffic, audiences and conversion insight.",
-  "speed-insights": "Core Web Vitals from real visitors.",
-  observability: "Traces, metrics and health across services.",
+  logs: "Every request served and what your code printed while serving it.",
+  analytics:
+    "Visitors, pages, sources and countries, like a web analytics suite.",
+  product:
+    "What people do in your product: events, users, funnels and retention.",
+  "speed-insights":
+    "Why it's slow: Core Web Vitals from real visitors, and where each request spends its time.",
+  traces: "Follow one request through every service it touches, span by span.",
+  errors:
+    "Crashes and exceptions grouped into issues, with when and where they happen.",
+  observability:
+    "Is it healthy: requests, errors and every resource, plus checks from outside.",
+  uptime:
+    "Checks from around the world that tell you the moment something is down.",
+  alerts: "Rules across every signal, and who gets told when one fires.",
   firewall: "Traffic rules, rate limits and attack mitigation.",
   cdn: "Edge cache, regions and asset delivery.",
   "environment-variables": "Encrypted build and runtime configuration.",

@@ -1,29 +1,37 @@
-import { SectionSkeletonHeader } from "./SectionSkeletonParts";
-import { SKELETON_ROWS } from "./skeleton.constants";
+import { SkeletonHeader } from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
+const CARDS = ["a", "b", "c", "d"];
+
+/** Stacked settings cards: an icon well and title, a field, a footer strip. */
 export function SettingsSectionSkeleton({ account }: { account: boolean }) {
-  if (!account)
-    return (
-      <main className="w-full animate-pulse space-y-6 px-5 py-6" aria-busy>
-        <SectionSkeletonHeader titleWidth="w-32" />
-        <section className="h-72 rounded-2xl border border-border bg-foreground/2" />
-        <section className="h-36 rounded-2xl border border-red-400/15 bg-red-400/3" />
-      </main>
-    );
   return (
-    <main className="w-full animate-pulse px-5 py-6" aria-busy>
-      <SectionSkeletonHeader titleWidth="w-32" />
-      <div className="mt-6 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-10">
-        <div className="hidden space-y-1 lg:block">
-          {SKELETON_ROWS.slice(0, 7).map((row) => (
-            <div className="h-8 rounded-lg bg-foreground/3" key={row} />
+    <PageBody className="max-w-4xl">
+      <main aria-busy aria-label="Loading settings" className="space-y-5">
+        <SkeletonHeader />
+        {account ? <span className="skeleton block h-2.5 w-20" /> : null}
+        <div className="space-y-3">
+          {CARDS.map((card, index) => (
+            <div
+              aria-hidden="true"
+              className="surface-card overflow-hidden rounded-card"
+              key={card}
+            >
+              <div className="flex gap-3 p-6">
+                <span className="skeleton size-9 shrink-0 rounded-tile" />
+                <div className="flex-1 space-y-2.5">
+                  <span className="skeleton block h-3.5 w-32" />
+                  <span className="skeleton block h-2.5 w-2/3" />
+                  {index < 2 ? (
+                    <span className="skeleton mt-4 block h-9 max-w-md rounded-control" />
+                  ) : null}
+                </div>
+              </div>
+              <div className="h-11 border-t border-hairline bg-foreground/[0.02]" />
+            </div>
           ))}
         </div>
-        <div className="max-w-4xl space-y-5">
-          <section className="h-80 rounded-2xl border border-border bg-foreground/2" />
-          <section className="h-56 rounded-2xl border border-border bg-foreground/2" />
-        </div>
-      </div>
-    </main>
+      </main>
+    </PageBody>
   );
 }

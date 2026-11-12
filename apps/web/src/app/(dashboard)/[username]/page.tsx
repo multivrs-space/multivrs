@@ -1,57 +1,12 @@
-import { notFound, redirect } from "next/navigation";
-import { ProjectsGrid } from "@/features/dashboard/components/ProjectsGrid";
-import { getServerSession } from "@/lib/auth/session";
-import { getAccountUsage } from "@/lib/services/account-usage.service";
-import { dashboardProjects } from "@/lib/services/dashboard.service";
-import { canAccessDashboardWorkspace } from "@/lib/services/dashboard-scope.service";
+import { WorkspaceOverview } from "@/features/dashboard/components/overview/WorkspaceOverview";
 
 /**
- * Account overview (all-projects scope) — served at /[username].
+ * The workspace home at /[username]: every layer of the stack at a glance.
+ * `params` is handed down unresolved; each card awaits it inside its own
+ * Suspense boundary, so navigation shows the page shell instantly.
  */
-export default function DashboardPage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
-  const username = resolveUsername(params);
-  const projects = loadProjects(params);
-  const usage = loadUsage(params);
-
+export default function DashboardPage({ params }: PageProps<"/[username]">) {
   return (
-    <div className="relative isolate flex min-h-[calc(100vh-3.5rem)] flex-col">
-      <div className="relative z-10 w-full px-5 py-8 lg:px-8">
-        <ProjectsGrid username={username} projects={projects} usage={usage} />
-      </div>
-    </div>
+    <WorkspaceOverview username={params.then((value) => value.username)} />
   );
-}
-
-async function resolveUsername(params: Promise<{ username: string }>) {
-  return (await params).username;
-}
-
-async function loadProjects(params: Promise<{ username: string }>) {
-  const { username, userId } = await viewer(params);
-  return dashboardProjects(username, userId);
-}
-
-async function loadUsage(params: Promise<{ username: string }>) {
-  const { username, userId } = await viewer(params);
-  return getAccountUsage(userId, username);
-}
-
-/** The account's owner or someone on its team; anyone else gets a 404, as in the layout. */
-async function viewer(params: Promise<{ username: string }>) {
-  const [{ username }, session] = await Promise.all([
-    params,
-    getServerSession(),
-  ]);
-  if (!session) redirect("/login");
-  if (
-    session.user.username !== username &&
-    !(await canAccessDashboardWorkspace(session.user.id, username))
-  ) {
-    notFound();
-  }
-  return { username, userId: session.user.id };
 }

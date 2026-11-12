@@ -1,5 +1,7 @@
 export const PLAN_KEYS = ["hobby", "pro", "enterprise"] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
+/** A plan as shown: `unlimited` is the limit-exempt Multivrs team account. */
+export type DisplayPlan = PlanKey | "unlimited";
 
 export const ADD_ON_KEYS = [
   "developer_seat",

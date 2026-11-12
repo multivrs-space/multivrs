@@ -47,11 +47,13 @@ export function metricAllowance(
   if (override !== undefined)
     return override === null ? null : BigInt(override);
   const definition = METER_CATALOG[metric];
-  if (!definition || context.plan === "enterprise") return null;
+  if (!definition) return null;
+  // Enterprise starts from Pro; its contract raises what it needs through
+  // entitlement overrides. Only the limit-exempt team account has no cap.
   const base =
-    context.plan === "pro"
-      ? definition.proAllowance
-      : definition.hobbyAllowance;
+    context.plan === "hobby"
+      ? definition.hobbyAllowance
+      : definition.proAllowance;
   if (metric === "mail_email_units") {
     return base + BigInt(context.addOns.mail_volume ?? 0) * 5_000n;
   }

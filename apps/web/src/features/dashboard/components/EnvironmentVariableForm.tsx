@@ -1,17 +1,24 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { DASH_FIELD } from "@/components/dashboard/menu";
+import { ToggleChips } from "@/components/dashboard/ToggleChips";
+import { LiveLock, LivePlus } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import type { EnvironmentTarget } from "@/features/dashboard/types/environment-variable.types";
 import { requestOk } from "@/lib/api/request.client";
 
-const TARGETS: EnvironmentTarget[] = ["production", "preview", "development"];
-type FormState = "idle" | "saving" | "success" | "error";
+const TARGETS: { value: EnvironmentTarget; label: string }[] = [
+  { value: "production", label: "Production" },
+  { value: "preview", label: "Preview" },
+  { value: "development", label: "Development" },
+];
 
+/** Add an encrypted variable and choose which environments receive it. */
 export function EnvironmentVariableForm({ projectId }: { projectId: string }) {
   const router = useRouter();
   const [key, setKey] = useState("");
@@ -20,20 +27,12 @@ export function EnvironmentVariableForm({ projectId }: { projectId: string }) {
     "production",
     "preview",
   ]);
-  const [state, setState] = useState<FormState>("idle");
-
-  function toggleTarget(target: EnvironmentTarget, checked: boolean) {
-    setTargets((current) =>
-      checked
-        ? [...new Set([...current, target])]
-        : current.filter((item) => item !== target),
-    );
-  }
+  const [saving, setSaving] = useState(false);
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (state === "saving") return;
-    setState("saving");
+    if (saving) return;
+    setSaving(true);
     void requestOk(
       `/api/projects/${projectId}/environment`,
       {
@@ -44,65 +43,73 @@ export function EnvironmentVariableForm({ projectId }: { projectId: string }) {
       "Variable could not be saved",
     )
       .then(() => {
+        toast.success(`${key} saved`);
         setKey("");
         setValue("");
-        setState("success");
         router.refresh();
       })
-      .catch(() => setState("error"));
+      .catch(() =>
+        toast.error(
+          "Couldn't save the variable. Check the encryption key and try again.",
+        ),
+      )
+      .finally(() => setSaving(false));
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="grid gap-4 border-b border-[var(--hairline)] bg-foreground/[0.03] p-5 lg:grid-cols-[1fr_1.5fr_auto]"
-    >
-      <Input
-        aria-label="Variable name"
-        value={key}
-        onChange={(event) => setKey(event.target.value.toUpperCase())}
-        placeholder="DATABASE_URL"
-        required
+    <DashCard aria-label="Add variable">
+      <DashCardHeader
+        description="Encrypted with AES-256-GCM; the value is never shown again"
+        icon={LiveLock}
+        title="Add variable"
       />
-      <Input
-        aria-label="Variable value"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder="Encrypted value"
-        required
-        type="password"
-      />
-      <Button disabled={state === "saving" || !targets.length} type="submit">
-        <Plus className="size-4" />
-        {state === "saving" ? "Saving…" : "Save variable"}
-      </Button>
-      <div className="flex flex-wrap gap-5 lg:col-span-3">
-        {TARGETS.map((target) => (
-          <div
-            key={target}
-            className="flex items-center gap-2 text-xs capitalize text-muted-foreground"
-          >
-            <Checkbox
-              aria-label={`${target} environment`}
-              checked={targets.includes(target)}
-              onCheckedChange={(checked) =>
-                toggleTarget(target, checked === true)
-              }
-            />
-            {target}
-          </div>
-        ))}
-        {state === "success" && (
-          <span className="text-xs text-emerald-400">
-            Encrypted variable saved.
-          </span>
-        )}
-        {state === "error" && (
-          <span className="text-xs text-rose-400">
-            Could not save the variable. Check the encryption key and try again.
-          </span>
-        )}
-      </div>
-    </form>
+      <form
+        className="grid gap-3 p-5 pt-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto]"
+        onSubmit={submit}
+      >
+        <Input
+          aria-label="Variable name"
+          className={`${DASH_FIELD} font-geist-mono`}
+          onChange={(event) =>
+            setKey(event.target.value.toUpperCase().replace(/\s+/g, "_"))
+          }
+          placeholder="DATABASE_URL"
+          required
+          value={key}
+        />
+        <Input
+          aria-label="Variable value"
+          autoComplete="off"
+          className={`${DASH_FIELD} font-geist-mono`}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="Value"
+          required
+          type="password"
+          value={value}
+        />
+        <Button
+          data-icon-trigger
+          disabled={saving || !targets.length}
+          type="submit"
+          variant="hero"
+        >
+          <LivePlus strokeWidth={2} />
+          {saving ? "Saving…" : "Save"}
+        </Button>
+        <ToggleChips
+          className="lg:col-span-3"
+          label="Environments"
+          onToggle={(target) =>
+            setTargets((current) =>
+              current.includes(target)
+                ? current.filter((item) => item !== target)
+                : [...current, target],
+            )
+          }
+          options={TARGETS}
+          selected={targets}
+        />
+      </form>
+    </DashCard>
   );
 }

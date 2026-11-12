@@ -1,111 +1,77 @@
-import { Bell, ChevronRight, MoreHorizontal, Search } from "lucide-react";
-import { DASHBOARD_NAV_ITEMS } from "@/features/dashboard/constants/navigation";
+import { RouteSkeleton } from "@/features/dashboard/components/shell/RouteSkeleton";
+import {
+  DASHBOARD_NAV_GROUPS,
+  DASHBOARD_NAV_ITEMS,
+} from "@/features/dashboard/constants/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * A fully static fallback for request-time session verification.
+ * A fully static stand-in for the rail shell while the session is verified.
  *
  * This component must not read pathname, params, cookies, headers, or any
  * other request data: Suspense fallbacks render outside the work they guard.
+ * RouteSkeleton picks the page shape in the browser, after hydration.
  */
 export function DashboardAuthFallback({ className }: { className?: string }) {
   return (
     <div
+      aria-busy
       className={cn(
-        "dashboard-shell dashboard-surface min-h-screen bg-[var(--ink)] text-foreground",
+        "dashboard-shell dashboard-surface dashboard-frame min-h-dvh bg-ink text-foreground lg:bg-ink-raised dark:lg:bg-ink",
         className,
       )}
     >
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[268px] flex-col border-r border-[var(--hairline)] bg-[var(--ink)] lg:flex">
-        <SidebarHeaderIdentitySkeleton />
-        <div className="px-3 pb-1 pt-3">
-          <div className="flex h-8 items-center gap-2 rounded-lg border border-[var(--hairline)] bg-foreground/[0.03] px-2.5 text-muted-foreground">
-            <Search className="size-3.5" />
-            <span className="flex-1 text-xs">Search…</span>
-            <kbd className="rounded-md border border-[var(--hairline)] bg-foreground/[0.04] px-1.5 py-0.5 font-geist-mono text-[10px]">
-              ⌘K
-            </kbd>
-          </div>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-(--rail-w) flex-col lg:flex">
+        <div className="flex h-16 items-center gap-2.5 px-5">
+          <span className="skeleton size-6 rounded-full" />
+          <span className="skeleton h-3 w-28" />
         </div>
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          <nav className="flex-1 px-3 pb-3 pt-1" aria-label="Dashboard">
-            <ul className="flex flex-col gap-0.5">
-              {DASHBOARD_NAV_ITEMS.map((item) => (
-                <li key={item.name}>
-                  <div className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted-foreground">
+        <nav aria-label="Dashboard" className="flex-1 overflow-hidden px-3">
+          {DASHBOARD_NAV_GROUPS.map((group) => (
+            <section className="mt-3 first:mt-1" key={group.id}>
+              {group.label ? (
+                <p className="mb-1 px-2.5 font-geist-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground/55">
+                  {group.label}
+                </p>
+              ) : null}
+              <ul className="flex flex-col gap-0.5">
+                {DASHBOARD_NAV_ITEMS.filter(
+                  (item) => item.group === group.id,
+                ).map((item) => (
+                  <li
+                    className="flex h-9 items-center gap-3 rounded-control px-2.5 text-[13px] text-muted-foreground"
+                    key={item.slug}
+                  >
                     <item.icon
-                      className="size-[17px] shrink-0 text-muted-foreground/70"
+                      className="size-[18px] opacity-80"
                       strokeWidth={1.75}
                     />
-                    <span className="truncate tracking-[-0.01em]">
-                      {item.name}
-                    </span>
-                    {item.badge ? (
-                      <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-geist-mono text-[9px] font-medium uppercase tracking-widest text-primary">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-        <SidebarFooterIdentitySkeleton />
+                    <span className="truncate">{item.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </nav>
       </aside>
 
-      <div className="fixed inset-x-0 top-0 z-30 lg:left-[268px]">
-        <header className="flex h-14 items-center gap-2.5 border-b border-[var(--hairline)] bg-[var(--ink)]/80 px-5 backdrop-blur-xl">
-          <span className="text-[13px] font-medium text-foreground">
-            All Projects
+      <div className="relative min-w-0 lg:fixed lg:top-(--canvas-inset) lg:right-(--canvas-inset) lg:bottom-(--canvas-inset) lg:left-[calc(var(--rail-w)+var(--canvas-inset))] lg:overflow-hidden lg:rounded-canvas lg:surface-canvas">
+        <header className="flex h-14 items-center gap-2.5 border-b border-hairline px-5">
+          <span className="skeleton h-8 w-32 rounded-full" />
+          <span className="font-geist-mono text-[13px] text-muted-foreground/35">
+            /
           </span>
-          <ChevronRight className="size-3.5 text-muted-foreground/40" />
-          <span className="text-[13px] font-medium text-foreground">
-            Overview
+          <span className="skeleton h-3 w-20" />
+          <span className="ml-auto hidden items-center gap-2 lg:flex">
+            <span className="skeleton h-9 w-64 rounded-control" />
+            <span className="skeleton size-9 rounded-full" />
+            <span className="skeleton size-9 rounded-full" />
           </span>
         </header>
+        <div className="lg:h-[calc(100%-3.5rem)] lg:overflow-y-auto">
+          <RouteSkeleton />
+        </div>
       </div>
-
-      <div className="lg:pl-[268px]">
-        <div className="h-14" aria-hidden="true" />
-      </div>
-    </div>
-  );
-}
-
-function SidebarHeaderIdentitySkeleton() {
-  return (
-    <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-[var(--hairline)] px-5">
-      <span className="size-8 animate-pulse rounded-md bg-foreground/[0.07]" />
-      <span className="min-w-0 flex-1 space-y-2">
-        <span className="block h-3 w-24 animate-pulse rounded-sm bg-foreground/[0.08]" />
-        <span className="block h-2 w-12 animate-pulse rounded-sm bg-white/[0.045]" />
-      </span>
-    </div>
-  );
-}
-
-function SidebarFooterIdentitySkeleton() {
-  return (
-    <div className="flex items-center gap-2 border-t border-[var(--hairline)] px-4 py-3">
-      <span className="size-7 animate-pulse rounded-full bg-white/[0.07]" />
-      <span className="h-3 flex-1 animate-pulse rounded-sm bg-foreground/[0.07]" />
-      <button
-        type="button"
-        disabled
-        aria-label="Account menu loading"
-        className="flex size-8 items-center justify-center rounded-full border border-[var(--hairline)] text-muted-foreground/50"
-      >
-        <MoreHorizontal className="size-4" />
-      </button>
-      <button
-        type="button"
-        disabled
-        aria-label="Notifications loading"
-        className="flex size-8 items-center justify-center rounded-full border border-[var(--hairline)] text-muted-foreground/50"
-      >
-        <Bell className="size-4" />
-      </button>
     </div>
   );
 }

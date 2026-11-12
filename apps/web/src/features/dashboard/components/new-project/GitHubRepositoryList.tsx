@@ -1,9 +1,9 @@
 "use client";
 
 import type { FrameworkId } from "@multivrs/config";
-import { ArrowRight, Loader2, Lock } from "lucide-react";
+import { Spinner } from "@/components/dashboard/Spinner";
+import { LiveChevronRight, LiveLock } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { RepositoryIcon } from "@/features/dashboard/components/RepositoryIcon";
 import { FRAMEWORK_LABELS } from "@/features/dashboard/constants/framework-labels";
 import { relativeTime } from "@/features/dashboard/lib/relative-time";
@@ -31,79 +31,82 @@ export function GitHubRepositoryList({
 }: GitHubRepositoryListProps) {
   if (loading)
     return (
-      <ul aria-busy="true" className="divide-y divide-(--hairline)">
+      <ul aria-busy="true" className="space-y-1 p-2 pt-3">
         {SKELETON_ROWS.map((row) => (
-          <li key={row} className="flex items-center gap-3 px-4 py-3">
-            <Skeleton className="size-8 rounded-md" />
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-3.5 w-40" />
-              <Skeleton className="h-3 w-24" />
-            </div>
+          <li className="flex items-center gap-3 px-3 py-2.5" key={row}>
+            <span className="skeleton size-8 rounded-[9px]" />
+            <span className="flex-1 space-y-2">
+              <span className="skeleton block h-3 w-40" />
+              <span className="skeleton block h-2.5 w-28" />
+            </span>
+            <span className="skeleton h-8 w-20 rounded-full" />
           </li>
         ))}
       </ul>
     );
   if (!repositories.length)
     return (
-      <p className="px-4 py-14 text-center text-sm text-muted-foreground">
+      <p className="px-5 py-16 text-center text-[13px] text-muted-foreground">
         {error ?? "No repositories match your search."}
       </p>
     );
   return (
-    <ul className="max-h-[560px] divide-y divide-(--hairline) overflow-y-auto">
-      {repositories.map((repository) => (
-        <li
-          key={repository.id}
-          className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-foreground/[0.03]"
-        >
-          <RepositoryIcon
-            framework={frameworks[repository.full_name]}
-            language={repository.language}
-            name={repository.name}
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <span className="truncate text-sm font-medium">
-                {repository.name}
-              </span>
-              {repository.private ? (
-                <Lock
-                  aria-label="Private repository"
-                  className="size-3 shrink-0 text-muted-foreground"
-                />
-              ) : null}
-            </div>
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">
-              {stackLabel(
-                frameworks[repository.full_name],
-                repository.language,
-              )}
-              Updated {relativeTime(repository.updated_at)}
-            </p>
-          </div>
-          <Button
-            type="button"
-            size="xs"
-            variant="outline"
-            disabled={importingId !== null}
-            onClick={() => onImport(repository)}
-            className="border-(--hairline-strong) bg-transparent px-3"
+    <ul className="max-h-[min(560px,60vh)] space-y-0.5 overflow-y-auto p-2 pt-3">
+      {repositories.map((repository) => {
+        const framework = frameworks[repository.full_name];
+        const importing = importingId === repository.id;
+        return (
+          <li
+            className="group flex items-center gap-3 rounded-tile px-3 py-2.5 transition-colors hover:bg-foreground/[0.035]"
+            key={repository.id}
           >
-            {importingId === repository.id ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : (
-              <>
-                Import
-                <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
-              </>
-            )}
-          </Button>
-        </li>
-      ))}
+            <RepositoryIcon
+              framework={framework}
+              language={repository.language}
+              name={repository.name}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="flex min-w-0 items-center gap-1.5 text-[13.5px] font-semibold tracking-[-0.01em] text-foreground">
+                <span className="truncate">{repository.name}</span>
+                {repository.private ? (
+                  <LiveLock
+                    aria-label="Private repository"
+                    className="size-3 shrink-0 text-muted-foreground"
+                    strokeWidth={2}
+                  />
+                ) : null}
+              </p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {stackLabel(framework, repository.language)}
+                <time dateTime={repository.updated_at}>
+                  updated {relativeTime(repository.updated_at)}
+                </time>
+              </p>
+            </div>
+            <Button
+              aria-label={`Import ${repository.full_name}`}
+              className="h-8 px-3.5 text-[12.5px]"
+              data-icon-trigger
+              disabled={importingId !== null}
+              onClick={() => onImport(repository)}
+              size="sm"
+              type="button"
+              variant={importing ? "hero" : "raised"}
+            >
+              {importing ? <Spinner className="size-3" /> : null}
+              Import
+              {importing ? null : (
+                <LiveChevronRight className="size-3.5" strokeWidth={2} />
+              )}
+            </Button>
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
+/** "Next.js · " once detected, else the repository's main language. */
 function stackLabel(
   framework: FrameworkId | null | undefined,
   language: string | null,

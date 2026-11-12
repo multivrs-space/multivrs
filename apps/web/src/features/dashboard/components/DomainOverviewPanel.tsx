@@ -1,8 +1,10 @@
 "use client";
 
-import { Copy } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { CopyButton } from "@/components/CopyButton";
+import { StatusOrb } from "@/components/dashboard/StatusOrb";
+import { LiveArrowLeft } from "@/components/icons/animated";
+import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
 import { DomainActions } from "@/features/dashboard/components/DomainActions";
 import { DomainMetadataGrid } from "@/features/dashboard/components/DomainMetadataGrid";
 import type { DomainDetail } from "@/lib/domains/dns.types";
@@ -16,60 +18,56 @@ interface DomainOverviewPanelProps {
   onToggleRenew(): void;
 }
 
+/** The domain's name, state and key facts at the top of its page. */
 export function DomainOverviewPanel(props: DomainOverviewPanelProps) {
   const { autoRenew, backUrl, delegated, domain, renewPending, onToggleRenew } =
     props;
-  const copyDomain = () => {
-    void navigator.clipboard
-      .writeText(domain.hostname)
-      .then(() => toast.success("Domain copied"));
-  };
+  const live = domain.verified && domain.certStatus === "active";
   return (
     <>
-      <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
-        <Link
-          href={backUrl}
-          className="transition-colors hover:text-foreground"
-        >
-          Domains
-        </Link>
-        <span>/</span>
-        <span className="flex items-center gap-1.5 font-medium text-foreground">
-          {domain.hostname}
-          <button
-            type="button"
-            onClick={copyDomain}
-            className="text-muted-foreground transition-colors hover:text-foreground"
-            aria-label={`Copy ${domain.hostname}`}
-          >
-            <Copy className="size-3.5" />
-          </button>
-        </span>
-      </div>
-      <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            {domain.hostname}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {domain.managed
-              ? "Registered and managed by Multivrs"
-              : "Externally registered domain"}
-          </p>
-        </div>
-        <DomainActions
-          domainId={domain.id}
-          detailUrl="#"
-          hostname={domain.hostname}
-          initialAutoRenew={autoRenew}
-        />
-      </div>
+      <Link
+        className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+        data-icon-trigger
+        href={backUrl}
+      >
+        <LiveArrowLeft className="size-3.5" strokeWidth={2} />
+        Domains
+      </Link>
+      <DashboardPageHeader
+        actions={
+          <DomainActions
+            detailUrl="#"
+            domainId={domain.id}
+            hostname={domain.hostname}
+            initialAutoRenew={autoRenew}
+          />
+        }
+        description={
+          domain.managed
+            ? "Registered and managed by Multivrs."
+            : "Registered elsewhere; DNS and routing managed here."
+        }
+        eyebrow="Domain"
+        title={
+          <span className="flex flex-wrap items-center gap-2.5">
+            <span className="font-geist-mono text-[0.85em]">
+              {domain.hostname}
+            </span>
+            <CopyButton className="size-8" text={domain.hostname} />
+            <StatusOrb
+              label={live ? "Active" : "Pending setup"}
+              pill
+              tone={live ? "ready" : "building"}
+            />
+          </span>
+        }
+      />
       <DomainMetadataGrid
         autoRenew={autoRenew}
         delegated={delegated}
         domain={domain}
-        renewPending={renewPending}
         onToggleRenew={onToggleRenew}
+        renewPending={renewPending}
       />
     </>
   );

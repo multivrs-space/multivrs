@@ -62,6 +62,7 @@ model User {
   /// The team that belongs to this account: members can open its projects.
   accountTeam          Organization?         @relation("AccountTeam")
   organizationInvites  Invitation[]          @relation("InvitationInviter")
+  createdDeployments   Deployment[]          @relation("DeploymentCreator")
 
   @@index([email])
   @@index([username])
@@ -220,14 +221,18 @@ model Deployment {
   startedAt    DateTime?
   finishedAt   DateTime?
   errorMessage String?
+  /// Who started it from the dashboard, CLI or API; null for git pushes.
+  createdById  String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   project      Project         @relation("ProjectDeployments", fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy    User?           @relation("DeploymentCreator", fields: [createdById], references: [id], onDelete: SetNull)
   productionOf Project?        @relation("ProductionDeployment")
   logs         DeploymentLog[]
 
   @@index([projectId])
+  @@index([createdById])
   @@map("deployments")
 }
 

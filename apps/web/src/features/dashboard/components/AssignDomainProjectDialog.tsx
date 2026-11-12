@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import SpecularButton from "@/components/SpecularButton";
+import { DASH_DIALOG } from "@/components/dashboard/menu";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AssignDomainNameStep } from "@/features/dashboard/components/AssignDomainNameStep";
 import { AssignDomainTargetStep } from "@/features/dashboard/components/AssignDomainTargetStep";
@@ -64,18 +65,10 @@ export function AssignDomainProjectDialog({
       open={open}
       onOpenChange={(value) => (value ? setOpen(true) : reset())}
     >
-      <SpecularButton
-        size="sm"
-        tint="#ffffff"
-        tintOpacity={0.9}
-        lineColor="#ffffff"
-        baseColor="#ffffff"
-        textColor="#000000"
-        onClick={() => setOpen(true)}
-      >
+      <Button onClick={() => setOpen(true)} size="sm" variant="hero">
         Connect
-      </SpecularButton>
-      <DialogContent className="max-w-md rounded-2xl border border-border bg-card p-6 text-foreground shadow-2xl">
+      </Button>
+      <DialogContent className={`${DASH_DIALOG} max-w-md`}>
         {step === 1 ? (
           <AssignDomainNameStep
             fullDomain={fullDomain}

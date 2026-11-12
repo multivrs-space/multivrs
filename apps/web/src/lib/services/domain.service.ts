@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { ownedOrTeamWhere } from "@/lib/services/account-access";
+import { accountOwnerIdForSlug } from "@/lib/services/dashboard-scope.service";
 import { projectAccessWhere } from "@/lib/services/project-access";
 
 export interface DashboardDomain {
@@ -66,9 +67,11 @@ export async function domainProjectOptions(
   username: string,
   projectSlug?: string,
 ): Promise<DomainProjectOption[]> {
+  const ownerId = await accountOwnerIdForSlug(username);
+  if (!ownerId) return [];
   return prisma.project.findMany({
     where: {
-      owner: { username },
+      ownerId,
       OR: projectAccessWhere(viewerId),
       ...(projectSlug ? { slug: projectSlug } : {}),
     },

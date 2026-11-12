@@ -1,15 +1,11 @@
 "use client";
 
 import { useReducer } from "react";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
+import { DASH_DIALOG } from "@/components/dashboard/menu";
+import { LiveNetwork } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import type { DnsRecordInput } from "@/features/dashboard/domain-dns-api";
 import type { DnsRecord, DnsRecordType } from "@/lib/domains/dns.types";
 import { DnsRecordFields } from "./DnsRecordFields";
@@ -54,16 +50,13 @@ export function DnsRecordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className={DASH_DIALOG}>
         <form onSubmit={submit} className="grid gap-6">
-          <DialogHeader>
-            <DialogTitle>
-              {record ? "Edit DNS record" : "Add DNS record"}
-            </DialogTitle>
-            <DialogDescription>
-              Changes are published to Openprovider authoritative DNS.
-            </DialogDescription>
-          </DialogHeader>
+          <DashDialogHeader
+            description="Changes publish to the authoritative DNS within a minute."
+            icon={LiveNetwork}
+            title={record ? "Edit DNS record" : "Add DNS record"}
+          />
           <DnsRecordFields
             name={state.name}
             setName={(name) => update({ name })}
@@ -76,15 +69,16 @@ export function DnsRecordDialog({
             priority={state.priority}
             setPriority={(priority) => update({ priority })}
           />
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
-              type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
+              size="sm"
+              type="button"
+              variant="quiet"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
+            <Button disabled={pending} size="sm" type="submit" variant="hero">
               {pending ? "Saving…" : "Save record"}
             </Button>
           </DialogFooter>

@@ -1,18 +1,30 @@
 "use client";
 
-import { Box, Play, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { CopyButton } from "@/components/CopyButton";
+import { DashCard } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatusOrb } from "@/components/dashboard/StatusOrb";
+import {
+  LivePlus,
+  LiveSquareTerminal,
+  LiveTrash,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
+import {
+  SandboxTerminal,
+  type TerminalEntry,
+} from "@/features/dashboard/components/sandboxes/SandboxTerminal";
 import { requestOk } from "@/lib/api/request.client";
 import {
   sandboxCommandResponseSchema,
   sandboxCreateResponseSchema,
 } from "@/lib/schemas/sandbox.schemas";
 
-type SandboxState = "idle" | "creating" | "ready" | "running" | "error";
-
+/** An ephemeral container for this project: start it, run commands, end it. */
 export function SandboxesPage({
   projectId,
   projectName,
@@ -21,12 +33,14 @@ export function SandboxesPage({
   projectName: string;
 }) {
   const [sandboxId, setSandboxId] = useState<string>();
-  const [command, setCommand] = useState("pwd && ls -la");
-  const [output, setOutput] = useState("");
-  const [state, setState] = useState<SandboxState>("idle");
+  const [history, setHistory] = useState<TerminalEntry[]>([]);
+  const [busy, setBusy] = useState<
+    "creating" | "running" | "destroying" | null
+  >(null);
+
   function create() {
-    if (state === "creating") return;
-    setState("creating");
+    if (busy) return;
+    setBusy("creating");
     void requestOk(
       `/api/projects/${projectId}/sandboxes`,
       { method: "POST" },
@@ -34,15 +48,18 @@ export function SandboxesPage({
     )
       .then((response) => response.json())
       .then((body) => sandboxCreateResponseSchema.parse(body))
-      .then((result) => {
-        setSandboxId(result.sandboxId);
-        setState("ready");
-      })
-      .catch(() => setState("error"));
+      .then((result) => setSandboxId(result.sandboxId))
+      .catch(() =>
+        toast.error(
+          "The sandbox didn't start. Check the build worker configuration.",
+        ),
+      )
+      .finally(() => setBusy(null));
   }
-  function run() {
-    if (!sandboxId || state === "running") return;
-    setState("running");
+
+  function run(command: string) {
+    if (!sandboxId || busy) return;
+    setBusy("running");
     void requestOk(
       `/api/projects/${projectId}/sandboxes/${sandboxId}`,
       {
@@ -54,14 +71,23 @@ export function SandboxesPage({
     )
       .then((response) => response.json())
       .then((body) => sandboxCommandResponseSchema.parse(body))
-      .then((result) => {
-        setOutput([result.stdout, result.stderr].filter(Boolean).join("\n"));
-        setState("ready");
-      })
-      .catch(() => setState("error"));
+      .then((result) =>
+        setHistory((current) => [
+          ...current,
+          {
+            id: `${current.length}-${command}`,
+            command,
+            output: [result.stdout, result.stderr].filter(Boolean).join("\n"),
+          },
+        ]),
+      )
+      .catch(() => toast.error("That command didn't run."))
+      .finally(() => setBusy(null));
   }
+
   function destroy() {
-    if (!sandboxId) return;
+    if (!sandboxId || busy) return;
+    setBusy("destroying");
     void requestOk(
       `/api/projects/${projectId}/sandboxes/${sandboxId}`,
       { method: "DELETE" },
@@ -69,66 +95,70 @@ export function SandboxesPage({
     )
       .then(() => {
         setSandboxId(undefined);
-        setOutput("");
-        setState("idle");
+        setHistory([]);
+        toast.success("Sandbox destroyed");
       })
-      .catch(() => setState("error"));
+      .catch(() => toast.error("Couldn't destroy the sandbox."))
+      .finally(() => setBusy(null));
   }
+
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
+        actions={
+          sandboxId ? (
+            <Button
+              data-icon-trigger
+              disabled={busy !== null}
+              onClick={destroy}
+              size="sm"
+              variant="danger"
+            >
+              <LiveTrash strokeWidth={1.75} />
+              {busy === "destroying" ? "Destroying…" : "Destroy"}
+            </Button>
+          ) : null
+        }
+        description="A throwaway container with this project's code, for quick commands and checks."
+        eyebrow={`${projectName} · Run`}
         title="Sandboxes"
-        description={<>Ephemeral Cloudflare container for {projectName}.</>}
       />
-      <section className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-background/70">
-        <div className="flex items-center justify-between gap-5 border-b border-[var(--hairline)] p-5">
-          <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-xl border border-purple-400/20 bg-purple-400/[0.06]">
-              <Box className="size-4 text-purple-300" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold">Development sandbox</h2>
-              <p className="mt-1 font-geist-mono text-[10px] text-muted-foreground">
-                {sandboxId ?? "Not running"}
-              </p>
-            </div>
+      {sandboxId ? (
+        <DashCard aria-label="Sandbox terminal">
+          <div className="flex items-center gap-3 border-b border-hairline px-4 py-3">
+            <StatusOrb label="Running" pill tone="ready" />
+            <span className="truncate font-geist-mono text-[12px] text-muted-foreground">
+              {sandboxId}
+            </span>
+            <CopyButton className="size-7" text={sandboxId} />
           </div>
-          {sandboxId ? (
-            <Button onClick={destroy} variant="outline">
-              <Trash2 className="size-4" />
-              Destroy
-            </Button>
-          ) : (
-            <Button disabled={state === "creating"} onClick={create}>
-              {state === "creating" ? "Starting…" : "Create sandbox"}
-            </Button>
-          )}
-        </div>
-        {sandboxId && (
-          <div className="space-y-4 p-5">
-            <div className="flex gap-3">
-              <Input
-                value={command}
-                onChange={(event) => setCommand(event.target.value)}
-                aria-label="Shell command"
-              />
-              <Button disabled={state === "running"} onClick={run}>
-                <Play className="size-4" />
-                {state === "running" ? "Running…" : "Run"}
+          <SandboxTerminal
+            history={history}
+            onRun={run}
+            running={busy === "running"}
+          />
+        </DashCard>
+      ) : (
+        <DashCard>
+          <EmptyState
+            actions={
+              <Button
+                data-icon-trigger
+                disabled={busy !== null}
+                onClick={create}
+                size="sm"
+                variant="hero"
+              >
+                <LivePlus strokeWidth={2} />
+                {busy === "creating" ? "Starting…" : "Create sandbox"}
               </Button>
-            </div>
-            <pre className="min-h-64 overflow-auto rounded-xl border border-[var(--hairline)] bg-muted p-4 font-geist-mono text-xs leading-5 text-emerald-300">
-              {output || "$ Ready"}
-            </pre>
-          </div>
-        )}
-        {state === "error" && (
-          <p className="border-t border-[var(--hairline)] px-5 py-3 text-xs text-rose-400">
-            Sandbox request failed. Check the Cloudflare build worker
-            configuration.
-          </p>
-        )}
-      </section>
-    </div>
+            }
+            description="Spin up an isolated container, run shell commands against your project, and throw it away when you're done."
+            glyph={LiveSquareTerminal}
+            title="No sandbox running"
+          />
+        </DashCard>
+      )}
+    </PageBody>
   );
 }

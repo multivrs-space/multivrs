@@ -1,22 +1,27 @@
 "use client";
 
 import type { FrameworkId } from "@multivrs/config";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BuildSettingsFields } from "@/features/dashboard/components/BuildSettingsFields";
+import { BackLink } from "@/components/dashboard/BackLink";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
-import { DeployPanel } from "@/features/dashboard/components/DeployPanel";
-import { EnvironmentDraftEditor } from "@/features/dashboard/components/EnvironmentDraftEditor";
-import { ProjectImportBasics } from "@/features/dashboard/components/ProjectImportBasics";
+import { BuildSettingsFields } from "@/features/dashboard/components/new-project/BuildSettingsFields";
+import { DeployPanel } from "@/features/dashboard/components/new-project/DeployPanel";
+import { EnvironmentDraftEditor } from "@/features/dashboard/components/new-project/EnvironmentDraftEditor";
+import { ImportDeployView } from "@/features/dashboard/components/new-project/ImportDeployView";
+import { ProjectImportBasics } from "@/features/dashboard/components/new-project/ProjectImportBasics";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { useDeploymentImport } from "@/features/dashboard/hooks/useDeploymentImport";
 import { useFrameworkDetection } from "@/features/dashboard/hooks/useFrameworkDetection";
+import { warmBuildMachine } from "@/features/dashboard/lib/build-warmup.client";
+import { deployBlocker } from "@/features/dashboard/lib/deploy-blocker";
 import type {
   DeploymentImportConfig,
   RepositorySource,
 } from "@/features/dashboard/types/deployment-import.types";
+import { slugify } from "@/lib/services/slug";
 
+/** Step two: check what Multivrs detected, deploy, and watch it go live. */
 export function NewProjectImportFlow({
   deploymentDomain,
   username,
@@ -38,8 +43,6 @@ export function NewProjectImportFlow({
     rootDirectory: ".",
   });
   const [detectRoot, setDetectRoot] = useState(".");
-  const [buildOpen, setBuildOpen] = useState(false);
-  const [environmentOpen, setEnvironmentOpen] = useState(false);
   const chosenByUser = useRef(false);
   const detection = useFrameworkDetection({
     owner: repositoryOwner,
@@ -57,6 +60,11 @@ export function NewProjectImportFlow({
     url: search.get("s") || "",
   };
   const deployment = useDeploymentImport(source);
+  const slug = deployment.project?.slug ?? slugify(config.projectName);
+  const address = `https://${slug}.${deploymentDomain}`;
+
+  // Boot the build machine while the form is being checked, not after Deploy.
+  useEffect(() => warmBuildMachine({ account: username }), [username]);
 
   // Adopt the detected framework unless the user already picked one.
   useEffect(() => {
@@ -65,75 +73,80 @@ export function NewProjectImportFlow({
     setConfig((current) => ({ ...current, framework }));
   }, [detection]);
 
-  const detectedFramework = result?.framework ?? "static";
-  const usesDetected = config.framework === detectedFramework;
+  const usesDetected = config.framework === (result?.framework ?? "static");
+  const facts = {
+    address,
+    framework: config.framework,
+    rootDirectory: config.rootDirectory,
+    source,
+  };
 
   return (
-    <div className="w-full space-y-6 px-5 py-6 lg:px-8">
-      <Link
-        href={`/${username}/new`}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" /> Choose another repository
-      </Link>
-      <DashboardPageHeader
-        title={`Configure ${source.name}`}
-        description="Check the detected settings, then deploy. You can change all of these later."
-      />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="space-y-4 rounded-xl border border-(--hairline) bg-(--ink-raised) p-5">
-          <ProjectImportBasics
-            config={config}
-            detection={detection}
-            deploymentDomain={deploymentDomain}
-            onChange={setConfig}
-            onFrameworkChange={(framework: FrameworkId) => {
-              chosenByUser.current = true;
-              setConfig((current) => ({ ...current, framework }));
-            }}
-            onRootCommit={(root) => {
-              chosenByUser.current = false;
-              setDetectRoot(root);
-            }}
+    <PageBody>
+      <BackLink href={`/${username}/new`} label="Choose another repository" />
+      {deployment.started ? (
+        <ImportDeployView
+          {...facts}
+          key={deployment.started.deploymentId}
+          onEdit={deployment.edit}
+          onRetry={() => void deployment.deploy(config)}
+          retrying={deployment.starting}
+          started={deployment.started}
+          username={username}
+        />
+      ) : (
+        <>
+          <DashboardPageHeader
+            description="Multivrs filled these in from the repository. Change anything you need, then deploy. All of it can be edited later."
+            eyebrow={`${source.owner}/${source.name} · ${source.branch}`}
+            title={`Configure ${source.name}`}
           />
-          <BuildSettingsFields
-            config={config}
-            defaults={{
-              buildCommand: usesDetected
-                ? (result?.buildCommand ?? null)
-                : null,
-              installCommand: result
-                ? `${result.packageManager} install`
-                : null,
-              outputDirectory: usesDetected
-                ? (result?.outputDirectory ?? null)
-                : null,
-            }}
-            onChange={setConfig}
-            open={buildOpen}
-            onToggle={() => setBuildOpen((value) => !value)}
-          />
-          <EnvironmentDraftEditor
-            config={config}
-            onChange={setConfig}
-            open={environmentOpen}
-            onToggle={() => setEnvironmentOpen((value) => !value)}
-          />
-        </section>
-        <aside className="lg:sticky lg:top-20">
-          <DeployPanel
-            config={config}
-            deployment={deployment}
-            disabled={
-              deployment.deploying ||
-              !source.url ||
-              detection.status === "detecting"
-            }
-            onDeploy={() => deployment.deploy(config)}
-            source={source}
-          />
-        </aside>
-      </div>
-    </div>
+          <div className="grid items-start gap-3 lg:grid-cols-12">
+            <div className="grid min-w-0 gap-3 lg:col-span-8">
+              <ProjectImportBasics
+                config={config}
+                deploymentDomain={deploymentDomain}
+                detection={detection}
+                onChange={setConfig}
+                onFrameworkChange={(framework: FrameworkId) => {
+                  chosenByUser.current = true;
+                  setConfig((current) => ({ ...current, framework }));
+                }}
+                onRootCommit={(root) => {
+                  chosenByUser.current = false;
+                  setDetectRoot(root);
+                }}
+                project={deployment.project}
+              />
+              <BuildSettingsFields
+                config={config}
+                defaults={{
+                  buildCommand: usesDetected
+                    ? (result?.buildCommand ?? null)
+                    : null,
+                  installCommand: result
+                    ? `${result.packageManager} install`
+                    : null,
+                  outputDirectory: usesDetected
+                    ? (result?.outputDirectory ?? null)
+                    : null,
+                }}
+                detected={result !== null}
+                onChange={setConfig}
+              />
+              <EnvironmentDraftEditor config={config} onChange={setConfig} />
+            </div>
+            <aside className="lg:sticky lg:top-[calc(var(--topbar-h)+1.25rem)] lg:col-span-4">
+              <DeployPanel
+                {...facts}
+                blocker={deployBlocker(config, detection.status, source.url)}
+                onDeploy={() => void deployment.deploy(config)}
+                starting={deployment.starting}
+              />
+            </aside>
+          </div>
+        </>
+      )}
+    </PageBody>
   );
 }

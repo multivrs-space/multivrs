@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NewProjectFlow } from "@/features/dashboard/components/NewProjectFlow";
+import { NewProjectFlow } from "@/features/dashboard/components/new-project/NewProjectFlow";
 
 /** Reads the URL and session at request time, like the rest of the dashboard. */
 export const instant = false;

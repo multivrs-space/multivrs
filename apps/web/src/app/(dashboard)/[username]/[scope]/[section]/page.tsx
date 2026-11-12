@@ -1,13 +1,17 @@
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { DeploymentsPage } from "@/features/dashboard/components/DeploymentsPage";
 import { DomainsPage } from "@/features/dashboard/components/DomainsPage";
-import { LogsPage } from "@/features/dashboard/components/LogsPage";
+import { LogsSection } from "@/features/dashboard/components/logs/LogsSection";
+import {
+  isObserveSection,
+  ObserveSection,
+} from "@/features/dashboard/components/observe/ObserveSection";
+import { ObserveTabs } from "@/features/dashboard/components/observe/ObserveTabs";
 import { PlatformSectionStream } from "@/features/dashboard/components/PlatformSectionStream";
 import { ProjectSettingsPage } from "@/features/dashboard/components/ProjectSettingsPage";
+import { ProjectsSection } from "@/features/dashboard/components/ProjectsSection";
 import { SectionPlaceholder } from "@/features/dashboard/components/SectionPlaceholder";
-import { SettingsPage } from "@/features/dashboard/components/SettingsPage";
 import { TeamSettingsPage } from "@/features/dashboard/components/TeamSettingsPage";
 import { TemplatesDashboard } from "@/features/dashboard/components/TemplatesDashboard";
 import { ALL_PROJECTS_SCOPE } from "@/features/dashboard/constants/navigation";
@@ -19,23 +23,14 @@ import { isPlatformProjectSection } from "@/features/dashboard/lib/project-platf
 import type { AnalyticsRange } from "@/features/dashboard/types/analytics.types";
 import { getServerSession } from "@/lib/auth/session";
 import { ensureAccountTeam } from "@/lib/services/account-team.service";
-import { getAccountProfile } from "@/lib/services/account.service";
-import { accountDeletionBlockers } from "@/lib/services/account-deletion.service";
-import { getAccountSignIn } from "@/lib/services/account-sign-in.service";
-import { listApiTokens } from "@/lib/services/api-token.service";
-import { listAuditEvents } from "@/lib/services/audit-event.service";
 import { getBillingOverview } from "@/lib/services/billing-overview.service";
-import {
-  dashboardDeployments,
-  dashboardProjects,
-} from "@/lib/services/dashboard.service";
+import { dashboardDeployments } from "@/lib/services/dashboard-deployments.service";
 import { getScopedProject } from "@/lib/services/dashboard-scope.service";
 import {
   dashboardDomains,
   domainProjectOptions,
 } from "@/lib/services/domain.service";
 import { getProject } from "@/lib/services/project.service";
-import { listProjectRuntimeLogs } from "@/lib/services/runtime-log.service";
 import {
   getSellerTemplates,
   getTemplateCategories,
@@ -60,6 +55,18 @@ export default async function SectionPage({
     notFound();
   }
 
+  if (section === "projects") {
+    if (scope !== ALL_PROJECTS_SCOPE)
+      redirect(`/${username}/${ALL_PROJECTS_SCOPE}/projects`);
+    const { view } = await searchParams;
+    return (
+      <ProjectsSection
+        initialView={view === "usage" ? "usage" : "projects"}
+        username={username}
+      />
+    );
+  }
+
   if (section === "deployments") {
     const session = await getServerSession();
     if (!session) notFound();
@@ -71,22 +78,36 @@ export default async function SectionPage({
     return <DeploymentsPage deployments={deployments} />;
   }
 
-  if (section === "logs") {
-    const session = await getServerSession();
-    if (!session) notFound();
-    const projects = await dashboardProjects(username, session.user.id);
-    if (!projects) notFound();
+  if (section === "logs")
+    return <LogsSection scope={scope} username={username} />;
+
+  if (isObserveSection(section)) {
+    const { range } = await searchParams;
     return (
-      <LogsPage
-        username={username}
-        projects={projects}
-        projectSlug={scope === ALL_PROJECTS_SCOPE ? undefined : scope}
-        logs={
-          scope === ALL_PROJECTS_SCOPE
-            ? []
-            : await listProjectRuntimeLogs(session.user.id, username, scope)
-        }
-      />
+      <ObserveTabs scope={scope} section={section} username={username}>
+        <ObserveSection
+          range={range === "24h" || range === "30d" ? range : "7d"}
+          scope={scope}
+          section={section}
+          username={username}
+        />
+      </ObserveTabs>
+    );
+  }
+
+  // Traces sit under Performance; the view itself is Monitoring's traces view.
+  if (section === "traces") {
+    return (
+      <ObserveTabs scope={scope} section={section} username={username}>
+        <PlatformSectionStream
+          analyticsRange="24h"
+          meta={meta}
+          requestedView="traces"
+          scope={scope}
+          section="observability"
+          username={username}
+        />
+      </ObserveTabs>
     );
   }
 
@@ -163,15 +184,17 @@ export default async function SectionPage({
   if (isPlatformProjectSection(section)) {
     const mailSearch = await searchParams;
     return (
-      <PlatformSectionStream
-        compose={mailSearch.compose}
-        analyticsRange={parseAnalyticsRange(mailSearch.range)}
-        meta={meta}
-        requestedView={mailSearch.view}
-        scope={scope}
-        section={section}
-        username={username}
-      />
+      <ObserveTabs scope={scope} section={section} username={username}>
+        <PlatformSectionStream
+          compose={mailSearch.compose}
+          analyticsRange={parseAnalyticsRange(mailSearch.range)}
+          meta={meta}
+          requestedView={mailSearch.view}
+          scope={scope}
+          section={section}
+          username={username}
+        />
+      </ObserveTabs>
     );
   }
 

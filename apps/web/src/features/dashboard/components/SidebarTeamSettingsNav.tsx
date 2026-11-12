@@ -1,23 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import {
+  LiveCreditCard,
+  LiveReceipt,
+  LiveSettings,
+  LiveUsers,
+} from "@/components/icons/animated";
+import {
+  ContextNavHeader,
+  ContextNavItem,
+  ContextNavList,
+} from "@/features/dashboard/components/shell/ContextNav";
+import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
 
+/** Only sections the team settings page actually has. */
 const TEAM_SETTINGS_ITEMS = [
-  { id: "general", label: "General" },
-  { id: "billing", label: "Billing" },
-  { id: "build", label: "Build and Deployment" },
-  { id: "invoices", label: "Invoices" },
-  { id: "members", label: "Members" },
-  { id: "access", label: "Access Groups" },
-  { id: "webhooks", label: "Webhooks" },
-  { id: "security", label: "Security & Privacy" },
-  { id: "keys", label: "Key Management" },
-  { id: "activity", label: "Activity" },
+  { id: "general", label: "General", icon: LiveSettings },
+  { id: "members", label: "Members", icon: LiveUsers },
+  { id: "billing", label: "Billing", icon: LiveCreditCard },
+  { id: "invoices", label: "Invoices", icon: LiveReceipt },
 ];
 
-export function SidebarTeamSettingsNav() {
+/** Team settings sections; the current one follows the scroll position. */
+export function SidebarTeamSettingsNav({
+  onBack,
+  onLinkClick,
+}: {
+  onBack?: () => void;
+  onLinkClick?: () => void;
+} = {}) {
   const [activeItem, setActiveItem] = useState("general");
+  const { username } = useDashboardScope();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -39,29 +53,28 @@ export function SidebarTeamSettingsNav() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 hide-scrollbar">
-        <ul className="flex flex-col gap-0.5">
-          {TEAM_SETTINGS_ITEMS.map((item) => {
-            const isActive = activeItem === item.id;
-            return (
-              <li key={item.id}>
-                <a
-                  href={`#${item.id}`}
-                  onClick={() => setActiveItem(item.id)}
-                  className={cn(
-                    "flex h-8 items-center rounded-md px-2.5 text-xs transition-colors",
-                    isActive
-                      ? "bg-white/[0.08] dark:bg-white/[0.08] font-medium text-foreground"
-                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-                  )}
-                >
-                  {item.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      <ContextNavHeader
+        backHref={username ? `/${username}` : undefined}
+        icon={LiveSettings}
+        onBack={onBack}
+        title="Team settings"
+      />
+      <ContextNavList>
+        {TEAM_SETTINGS_ITEMS.map((item) => (
+          <ContextNavItem
+            active={activeItem === item.id}
+            href={`#${item.id}`}
+            icon={item.icon}
+            key={item.id}
+            label={item.label}
+            native
+            onClick={() => {
+              setActiveItem(item.id);
+              onLinkClick?.();
+            }}
+          />
+        ))}
+      </ContextNavList>
     </div>
   );
 }

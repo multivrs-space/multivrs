@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import type { Artifact } from "@multivrs/build-utils/artifact";
+import {
+  type Artifact,
+  compareArtifactPaths,
+} from "@multivrs/build-utils/artifact";
 import type { ArtifactMetadataInput } from "@multivrs/client";
 import { ValidationError } from "@multivrs/error-utils";
 
@@ -10,7 +13,9 @@ export function assertSafeArtifactPath(path: string): void {
 }
 
 export function artifactFromMetadata(input: ArtifactMetadataInput): Artifact {
-  const files = [...input.files].sort((a, b) => a.path.localeCompare(b.path));
+  const files = [...input.files].sort((a, b) =>
+    compareArtifactPaths(a.path, b.path),
+  );
   const digest = createHash("sha256");
   for (const file of files) {
     assertSafeArtifactPath(file.path);

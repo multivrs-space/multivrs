@@ -1,15 +1,11 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
+import { type OrbTone, StatusOrb } from "@/components/dashboard/StatusOrb";
+import { LiveArrowUpRight, LiveCreditCard } from "@/components/icons/animated";
 import { TeamAvatar } from "@/components/TeamAvatar";
-import { buttonVariants } from "@/components/ui/button-variants";
 import {
   SettingsCard,
   SettingsCardBody,
-  SettingsCardFooter,
 } from "@/features/dashboard/components/settings/SettingsCard";
-import { cn } from "@/lib/utils";
 
 export interface TeamItem {
   id: string;
@@ -20,112 +16,75 @@ export interface TeamItem {
   status?: string;
 }
 
-interface AccountBillingItemsTabProps {
-  teams?: TeamItem[];
-}
+const PLAN: Record<string, string> = {
+  enterprise: "Enterprise",
+  pro: "Pro",
+  hobby: "Hobby",
+};
+const STATUS: Record<string, { label: string; tone: OrbTone }> = {
+  active: { label: "Active", tone: "ready" },
+  trialing: { label: "Trial", tone: "ready" },
+  past_due: { label: "Past due", tone: "error" },
+  unpaid: { label: "Unpaid", tone: "error" },
+  canceled: { label: "Canceled", tone: "idle" },
+};
 
-export function AccountBillingItemsTab({
-  teams = [],
-}: AccountBillingItemsTabProps) {
+/** What each team you're on pays for; its billing lives in team settings. */
+export function AccountBillingItemsTab({ teams = [] }: { teams?: TeamItem[] }) {
   return (
-    <div className="space-y-8">
-      {/* Teams Section */}
-      <div>
-        <h2 className="text-sm font-semibold text-foreground tracking-tight mb-3">
-          Teams
-        </h2>
-        {teams.length > 0 ? (
-          <div className="space-y-4">
+    <SettingsCard id="billing-items">
+      <SettingsCardBody
+        description="Each team is billed on its own. Open one to change its plan or add-ons."
+        icon={LiveCreditCard}
+        title="Plans by team"
+      >
+        {teams.length ? (
+          <ul className="divide-y divide-hairline">
             {teams.map((team) => {
-              const planLabel = (team.plan || "hobby").toLowerCase();
-              const formattedPlan =
-                planLabel === "enterprise"
-                  ? "Enterprise"
-                  : planLabel === "pro"
-                  ? "Pro"
-                  : "Hobby";
-
-              const rawStatus = (team.status || "active").toLowerCase();
-              const formattedStatus =
-                rawStatus === "active"
-                  ? "Active"
-                  : rawStatus === "trialing"
-                  ? "Trial"
-                  : rawStatus === "past_due"
-                  ? "Past Due"
-                  : rawStatus === "canceled"
-                  ? "Canceled"
-                  : rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
-
-              const statusBadgeClass =
-                rawStatus === "active" || rawStatus === "trialing"
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                  : rawStatus === "past_due"
-                  ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  : "border-border bg-muted text-muted-foreground";
-
+              const raw = (team.status ?? "active").toLowerCase();
+              const state = STATUS[raw] ?? {
+                label: raw,
+                tone: "idle" as const,
+              };
               return (
-                <SettingsCard key={team.id || team.slug}>
-                  <SettingsCardBody>
-                    <div className="flex items-center gap-3">
-                      {/* Team Avatar */}
-                      <TeamAvatar
-                        name={team.name || team.slug}
-                        logo={team.logo}
-                        size={28}
-                      />
-
-                      <span className="text-sm font-medium text-foreground">
-                        {team.name || team.slug}
-                      </span>
-
-                      <div className="flex items-center gap-1.5 ml-1">
-                        <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {formattedPlan}
-                        </span>
-                        <span
-                          className={cn(
-                            "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                            statusBadgeClass,
-                          )}
-                        >
-                          {formattedStatus}
-                        </span>
-                      </div>
-                    </div>
-                  </SettingsCardBody>
-                  <SettingsCardFooter
-                    helperText={
-                      <span className="text-xs text-muted-foreground">
-                        Visit {team.name || team.slug}&apos;s billing settings for details.
-                      </span>
-                    }
-                    action={
-                      <Link
-                        href={`/${team.slug}/~/settings`}
-                        className={cn(
-                          buttonVariants({ variant: "outline", size: "sm" }),
-                          "h-8 rounded-md border-border bg-background hover:bg-muted text-xs font-medium text-foreground px-4 cursor-pointer",
-                        )}
-                      >
-                        View Billing Settings
-                      </Link>
-                    }
+                <li
+                  className="flex items-center gap-3 py-3"
+                  key={team.id || team.slug}
+                >
+                  <TeamAvatar
+                    logo={team.logo}
+                    name={team.name || team.slug}
+                    size={36}
                   />
-                </SettingsCard>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13.5px] font-medium">
+                      {team.name || team.slug}
+                    </p>
+                    <p className="text-[12px] text-muted-foreground">
+                      {PLAN[(team.plan ?? "hobby").toLowerCase()] ?? "Hobby"}{" "}
+                      plan
+                    </p>
+                  </div>
+                  <StatusOrb label={state.label} pill tone={state.tone} />
+                  <Link
+                    aria-label={`${team.name} billing`}
+                    className="surface-raised surface-press grid size-8 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+                    data-icon-trigger
+                    href={`/${team.slug}/~/settings#billing`}
+                    title="Billing settings"
+                  >
+                    <LiveArrowUpRight className="size-3.5" strokeWidth={2} />
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         ) : (
-          <SettingsCard>
-            <SettingsCardBody>
-              <div className="py-6 text-center text-xs text-muted-foreground">
-                You do not belong to any teams yet.
-              </div>
-            </SettingsCardBody>
-          </SettingsCard>
+          <p className="py-6 text-center text-[13px] text-muted-foreground">
+            You aren't on any team yet.
+          </p>
         )}
-      </div>
-    </div>
+      </SettingsCardBody>
+    </SettingsCard>
   );
 }

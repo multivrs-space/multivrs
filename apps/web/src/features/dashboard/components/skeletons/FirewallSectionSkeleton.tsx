@@ -1,37 +1,28 @@
-import { SectionLoadingHeader } from "./SectionSkeletonParts";
-import { SKELETON_ROWS } from "./skeleton.constants";
+import {
+  SkeletonCard,
+  SkeletonHeader,
+  SkeletonRows,
+} from "@/components/dashboard/SkeletonCard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 
+/** Mirrors the firewall page: sentence composer, then ordered rules. */
 export function FirewallSectionSkeleton() {
   return (
-    <main className="w-full space-y-6 px-5 py-6" aria-busy>
-      <SectionLoadingHeader
-        description="Ordered traffic rules for the selected project."
-        title="Firewall"
-      />
-      <section className="overflow-hidden rounded-2xl border border-border bg-foreground/2">
-        <div className="h-20 border-border border-b p-4">
-          <h2 className="text-sm font-semibold">Custom rules</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Create, pause, and remove rules without redeploying.
-          </p>
-        </div>
-        <div className="grid grid-cols-4 gap-3 border-border border-b p-4">
-          {["Rule name", "Path", "Starts with", "/admin or NG"].map((label) => (
-            <div
-              className="flex h-10 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground"
-              key={label}
-            >
-              {label}
-            </div>
-          ))}
-        </div>
-        {SKELETON_ROWS.slice(0, 3).map((row) => (
-          <div
-            className="h-16 animate-pulse border-border border-b bg-foreground/[0.04]"
-            key={row}
-          />
-        ))}
-      </section>
-    </main>
+    <PageBody>
+      <main aria-busy aria-label="Loading firewall" className="space-y-5">
+        <SkeletonHeader action="w-40" />
+        <SkeletonCard>
+          <div className="flex flex-wrap gap-2">
+            {["if", "field", "op", "value", "then"].map((key) => (
+              <span className="skeleton h-9 w-28 rounded-control" key={key} />
+            ))}
+          </div>
+          <span className="skeleton mt-4 block h-10 w-full rounded-tile" />
+        </SkeletonCard>
+        <SkeletonCard>
+          <SkeletonRows rows={4} />
+        </SkeletonCard>
+      </main>
+    </PageBody>
   );
 }

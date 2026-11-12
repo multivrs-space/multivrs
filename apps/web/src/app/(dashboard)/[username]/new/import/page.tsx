@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { NewProjectImportFlow } from "@/features/dashboard/components/NewProjectImportFlow";
+import { NewProjectImportFlow } from "@/features/dashboard/components/new-project/NewProjectImportFlow";
+import { NewProjectImportSkeleton } from "@/features/dashboard/components/skeletons/NewProjectSkeletons";
 
 /** Reads the URL and session at request time, like the rest of the dashboard. */
 export const instant = false;
@@ -18,13 +19,7 @@ export default async function NewProjectImportPage({
 }) {
   const { username } = await params;
   return (
-    <Suspense
-      fallback={
-        <div className="px-5 py-6 text-sm text-muted-foreground lg:px-8">
-          Loading repository…
-        </div>
-      }
-    >
+    <Suspense fallback={<NewProjectImportSkeleton />}>
       <NewProjectImportFlow
         username={username}
         deploymentDomain={

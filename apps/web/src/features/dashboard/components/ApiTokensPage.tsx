@@ -1,8 +1,15 @@
 "use client";
 
-import { Check, Clipboard, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CopyButton } from "@/components/CopyButton";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { DASH_FIELD } from "@/components/dashboard/menu";
+import {
+  LiveKeyRound,
+  LivePlus,
+  LiveShieldAlert,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiTokenList } from "@/features/dashboard/components/ApiTokenList";
@@ -61,64 +68,67 @@ export function ApiTokensPage({
     toast.success("Token revoked");
   }
 
-  async function copyToken() {
-    if (!created) return;
-    await navigator.clipboard.writeText(created);
-    toast.success("Token copied");
-  }
-
   return (
-    <div className={embedded ? "" : "w-full space-y-6 px-5 py-6"}>
-      {!embedded ? (
+    <div
+      className={
+        embedded
+          ? ""
+          : "mx-auto w-full max-w-[1440px] space-y-5 px-4 py-5 lg:px-6 lg:py-6"
+      }
+    >
+      {embedded ? null : (
         <DashboardPageHeader
+          description="Tokens let the CLI and CI act on your account."
           title="Developer tokens"
-          description="Manage CLI access to your account."
         />
-      ) : null}
-
-      <section className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground">
-        <div className="border-b border-border p-6">
-          <h2 className="text-[17px] font-semibold text-foreground tracking-tight">Developer tokens</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage CLI access to your account.
-          </p>
-        </div>
-        <div className="p-6">
+      )}
+      <DashCard aria-label="Developer tokens">
+        <DashCardHeader
+          description="Tokens let the CLI and CI act as you"
+          icon={LiveKeyRound}
+          title="Developer tokens"
+        />
+        <div className="space-y-4 p-5 pt-4">
           <div className="flex max-w-xl gap-2">
             <Input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
+              aria-label="Token name"
+              className={DASH_FIELD}
               maxLength={80}
-              placeholder="e.g. CI/CD or CLI"
-              className="h-10 rounded-md border border-border bg-background px-3.5 text-sm text-foreground placeholder:text-muted-foreground"
+              onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. CI or laptop CLI"
+              value={name}
             />
             <Button
-              onClick={createToken}
+              data-icon-trigger
               disabled={busy || !name.trim()}
-              className="h-10 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium px-4 shrink-0"
+              onClick={createToken}
+              size="sm"
+              variant="hero"
             >
-              <Plus className="mr-2 size-3.5" /> Create
+              <LivePlus strokeWidth={2} />
+              Create
             </Button>
           </div>
           {created ? (
-            <div className="mt-5 flex max-w-2xl items-center gap-2 border border-emerald-500/30 bg-emerald-500/5 p-3">
-              <Check className="size-4 shrink-0 text-emerald-500" />
-              <code className="min-w-0 flex-1 overflow-x-auto text-xs">
-                {created}
-              </code>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={copyToken}
-                title="Copy token"
-              >
-                <Clipboard className="size-4" />
-              </Button>
+            <div
+              className="max-w-2xl rounded-tile border border-amber-500/25 bg-amber-500/[0.06] p-3.5 duration-300 animate-in fade-in-0"
+              data-icon-trigger
+            >
+              <p className="flex items-center gap-2 text-[12.5px] font-medium text-amber-800 dark:text-amber-200">
+                <LiveShieldAlert className="size-4" strokeWidth={1.75} />
+                Copy it now. You won't be able to see it again.
+              </p>
+              <div className="surface-inset mt-2.5 flex items-center gap-2 rounded-control py-1 pl-3 pr-1">
+                <code className="min-w-0 flex-1 overflow-x-auto font-geist-mono text-[12px]">
+                  {created}
+                </code>
+                <CopyButton className="size-7" text={created} />
+              </div>
             </div>
           ) : null}
         </div>
-        <ApiTokenList tokens={tokens} onRevoke={(id) => void revokeToken(id)} />
-      </section>
+        <ApiTokenList onRevoke={(id) => void revokeToken(id)} tokens={tokens} />
+      </DashCard>
     </div>
   );
 }

@@ -1,26 +1,64 @@
-import { Activity, CircleGauge, MousePointerClick, Timer } from "lucide-react";
-import Link from "next/link";
+import { RankedRows } from "@/components/dashboard/charts/RankedRows";
+import { SegmentedGauge } from "@/components/dashboard/charts/SegmentedGauge";
+import {
+  DashCard,
+  DashCardHeader,
+  DashCardInsight,
+} from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { SegmentedNav } from "@/components/dashboard/SegmentedNav";
+import {
+  LiveGauge,
+  LiveHistory,
+  LiveImage,
+  LiveLayoutGrid,
+  LiveSparkles,
+  LiveZap,
+} from "@/components/icons/animated";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
-import type {
-  WebVitalMetric,
-  WebVitalsData,
-} from "@/features/dashboard/types/analytics.types";
+import { PageBody } from "@/features/dashboard/components/PageBody";
+import { VitalRoutesCard } from "@/features/dashboard/components/speed/VitalRoutesCard";
+import { VitalTile } from "@/features/dashboard/components/speed/VitalTile";
+import {
+  experienceScore,
+  scoreVerdict,
+  type VitalName,
+} from "@/features/dashboard/lib/web-vitals";
+import type { WebVitalsData } from "@/features/dashboard/types/analytics.types";
 
-const META = {
-  CLS: { description: "Visual stability", icon: Activity, unit: "" },
-  INP: {
-    description: "Interaction responsiveness",
-    icon: MousePointerClick,
-    unit: " ms",
-  },
-  LCP: {
-    description: "Largest content render",
-    icon: CircleGauge,
-    unit: " ms",
-  },
-  TTFB: { description: "Initial server response", icon: Timer, unit: " ms" },
-} as const;
+const VITALS: {
+  name: VitalName;
+  description: string;
+  icon: typeof LiveImage;
+}[] = [
+  { name: "LCP", description: "Largest content render", icon: LiveImage },
+  { name: "INP", description: "Interaction response", icon: LiveZap },
+  { name: "CLS", description: "Visual stability", icon: LiveLayoutGrid },
+  { name: "TTFB", description: "First server byte", icon: LiveHistory },
+];
 
+const UNAVAILABLE: Record<
+  Exclude<WebVitalsData["state"], "ready">,
+  { title: string; description: string }
+> = {
+  locked: {
+    title: "Speed Insights is off for this project",
+    description:
+      "Turn on Speed Insights in team billing to collect Core Web Vitals from real visits.",
+  },
+  error: {
+    title: "Web Vitals didn't load",
+    description:
+      "Speed Insights didn't answer this time. Try again in a moment.",
+  },
+  unconfigured: {
+    title: "Speed Insights isn't connected here",
+    description:
+      "Speed Insights isn't set up in this environment, so there are no vitals to read yet.",
+  },
+};
+
+/** How fast the site feels to real visitors, scored and broken down. */
 export function SpeedInsightsPage({
   projectName,
   vitals,
@@ -28,152 +66,108 @@ export function SpeedInsightsPage({
   projectName: string;
   vitals: WebVitalsData;
 }) {
+  const score = experienceScore(vitals.metrics);
+  const weakest = vitals.metrics
+    .filter((metric) => metric.name !== "TTFB")
+    .sort((left, right) => left.goodRate - right.goodRate)[0];
+
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
-        title="Speed Insights"
-        description={
-          <>Core Web Vitals collected from real visits to {projectName}.</>
+        actions={
+          <SegmentedNav
+            aria-label="Time range"
+            items={(["24h", "7d", "30d"] as const).map((range) => ({
+              label: range,
+              href: `?range=${range}`,
+              active: vitals.range === range,
+            }))}
+          />
         }
-      >
-        <nav className="mt-5 flex w-fit gap-4 border-b border-[var(--hairline)]">
-          {(["24h", "7d", "30d"] as const).map((range) => (
-            <Link
-              className={`border-b-2 pb-2 text-xs uppercase ${
-                range === vitals.range
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground"
-              }`}
-              href={`?range=${range}`}
-              key={range}
-              scroll={false}
-            >
-              {range}
-            </Link>
-          ))}
-        </nav>
-      </DashboardPageHeader>
-      {vitals.state !== "ready" && <InsightState state={vitals.state} />}
-      <section className="grid border-y border-[var(--hairline)] md:grid-cols-2 xl:grid-cols-4">
-        {(Object.keys(META) as WebVitalMetric["name"][]).map((name) => {
-          const metric = vitals.metrics.find((item) => item.name === name);
-          const meta = META[name];
-          return (
-            <article
-              key={name}
-              className="border-b border-[var(--hairline)] p-5 md:border-r xl:border-b-0"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex size-8 items-center justify-center rounded-lg border border-[var(--hairline)]">
-                  <meta.icon className="size-4 text-purple-400" />
-                </div>
-              </div>
-              <p className="mt-6 text-3xl font-semibold tracking-tight">
-                {metric ? `${formatValue(metric)}${meta.unit}` : "—"}
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {meta.description}
-              </p>
-              <p className="mt-5 font-geist-mono text-[10px] uppercase tracking-wider text-emerald-400">
-                {metric
-                  ? `${metric.goodRate.toFixed(0)}% good · ${metric.samples} samples`
-                  : "Waiting for visits"}
-              </p>
-            </article>
-          );
-        })}
-      </section>
-      <section className="grid border-y border-[var(--hairline)] lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div className="py-5 lg:border-r lg:border-[var(--hairline)] lg:pr-6">
-          <h2 className="text-sm font-medium">Performance by route</h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[600px] text-left text-xs">
-              <thead className="text-muted-foreground">
-                <tr className="border-b border-[var(--hairline)]">
-                  <th className="pb-3 font-medium">Route</th>
-                  <th className="pb-3 font-medium">LCP</th>
-                  <th className="pb-3 font-medium">INP</th>
-                  <th className="pb-3 font-medium">CLS</th>
-                  <th className="pb-3 text-right font-medium">Samples</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vitals.routes.map((route) => (
-                  <tr
-                    className="border-b border-[var(--hairline)]"
-                    key={route.path}
-                  >
-                    <td className="max-w-64 truncate py-3 font-geist-mono">
-                      {route.path}
-                    </td>
-                    <td className="py-3 text-muted-foreground">
-                      {milliseconds(route.metrics.LCP)}
-                    </td>
-                    <td className="py-3 text-muted-foreground">
-                      {milliseconds(route.metrics.INP)}
-                    </td>
-                    <td className="py-3 text-muted-foreground">
-                      {route.metrics.CLS?.toFixed(3) ?? "—"}
-                    </td>
-                    <td className="py-3 text-right text-muted-foreground">
-                      {route.samples.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!vitals.routes.length ? (
-              <p className="py-10 text-center text-xs text-muted-foreground">
-                Route performance appears after real visits.
-              </p>
-            ) : null}
-          </div>
-        </div>
-        <div className="py-5 lg:pl-6">
-          <h2 className="text-sm font-medium">Devices</h2>
-          <div className="mt-4 divide-y divide-[var(--hairline)]">
-            {vitals.devices.map((device) => (
-              <div
-                className="flex justify-between py-3 text-xs"
-                key={device.label}
-              >
-                <span className="capitalize text-muted-foreground">
-                  {device.label}
-                </span>
-                <span className="font-geist-mono">
-                  {device.requests.toLocaleString()}
-                </span>
-              </div>
+        description="Core Web Vitals measured from real visits, not lab tests."
+        eyebrow={`${projectName} · Speed Insights`}
+        title="Real experience"
+      />
+
+      {vitals.state !== "ready" ? (
+        <DashCard>
+          <EmptyState
+            description={UNAVAILABLE[vitals.state].description}
+            glyph={LiveGauge}
+            title={UNAVAILABLE[vitals.state].title}
+          />
+        </DashCard>
+      ) : (
+        <div className="grid gap-3 lg:grid-cols-12">
+          <DashCard aria-label="Experience score" className="lg:col-span-5">
+            <DashCardHeader
+              description="Share of visits with good vitals"
+              icon={LiveGauge}
+              title="Experience score"
+            />
+            <div className="flex flex-1 items-center px-5 pb-2 pt-6">
+              <SegmentedGauge
+                caption={
+                  score === null ? "Waiting for visits" : scoreVerdict(score)
+                }
+                label="Experience score"
+                value={score}
+              />
+            </div>
+            {weakest ? (
+              <DashCardInsight icon={LiveSparkles} label="Reading">
+                {weakest.name} has the lowest share of good visits (
+                {Math.round(weakest.goodRate)}%); improving it moves the score
+                most.
+              </DashCardInsight>
+            ) : (
+              <div className="h-4" />
+            )}
+          </DashCard>
+          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-7">
+            {VITALS.map((vital) => (
+              <VitalTile
+                description={vital.description}
+                icon={vital.icon}
+                key={vital.name}
+                metric={vitals.metrics.find(
+                  (metric) => metric.name === vital.name,
+                )}
+                name={vital.name}
+              />
             ))}
           </div>
+          <VitalRoutesCard className="lg:col-span-8" routes={vitals.routes} />
+          <DashCard aria-label="Devices" className="lg:col-span-4">
+            <DashCardHeader
+              description="Where measurements came from"
+              icon={LiveLayoutGrid}
+              title="Devices"
+            />
+            <div className="p-5 pt-4">
+              {vitals.devices.length ? (
+                <RankedRows
+                  labelHeading="Device"
+                  rows={vitals.devices.map((device) => ({
+                    label: device.label,
+                    value: device.requests,
+                  }))}
+                  valueHeading="Samples"
+                />
+              ) : (
+                <p className="py-8 text-center text-[13px] text-muted-foreground">
+                  No device data yet.
+                </p>
+              )}
+            </div>
+          </DashCard>
         </div>
-      </section>
-      <p className="text-xs leading-5 text-muted-foreground">
-        Multivrs injects a small first-party measurement script into served
-        HTML. No third-party analytics script or mock data is used.
+      )}
+
+      <p className="px-1 text-xs leading-5 text-muted-foreground">
+        Multivrs adds a small first-party measurement script to served HTML. No
+        third-party scripts and no sample data.
       </p>
-    </div>
-  );
-}
-
-function milliseconds(value: number | undefined): string {
-  return value === undefined ? "—" : `${Math.round(value).toLocaleString()} ms`;
-}
-
-function formatValue(metric: WebVitalMetric): string {
-  return metric.name === "CLS"
-    ? metric.value.toFixed(3)
-    : Math.round(metric.value).toLocaleString();
-}
-
-function InsightState({ state }: { state: WebVitalsData["state"] }) {
-  return (
-    <div className="border-y border-amber-400/20 bg-amber-400/[0.04] px-4 py-3 text-xs text-amber-200">
-      {state === "locked"
-        ? "Activate Speed Insights for this project from Billing to collect and query Web Vitals."
-        : state === "error"
-          ? "Web Vitals could not be loaded from Cloudflare."
-          : "Configure Cloudflare Analytics Engine to collect live Web Vitals."}
-    </div>
+    </PageBody>
   );
 }

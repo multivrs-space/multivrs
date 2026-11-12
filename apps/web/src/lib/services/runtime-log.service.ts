@@ -4,7 +4,6 @@ import type {
   RuntimeLogLevel,
 } from "@/features/dashboard/types/runtime-log.types";
 import { prisma } from "@/lib/prisma";
-import { getScopedProject } from "@/lib/services/dashboard-scope.service";
 import { deliverLogDrains } from "@/lib/services/log-drain.service";
 
 interface RuntimeLogBatch {
@@ -22,17 +21,17 @@ function level(value: string): RuntimeLogLevel {
   return "info";
 }
 
-export async function listProjectRuntimeLogs(
-  userId: string,
-  username: string,
-  projectSlug: string,
+/**
+ * What deployed code printed while serving, newest first. Build and deploy
+ * output stays with each deployment.
+ */
+export async function listRuntimeLogs(
+  projectIds: string[],
 ): Promise<RuntimeLogItem[]> {
-  const project = await getScopedProject(userId, username, projectSlug);
+  if (!projectIds.length) return [];
   const rows = await prisma.deploymentLog.findMany({
-    where: {
-      deployment: { projectId: project.id },
-    },
-    include: { deployment: { select: { id: true, status: true } } },
+    where: { source: "runtime", deployment: { projectId: { in: projectIds } } },
+    include: { deployment: { select: { projectId: true } } },
     orderBy: { createdAt: "desc" },
     take: 200,
   });
@@ -41,6 +40,8 @@ export async function listProjectRuntimeLogs(
     id: row.id,
     level: level(row.level),
     message: row.message,
+    projectId: row.deployment.projectId,
+    requestId: row.requestId,
     source: row.source,
     timestamp: row.createdAt.toISOString(),
   }));

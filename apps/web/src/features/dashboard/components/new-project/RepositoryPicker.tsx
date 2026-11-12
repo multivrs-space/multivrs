@@ -2,23 +2,30 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { LiveGitBranch, LiveKeyRound } from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
 import { GitHubMark } from "@/features/dashboard/components/GitHubMark";
-import { GitHubRepositoryList } from "@/features/dashboard/components/GitHubRepositoryList";
+import { GitHubRepositoryList } from "@/features/dashboard/components/new-project/GitHubRepositoryList";
 import { useGithubRepositories } from "@/features/dashboard/hooks/useGithubRepositories";
 import { useRepositoryFrameworks } from "@/features/dashboard/hooks/useRepositoryFrameworks";
 import { authClient } from "@/lib/auth-client";
 import type { GitHubRepository } from "@/lib/schemas/github.schemas";
+import { cn } from "@/lib/utils";
 
 interface RepositoryPickerProps {
   callbackURL: string;
+  className?: string;
   importingId: number | null;
   onImport: (repository: GitHubRepository) => void;
 }
 
+/** Every repository the connected GitHub account can reach, newest first. */
 export function RepositoryPicker({
   callbackURL,
+  className,
   importingId,
   onImport,
 }: RepositoryPickerProps) {
@@ -27,8 +34,9 @@ export function RepositoryPicker({
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
   const repositories = github.repositories.filter((repository) =>
-    repository.name.toLowerCase().includes(needle),
+    repository.full_name.toLowerCase().includes(needle),
   );
+  const disconnected = !github.loading && !github.connected;
 
   async function connect() {
     try {
@@ -41,57 +49,83 @@ export function RepositoryPicker({
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-(--hairline) bg-(--ink-raised)">
-      <div className="flex flex-wrap items-center gap-2 border-b border-(--hairline) p-3">
-        <div className="flex h-9 items-center gap-2 rounded-md border border-(--hairline) bg-foreground/[0.03] px-3 text-[13px] font-medium">
-          <GitHubMark className="size-4" />
-          {github.connected ? github.owner : "GitHub"}
-        </div>
-        <DashboardSearchInput
-          containerClassName="min-w-48 flex-1"
-          value={query}
-          onValueChange={setQuery}
-          placeholder="Search repositories"
-          disabled={!github.connected && !github.loading}
+    <DashCard aria-label="Import from GitHub" className={className}>
+      <DashCardHeader
+        action={
+          github.connected ? (
+            <Button
+              data-icon-trigger
+              onClick={connect}
+              size="sm"
+              type="button"
+              variant="quiet"
+            >
+              <LiveKeyRound strokeWidth={1.75} />
+              Manage access
+            </Button>
+          ) : null
+        }
+        description={
+          github.loading
+            ? "Reading your repositories…"
+            : github.connected
+              ? `${github.owner ?? "GitHub"} · ${github.repositories.length} repositories`
+              : "Not connected yet"
+        }
+        mark={<GitHubMark className="size-4" />}
+        title="Import from GitHub"
+      />
+      {disconnected ? (
+        <EmptyState
+          actions={
+            <Button onClick={connect} size="sm" type="button" variant="hero">
+              <GitHubMark className="size-3.5" />
+              Connect GitHub
+            </Button>
+          }
+          description="Multivrs lists the repositories you choose to share, and builds again on every push."
+          glyph={LiveGitBranch}
+          title="Connect your GitHub account"
         />
-      </div>
-      {!github.loading && !github.connected ? (
-        <div className="flex flex-col items-center px-6 py-14 text-center">
-          <GitHubMark className="size-7 text-foreground/70" />
-          <h2 className="mt-4 text-sm font-semibold">
-            Connect your GitHub account
-          </h2>
-          <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-            Multivrs lists the repositories you can access and redeploys on
-            every push.
-          </p>
-          <Button type="button" size="sm" className="mt-5" onClick={connect}>
-            Connect GitHub
-          </Button>
-        </div>
       ) : (
-        <GitHubRepositoryList
-          error={github.error}
-          frameworks={frameworks}
-          importingId={importingId}
-          loading={github.loading}
-          onImport={onImport}
-          repositories={repositories}
-        />
-      )}
-      {github.connected && !github.loading ? (
-        <p className="border-t border-(--hairline) px-4 py-2.5 text-xs text-muted-foreground">
-          {repositories.length} of {github.repositories.length} repositories ·
-          Missing one?{" "}
-          <button
-            type="button"
-            onClick={connect}
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+        <>
+          <div className="px-5 pt-4">
+            <DashboardSearchInput
+              clearable
+              disabled={github.loading}
+              onValueChange={setQuery}
+              placeholder="Search repositories"
+              value={query}
+            />
+          </div>
+          <GitHubRepositoryList
+            error={github.error}
+            frameworks={frameworks}
+            importingId={importingId}
+            loading={github.loading}
+            onImport={onImport}
+            repositories={repositories}
+          />
+          <p
+            className={cn(
+              "border-t border-hairline px-5 py-3 text-xs text-muted-foreground",
+              github.loading && "invisible",
+            )}
           >
-            Update GitHub access
-          </button>
-        </p>
-      ) : null}
-    </section>
+            {needle
+              ? `${repositories.length} of ${github.repositories.length} match`
+              : "Recently updated first."}{" "}
+            Missing one?{" "}
+            <button
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+              onClick={connect}
+              type="button"
+            >
+              Share more repositories
+            </button>
+          </p>
+        </>
+      )}
+    </DashCard>
   );
 }

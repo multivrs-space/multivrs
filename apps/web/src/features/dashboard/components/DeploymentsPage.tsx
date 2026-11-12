@@ -1,109 +1,62 @@
 "use client";
 
-import { Suspense, use, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Suspense } from "react";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
-import { DashboardSearchInput } from "@/features/dashboard/components/DashboardSearchInput";
-import { DeploymentRow } from "@/features/dashboard/components/DeploymentRow";
+import { DeploymentsBoard } from "@/features/dashboard/components/deployments/DeploymentsBoard";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { DeploymentsTableSkeleton } from "@/features/dashboard/components/skeletons/DataSectionSkeletons";
+import { useDashboardScope } from "@/features/dashboard/lib/useDashboardScope";
+import type { DeploymentCreator } from "@/features/dashboard/types/deployment-creator.types";
 
 export interface DashboardDeployment {
-  branch: string;
-  commitMessage?: string;
-  commitSha?: string;
-  createdAt: string;
-  detailsUrl: string;
-  duration: string;
-  environment?: "Preview" | "Production";
-  errorMessage?: string | null;
   id: string;
-  project: string;
   projectId: string;
-  status: string;
+  project: string;
+  projectSlug: string;
+  status: "Ready" | "Queued" | "Building" | "Failed" | "Canceled";
+  /** Where it was deployed to. */
+  target: "Production" | "Preview";
+  /** Same as `target`; kept for views that name it the environment. */
+  environment: "Production" | "Preview";
+  /** Serving the project's production address right now. */
+  current: boolean;
+  /** Its project builds from a repository, so it can be built again. */
+  canRedeploy: boolean;
+  branch: string;
+  /** Short SHA; absent for uploads that didn't come from git. */
+  commitSha?: string;
+  commitUrl?: string;
+  /** Only when the deploy recorded it; never made up from the SHA. */
+  commitMessage?: string;
+  renderMode?: string | null;
+  /** "2m 05s" once finished; empty while queued or building. */
+  duration: string;
+  startedAt?: string;
+  createdAt: string;
+  /** Who started it; null for git pushes. */
+  createdBy?: DeploymentCreator | null;
+  detailsUrl: string;
+  errorMessage?: string | null;
   url: string;
 }
 
+/** Build history and promotion status across this scope. */
 export function DeploymentsPage({
   deployments,
 }: {
   deployments: Promise<DashboardDeployment[] | null>;
 }) {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
+  const { isAllProjects, scope, username } = useDashboardScope();
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
+        description="Every build, where it went and what it shipped, newest first. Builds in progress stay pinned on top."
+        eyebrow={isAllProjects ? `${username} · All projects` : scope}
         title="Deployments"
-        description="Build history and promotion status across this scope."
       />
-      <div className="flex flex-wrap gap-2">
-        <DashboardSearchInput
-          containerClassName="min-w-64 flex-1"
-          value={query}
-          onValueChange={setQuery}
-          placeholder="Search project, branch, or commit"
-        />
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="Ready">Ready</SelectItem>
-            <SelectItem value="Building">Building</SelectItem>
-            <SelectItem value="Failed">Failed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
       <Suspense fallback={<DeploymentsTableSkeleton />}>
-        <DeploymentsTable
-          deployments={deployments}
-          query={query}
-          status={status}
-        />
+        <DeploymentsBoard deployments={deployments} workspace={isAllProjects} />
       </Suspense>
-    </div>
-  );
-}
-
-function DeploymentsTable({
-  deployments: deploymentsPromise,
-  query,
-  status,
-}: {
-  deployments: Promise<DashboardDeployment[] | null>;
-  query: string;
-  status: string;
-}) {
-  const deployments = use(deploymentsPromise) ?? [];
-  const normalized = query.trim().toLowerCase();
-  const filtered = deployments.filter(
-    (deployment) =>
-      (status === "all" || deployment.status === status) &&
-      (!normalized ||
-        [
-          deployment.project,
-          deployment.branch,
-          deployment.commitSha,
-          deployment.commitMessage,
-        ].some((value) => value?.toLowerCase().includes(normalized))),
-  );
-  return (
-    <div className="overflow-hidden rounded-xl border border-[var(--hairline)] bg-background">
-      {filtered.map((deployment) => (
-        <DeploymentRow key={deployment.id} deployment={deployment} />
-      ))}
-      {!filtered.length ? (
-        <div className="px-6 py-14 text-center text-sm text-muted-foreground">
-          No deployments match these filters.
-        </div>
-      ) : null}
-    </div>
+    </PageBody>
   );
 }

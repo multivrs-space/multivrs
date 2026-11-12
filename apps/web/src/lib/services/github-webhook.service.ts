@@ -67,10 +67,12 @@ export async function processGitHubDeploymentWebhook(input: {
         repoUrl,
         target: buildEvent.target,
       };
+      // A push has no Multivrs user behind it; the commit names its author.
       const deployment = await createDeployment(
         project.ownerId,
         project.id,
         buildInput,
+        null,
       );
       await dispatchCloudBuild({
         apiUrl: input.apiUrl,

@@ -13,7 +13,10 @@ const ruleResponseSchema = z.object({
 
 function config() {
   const token = process.env.CLOUDFLARE_API_TOKEN;
-  if (!token) throw providerError("Cloudflare Email Routing is not configured");
+  if (!token)
+    throw providerError(
+      "Inbound mail routing isn't set up in this environment",
+    );
   return {
     headers: {
       authorization: `Bearer ${token}`,
@@ -29,11 +32,13 @@ async function zoneId(hostname: string): Promise<string> {
     { headers },
   );
   if (!response.ok)
-    throw providerError(`Cloudflare zone lookup failed (${response.status})`);
+    throw providerError(
+      `Couldn't look up DNS for this domain (${response.status})`,
+    );
   const parsed = zoneResponseSchema.parse(await response.json());
   const zone = parsed.result[0];
   if (!parsed.success || !zone)
-    throw providerError(`No Cloudflare zone found for ${hostname}`);
+    throw providerError(`Multivrs doesn't manage DNS for ${hostname}`);
   return zone.id;
 }
 

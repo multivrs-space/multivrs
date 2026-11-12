@@ -1,16 +1,18 @@
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
-import { AccountChrome } from "@/features/dashboard/components/AccountChrome";
+import { redirect } from "next/navigation";
 import { SettingsPage } from "@/features/dashboard/components/SettingsPage";
+import { DashboardShell } from "@/features/dashboard/components/shell/DashboardShell";
 import { getServerSession } from "@/lib/auth/session";
-import { accountDeletionBlockers } from "@/lib/services/account-deletion.service";
+import { prisma } from "@/lib/prisma";
 import { getAccountProfile } from "@/lib/services/account.service";
+import { accountDeletionBlockers } from "@/lib/services/account-deletion.service";
 import { getAccountSignIn } from "@/lib/services/account-sign-in.service";
-import { ensureAccountTeam, teamsJoined } from "@/lib/services/account-team.service";
+import {
+  ensureAccountTeam,
+  teamsJoined,
+} from "@/lib/services/account-team.service";
 import { listApiTokens } from "@/lib/services/api-token.service";
 import { listAuditEvents } from "@/lib/services/audit-event.service";
-
-import { prisma } from "@/lib/prisma";
 import { isBillingScopeWhitelisted } from "@/lib/services/billing-entitlement-whitelist.service";
 
 export const instant = false;
@@ -35,7 +37,13 @@ export default async function AccountSettingsRoute() {
 
   const allOrgIds = [team.id, ...joinedTeams.map((t) => t.organizationId)];
 
-  const [subscriptions, personalSub, whitelistExemptions, dbInvoices, dbInvites] = await Promise.all([
+  const [
+    subscriptions,
+    personalSub,
+    whitelistExemptions,
+    dbInvoices,
+    dbInvites,
+  ] = await Promise.all([
     prisma.billingSubscription.findMany({
       where: {
         organizationId: { in: allOrgIds },
@@ -170,34 +178,28 @@ export default async function AccountSettingsRoute() {
   ];
 
   return (
-    <div className="dashboard-surface min-h-screen bg-(--ink) text-foreground">
-      <AccountChrome
-        user={{
-          id: session.user.id,
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image,
-        }}
-        workspaceName={team?.slug || profile.username || "account"}
+    <DashboardShell
+      user={{
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+      }}
+      workspaceName={team?.slug || profile.username || "account"}
+    >
+      <SettingsPage
+        deletionBlockers={deletionBlockers}
+        emailVerified={session.user.emailVerified ?? false}
+        events={events}
+        invites={invites}
+        invoices={invoices}
+        profile={profile}
+        signIn={signIn}
+        teams={teams}
+        tokens={tokens}
+        twoFactorEnabled={session.user.twoFactorEnabled ?? false}
+        userId={session.user.id}
       />
-      <div className="lg:pl-67 min-w-0 max-w-full">
-        <div className="h-14" aria-hidden="true" />
-        <main className="min-h-[calc(100vh-3.5rem)] min-w-0 max-w-full">
-          <SettingsPage
-            deletionBlockers={deletionBlockers}
-            emailVerified={session.user.emailVerified ?? false}
-            events={events}
-            invites={invites}
-            invoices={invoices}
-            profile={profile}
-            signIn={signIn}
-            teams={teams}
-            tokens={tokens}
-            twoFactorEnabled={session.user.twoFactorEnabled ?? false}
-            userId={session.user.id}
-          />
-        </main>
-      </div>
-    </div>
+    </DashboardShell>
   );
 }

@@ -1,15 +1,38 @@
 "use client";
 
-import { Copy, KeyRound, PlugZap } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { CopyButton } from "@/components/CopyButton";
+import { DashCard, DashCardHeader } from "@/components/dashboard/DashCard";
+import { DASH_FIELD } from "@/components/dashboard/menu";
+import {
+  LiveCloud,
+  LiveKeyRound,
+  LivePlugZap,
+} from "@/components/icons/animated";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import { requestOk } from "@/lib/api/request.client";
 import { oidcTokenResponseSchema } from "@/lib/schemas/oidc.schemas";
 
-type TokenState = "idle" | "loading" | "success" | "error";
+const PROVIDERS = [
+  {
+    name: "AWS",
+    step: "IAM → Identity providers → Add OpenID Connect provider",
+  },
+  {
+    name: "Google Cloud",
+    step: "IAM → Workload Identity Federation → Add provider",
+  },
+  {
+    name: "Azure",
+    step: "App registration → Federated credentials → Add credential",
+  },
+];
 
+/** Short-lived OIDC identity so deployments reach your cloud without secrets. */
 export function IntegrationsPage({
   issuer,
   projectId,
@@ -21,10 +44,11 @@ export function IntegrationsPage({
 }) {
   const [audience, setAudience] = useState("multivrs");
   const [token, setToken] = useState("");
-  const [state, setState] = useState<TokenState>("idle");
+  const [loading, setLoading] = useState(false);
+
   function generateToken() {
-    if (state === "loading") return;
-    setState("loading");
+    if (loading) return;
+    setLoading(true);
     void requestOk(
       `/api/projects/${projectId}/oidc/token`,
       {
@@ -36,85 +60,105 @@ export function IntegrationsPage({
     )
       .then((response) => response.json())
       .then((body) => oidcTokenResponseSchema.parse(body))
-      .then((result) => {
-        setToken(result.token);
-        setState("success");
-      })
-      .catch(() => setState("error"));
+      .then((result) => setToken(result.token))
+      .catch(() =>
+        toast.error(
+          "Couldn't generate a token. The OIDC signing key or public app URL isn't configured.",
+        ),
+      )
+      .finally(() => setLoading(false));
   }
-  async function copyToken() {
-    await navigator.clipboard.writeText(token);
-  }
+
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
+        description="Signed, short-lived project identity your deployments can exchange for cloud credentials."
+        eyebrow={`${projectName} · Configure`}
         title="Integrations"
-        description={
-          <>Short-lived OIDC identity for {projectName} and its deployments.</>
-        }
       />
-      <section className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-background/70">
-        <div className="flex items-start gap-4 border-b border-[var(--hairline)] p-5">
-          <div className="grid size-10 place-items-center rounded-xl border border-purple-400/20 bg-purple-400/[0.06]">
-            <PlugZap className="size-5 text-purple-300" />
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold">OpenID Connect</h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Exchange signed project identity for AWS, GCP, Azure, or another
-              trust provider without long-lived cloud secrets.
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-5 p-5">
-          <label
-            htmlFor="oidc-issuer"
-            className="space-y-2 text-xs text-muted-foreground"
-          >
-            <span>Issuer</span>
-            <Input id="oidc-issuer" readOnly value={issuer} />
-          </label>
-          <label
-            htmlFor="oidc-audience"
-            className="space-y-2 text-xs text-muted-foreground"
-          >
-            <span>Audience</span>
-            <Input
-              id="oidc-audience"
-              value={audience}
-              onChange={(event) => setAudience(event.target.value)}
-            />
-          </label>
-          <div>
-            <Button disabled={state === "loading"} onClick={generateToken}>
-              <KeyRound className="size-4" />
-              {state === "loading" ? "Generating…" : "Generate test token"}
-            </Button>
-          </div>
-          {token && (
-            <div className="relative rounded-xl border border-[var(--hairline)] bg-muted p-4 pr-12">
-              <code className="block max-h-28 overflow-auto break-all text-[10px] leading-5 text-muted-foreground">
-                {token}
-              </code>
-              <Button
-                aria-label="Copy token"
-                className="absolute right-2 top-2"
-                onClick={copyToken}
-                size="icon"
-                variant="ghost"
-              >
-                <Copy className="size-4" />
-              </Button>
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <DashCard aria-label="OpenID Connect">
+          <DashCardHeader
+            description="No long-lived cloud secrets in your environment"
+            icon={LivePlugZap}
+            title="OpenID Connect"
+          />
+          <div className="space-y-4 p-5 pt-4">
+            <div className="space-y-1.5 text-xs font-medium">
+              <span>Issuer</span>
+              <div className="flex items-center gap-1">
+                <Input
+                  className={`${DASH_FIELD} font-geist-mono`}
+                  id="oidc-issuer"
+                  readOnly
+                  value={issuer}
+                />
+                <CopyButton className="size-9" text={issuer} />
+              </div>
             </div>
-          )}
-          {state === "error" && (
-            <p className="text-xs text-rose-400">
-              Token generation failed. Configure the OIDC signing key and public
-              app URL.
-            </p>
-          )}
-        </div>
-      </section>
-    </div>
+            <label
+              className="block space-y-1.5 text-xs font-medium"
+              htmlFor="oidc-audience"
+            >
+              <span>Audience</span>
+              <Input
+                className={`${DASH_FIELD} font-geist-mono`}
+                id="oidc-audience"
+                onChange={(event) => setAudience(event.target.value)}
+                value={audience}
+              />
+            </label>
+            <Button
+              data-icon-trigger
+              disabled={loading}
+              onClick={generateToken}
+              size="sm"
+              variant="hero"
+            >
+              <LiveKeyRound strokeWidth={1.75} />
+              {loading ? "Generating…" : "Generate a test token"}
+            </Button>
+            {token ? (
+              <div className="surface-inset relative rounded-tile p-3 pr-11 duration-300 animate-in fade-in-0">
+                <code className="block max-h-28 overflow-auto break-all font-geist-mono text-[11px] leading-5 text-muted-foreground">
+                  {token}
+                </code>
+                <CopyButton
+                  className="absolute right-2 top-2 size-7"
+                  text={token}
+                />
+              </div>
+            ) : null}
+          </div>
+        </DashCard>
+        <DashCard aria-label="Connect your cloud">
+          <DashCardHeader
+            description="Trust this issuer once; deployments do the rest"
+            icon={LiveCloud}
+            title="Connect your cloud"
+          />
+          <ul className="space-y-2 p-5 pt-4">
+            {PROVIDERS.map((provider) => (
+              <li
+                className="surface-inset rounded-tile px-3.5 py-3"
+                key={provider.name}
+              >
+                <p className="text-[13px] font-medium">{provider.name}</p>
+                <p className="mt-0.5 text-[12px] text-muted-foreground">
+                  {provider.step}
+                </p>
+              </li>
+            ))}
+            <li className="px-1 pt-1 text-[12px] leading-5 text-muted-foreground">
+              Use the issuer on the left and the audience{" "}
+              <span className="font-geist-mono text-foreground">
+                {audience || "multivrs"}
+              </span>
+              .
+            </li>
+          </ul>
+        </DashCard>
+      </div>
+    </PageBody>
   );
 }

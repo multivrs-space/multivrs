@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { usePasskeySignIn } from "@/components/auth/use-passkey-sign-in";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
@@ -78,26 +79,9 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
       .finally(() => setIsLoading(false));
   };
 
+  const startPasskey = usePasskeySignIn(returnTo, setIsLoading);
   const signInWithPasskey = () => {
-    if (isLoading) return;
-    setIsLoading(true);
-    void authClient.signIn
-      .passkey()
-      .then((result) => {
-        if (result?.error) {
-          // Closing the system prompt isn't an error worth reporting.
-          const code = "code" in result.error ? result.error.code : "";
-          if (!/CANCEL|ABORT|NOT_ALLOWED/i.test(code)) {
-            toast.error(result.error.message || "Passkey sign-in failed.");
-          }
-          return;
-        }
-        toast.success("Welcome back.");
-        router.replace(returnTo);
-        router.refresh();
-      })
-      .catch(() => toast.error("Passkey sign-in failed. Please try again."))
-      .finally(() => setIsLoading(false));
+    if (!isLoading) startPasskey();
   };
 
   return (
@@ -106,7 +90,9 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
         <h1 className="font-clash text-2xl font-semibold tracking-tight text-foreground">
           Sign in
         </h1>
-        <p className="text-sm text-muted-foreground">Welcome back to Multivrs.</p>
+        <p className="text-sm text-muted-foreground">
+          Welcome back to Multivrs.
+        </p>
       </div>
 
       <OAuthButtons callbackURL={returnTo} />
@@ -138,6 +124,7 @@ export function SignInForm({ returnTo }: { returnTo: string }) {
             Email
           </Label>
           <Input
+            autoComplete="username webauthn"
             id="email"
             type="email"
             placeholder="you@example.com"

@@ -1,8 +1,11 @@
+import { StatusOrb } from "@/components/dashboard/StatusOrb";
 import { DashboardPageHeader } from "@/features/dashboard/components/DashboardPageHeader";
 import { FirewallRuleComposer } from "@/features/dashboard/components/FirewallRuleComposer";
 import { FirewallRuleRows } from "@/features/dashboard/components/FirewallRuleRows";
+import { PageBody } from "@/features/dashboard/components/PageBody";
 import type { DashboardFirewallRule } from "@/features/dashboard/types/firewall-rule.types";
 
+/** Ordered traffic rules for one project, enforced at the edge. */
 export function FirewallPage({
   projectId,
   projectName,
@@ -12,24 +15,27 @@ export function FirewallPage({
   projectName: string;
   rules: DashboardFirewallRule[];
 }) {
+  const active = rules.filter((rule) => rule.enabled).length;
   return (
-    <div className="w-full space-y-6 px-5 py-6">
+    <PageBody>
       <DashboardPageHeader
-        title="Firewall"
-        description={
-          <>Ordered traffic rules for {projectName}. The first match wins.</>
+        actions={
+          <StatusOrb
+            label={
+              active
+                ? `${active} ${active === 1 ? "rule" : "rules"} enforcing`
+                : "No rules enforcing"
+            }
+            pill
+            tone={active ? "ready" : "idle"}
+          />
         }
+        description="Block, allow, challenge or rate-limit requests before they reach your app. No redeploy needed."
+        eyebrow={`${projectName} · Deliver`}
+        title="Firewall"
       />
-      <section className="overflow-hidden rounded-2xl border border-[var(--hairline)] bg-background/70 shadow-2xl shadow-black/10">
-        <div className="px-4 py-4">
-          <h2 className="text-sm font-semibold">Custom rules</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Create, pause, and remove rules without redeploying.
-          </p>
-        </div>
-        <FirewallRuleComposer projectId={projectId} />
-        <FirewallRuleRows projectId={projectId} rules={rules} />
-      </section>
-    </div>
+      <FirewallRuleComposer projectId={projectId} />
+      <FirewallRuleRows projectId={projectId} rules={rules} />
+    </PageBody>
   );
 }

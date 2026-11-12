@@ -3,16 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import SpecularButton from "@/components/SpecularButton";
-import { Button } from "@/components/ui/button";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DASH_DIALOG,
+  DASH_FIELD,
+  DASH_MENU,
+} from "@/components/dashboard/menu";
+import { LiveGlobe } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -60,18 +59,20 @@ export function ConnectDomainDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className={DASH_DIALOG}>
         <form onSubmit={submit} className="grid gap-6">
-          <DialogHeader>
-            <DialogTitle>Connect a domain</DialogTitle>
-            <DialogDescription>
-              Add a domain you already own, then verify and configure its DNS.
-            </DialogDescription>
-          </DialogHeader>
+          <DashDialogHeader
+            description="Add a domain you already own; we'll show the DNS records to set next."
+            icon={LiveGlobe}
+            title="Connect a domain"
+          />
           <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="domain-hostname">Domain</Label>
+            <div className="grid gap-1.5">
+              <Label className="text-xs" htmlFor="domain-hostname">
+                Domain
+              </Label>
               <Input
+                className={`${DASH_FIELD} font-geist-mono`}
                 id="domain-hostname"
                 value={hostname}
                 onChange={(event) => setHostname(event.target.value)}
@@ -80,13 +81,13 @@ export function ConnectDomainDialog({
                 required
               />
             </div>
-            <div className="grid gap-2">
-              <Label>Project</Label>
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Project</Label>
               <Select value={projectId} onValueChange={setProjectId}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className={`${DASH_FIELD} w-full`}>
                   <SelectValue placeholder="Select a project" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={DASH_MENU}>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
@@ -96,26 +97,23 @@ export function ConnectDomainDialog({
               </Select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
-              type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
+              size="sm"
+              type="button"
+              variant="quiet"
             >
               Cancel
             </Button>
-            <SpecularButton
-              type="submit"
-              size="sm"
-              tint="#ffffff"
-              tintOpacity={0.9}
-              lineColor="#ffffff"
-              baseColor="#ffffff"
-              textColor="#000000"
+            <Button
               disabled={pending || !projectId}
+              size="sm"
+              type="submit"
+              variant="hero"
             >
               {pending ? "Connecting…" : "Connect domain"}
-            </SpecularButton>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

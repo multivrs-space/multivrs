@@ -34,6 +34,8 @@ export async function createDeployment(
   ownerId: string,
   projectId: string,
   input: CreateDeploymentInput,
+  /** Who started it; the acting user unless the build came from a git push. */
+  createdById: string | null = ownerId,
 ): Promise<Deployment> {
   const project = await getProject(ownerId, projectId, "deploy");
   const row = await prisma.$transaction(async (tx) => {
@@ -51,6 +53,7 @@ export async function createDeployment(
         branch: input.branch ?? null,
         commitSha: input.commitSha ?? null,
         renderMode: input.renderMode ?? null,
+        createdById,
       },
     });
   });

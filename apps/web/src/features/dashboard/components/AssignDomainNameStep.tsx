@@ -1,10 +1,9 @@
-import SpecularButton from "@/components/SpecularButton";
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DashDialogHeader } from "@/components/dashboard/DashDialogHeader";
+import { DASH_FIELD } from "@/components/dashboard/menu";
+import { LiveGlobe } from "@/components/icons/animated";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface AssignDomainNameStepProps {
   fullDomain: string;
@@ -15,6 +14,7 @@ interface AssignDomainNameStepProps {
   onSubdomainChange(value: string): void;
 }
 
+/** Step 1 of 2: choose the subdomain (or the apex) to connect. */
 export function AssignDomainNameStep({
   fullDomain,
   hostname,
@@ -25,61 +25,44 @@ export function AssignDomainNameStep({
 }: AssignDomainNameStepProps) {
   return (
     <>
-      <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-lg font-semibold text-foreground">
-          Connect Domain
-        </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground">
-          Enter a subdomain to connect, or leave blank to use the apex.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="my-4 space-y-2">
-        <label
-          htmlFor="connected-domain"
-          className="block text-xs font-medium text-foreground/80"
-        >
+      <DashDialogHeader
+        description="Enter a subdomain to connect, or leave it blank to use the apex."
+        icon={LiveGlobe}
+        title="Connect domain · 1 of 2"
+      />
+      <div className="space-y-1.5">
+        <label className="block text-xs font-medium" htmlFor="connected-domain">
           Domain
         </label>
-        <div className="flex h-10 w-full items-center rounded-lg border border-border bg-muted px-3 text-sm focus-within:border-white/40">
+        <div
+          className={cn(
+            DASH_FIELD,
+            "flex items-center px-3 font-geist-mono focus-within:ring-2 focus-within:ring-ring/50",
+          )}
+        >
           <input
+            className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/60"
             id="connected-domain"
-            value={subdomain}
             onChange={(event) => onSubdomainChange(event.target.value)}
             placeholder="subdomain"
-            className="w-full bg-transparent text-foreground outline-hidden placeholder:text-muted-foreground"
+            value={subdomain}
           />
-          <span className="shrink-0 select-none text-sm text-muted-foreground">
+          <span className="shrink-0 select-none text-muted-foreground">
             .{hostname}
           </span>
         </div>
         <p className="pt-1 text-xs text-muted-foreground">
           Will connect{" "}
-          <span className="font-medium text-foreground/70">{fullDomain}</span>
+          <span className="font-geist-mono text-foreground">{fullDomain}</span>
         </p>
       </div>
-      <DialogFooter className="flex items-center justify-between pt-2 sm:justify-between">
-        <SpecularButton
-          size="sm"
-          tint="#ffffff"
-          tintOpacity={0.05}
-          lineColor="#666666"
-          baseColor="#333333"
-          textColor="#cccccc"
-          onClick={onCancel}
-        >
+      <DialogFooter className="gap-2">
+        <Button onClick={onCancel} size="sm" type="button" variant="quiet">
           Cancel
-        </SpecularButton>
-        <SpecularButton
-          size="sm"
-          tint="#ffffff"
-          tintOpacity={0.9}
-          lineColor="#ffffff"
-          baseColor="#ffffff"
-          textColor="#000000"
-          onClick={onContinue}
-        >
+        </Button>
+        <Button onClick={onContinue} size="sm" type="button" variant="hero">
           Continue
-        </SpecularButton>
+        </Button>
       </DialogFooter>
     </>
   );
